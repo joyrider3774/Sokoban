@@ -106,12 +106,24 @@ void TitleScreen()
 								if (InstalledLevelPacksCount >0)
 								{
 									FindLevels();
-									LoadUnlockData();
-									SelectedLevel=UnlockedLevels;
-									LevelEditorMode=false;
-									GameState=GSStageSelect;
-									if (GlobalSoundEnabled)
-										Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+								    if(InstalledLevels > 0)
+									{										
+										LoadUnlockData();
+										SelectedLevel=UnlockedLevels;
+										LevelEditorMode=false;
+										GameState=GSStageSelect;
+										if (GlobalSoundEnabled)
+											Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+									}
+									else
+									{
+										if (GlobalSoundEnabled)
+											Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+										SDL_BlitSurface(IMGTitleScreen,NULL,Buffer,NULL);
+										sprintf(Tekst,"There are no levels found in levelpack\n%s\n\nPlease create a level for this level pack\nfirst!",LevelPackName);
+										PrintForm(Tekst);
+										Input->Reset();
+                        			}
 								}
 								break;
 							case 2:
