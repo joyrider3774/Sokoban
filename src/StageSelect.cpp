@@ -168,93 +168,122 @@ void StageSelect()
 
 					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_L)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_L)]))
 					{
-						SelectedLevel -= 5;
-						if (GlobalSoundEnabled)
-							Mix_PlayChannel(-1,Sounds[SND_MENU],0);
 						if(LevelEditorMode)
 						{
-							if (SelectedLevel <= 0)
+							if(SelectedLevel != 0)
 							{
-								SelectedLevel = 0;
-								WorldParts.RemoveAll();
+								if (GlobalSoundEnabled)
+									Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+						
+								SelectedLevel -= 5;								
+								if (SelectedLevel <= 0)
+								{
+									SelectedLevel = 0;
+									WorldParts.RemoveAll();
+								}
+								else
+								{
+									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
+									if(!FileExists(FileName))
+										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
+									WorldParts.Load(FileName, true);
+								}
 							}
-							else
-							{
+						}
+						else
+						{
+							if(SelectedLevel != 1)
+							{								
+								if (GlobalSoundEnabled)
+									Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+								
+								SelectedLevel -= 5;	
+								if (SelectedLevel < 1)
+									SelectedLevel = 1;
 								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
 								if(!FileExists(FileName))
 									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
 								WorldParts.Load(FileName, true);
 							}
 						}
-						else
-						{
-							if (SelectedLevel < 1)
-								SelectedLevel = 1;
-							sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
-							if(!FileExists(FileName))
-								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
-							WorldParts.Load(FileName, true);
-						}
                         Input->Delay();
 					}
 
 					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_R)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_R)]))
 					{
-						SelectedLevel +=5;
-						if (GlobalSoundEnabled)
-							Mix_PlayChannel(-1,Sounds[SND_MENU],0);
-						if (SelectedLevel > InstalledLevels)
-							SelectedLevel = InstalledLevels;
-						sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
-						if(!FileExists(FileName))
-							sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
-						WorldParts.Load(FileName, true);
+						if(SelectedLevel != InstalledLevels)
+						{
+							if (GlobalSoundEnabled)
+								Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+							
+							SelectedLevel +=5;
+							if (SelectedLevel > InstalledLevels)
+								SelectedLevel = InstalledLevels;
+							sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
+							if(!FileExists(FileName))
+								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
+							WorldParts.Load(FileName, true);
+						}
 						Input->Delay();
 					}
 
 					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_LEFT)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_LEFT)]))
 					{
-						SelectedLevel--;
-						if (GlobalSoundEnabled)
-							Mix_PlayChannel(-1,Sounds[SND_MENU],0);
 						if(LevelEditorMode)
 						{
-							if (SelectedLevel <= 0)
+							if(SelectedLevel != 0)
 							{
-								SelectedLevel = 0;
-								WorldParts.RemoveAll();
+								if (GlobalSoundEnabled)
+									Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+								
+								SelectedLevel--;
+								if (SelectedLevel <= 0)
+								{
+									SelectedLevel = 0;
+									WorldParts.RemoveAll();
+								}
+								else
+								{
+									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
+									if(!FileExists(FileName))
+										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
+									WorldParts.Load(FileName,true);
+								}
 							}
-							else
+						}
+						else
+						{
+							if(SelectedLevel != 1)
 							{
+								if (GlobalSoundEnabled)
+									Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+								
+								SelectedLevel--;
+								if (SelectedLevel < 1)
+									SelectedLevel = 1;
 								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
 								if(!FileExists(FileName))
 									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
 								WorldParts.Load(FileName,true);
 							}
 						}
-						else
-						{
-							if (SelectedLevel < 1)
-								SelectedLevel = 1;
-							sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
-							if(!FileExists(FileName))
-								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
-							WorldParts.Load(FileName,true);
-						}
                         Input->Delay();
 					}
 
 					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_RIGHT)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_RIGHT)]))
 					{
-						SelectedLevel++;
-						if (GlobalSoundEnabled)
-							Mix_PlayChannel(-1,Sounds[SND_MENU],0);
-						if (SelectedLevel > InstalledLevels)
-							SelectedLevel = InstalledLevels;
-						sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
-						if(!FileExists(FileName))
-							sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
-						WorldParts.Load(FileName,true);
+						if(SelectedLevel != InstalledLevels)
+						{
+							SelectedLevel++;
+							if (GlobalSoundEnabled)
+								Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+							if (SelectedLevel > InstalledLevels)
+								SelectedLevel = InstalledLevels;
+							sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
+							if(!FileExists(FileName))
+								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
+							WorldParts.Load(FileName,true);
+						}
                         Input->Delay();
 					}
 
