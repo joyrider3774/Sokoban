@@ -748,8 +748,8 @@ void UnloadSounds()
 void LoadJoystickSettings()
 {
     JoystickSetup->AddDefinition(BUT_B,"Go back / Quit",1,1,SDLK_ESCAPE,SDLK_ESCAPE,"B");
-    JoystickSetup->AddDefinition(BUT_R,"Next Music / Inc Level +5",5,5,SDLK_PAGEDOWN,SDLK_PAGEDOWN,"R");
-    JoystickSetup->AddDefinition(BUT_L,"Prev Music / Dec Level -5",4,4,SDLK_PAGEUP,SDLK_PAGEUP,"L");
+    JoystickSetup->AddDefinition(BUT_R,"Next Music / Inc Level +5",5,5,SDLK_PAGEUP,SDLK_PAGEUP,"R");
+    JoystickSetup->AddDefinition(BUT_L,"Prev Music / Dec Level -5",4,4,SDLK_PAGEDOWN,SDLK_PAGEDOWN,"L");
     JoystickSetup->AddDefinition(BUT_LEFT,"Left",JOYSTICK_LEFT,JOYSTICK_LEFT,SDLK_LEFT,SDLK_LEFT,"LEFT");
     JoystickSetup->AddDefinition(BUT_RIGHT,"Right",JOYSTICK_RIGHT,JOYSTICK_RIGHT,SDLK_RIGHT,SDLK_RIGHT,"RIGHT");
     JoystickSetup->AddDefinition(BUT_DOWN,"Down",JOYSTICK_DOWN,JOYSTICK_DOWN,SDLK_DOWN,SDLK_DOWN,"DOWN");
