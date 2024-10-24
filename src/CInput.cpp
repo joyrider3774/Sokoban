@@ -31,6 +31,31 @@ void CInput::Update() {
 		if(Event.type == SDL_KEYUP)
             KeyboardHeld[Event.key.keysym.sym] = false;
         
+		if (Event.type == SDL_JOYHATMOTION)
+		{
+			switch (Event.jhat.value)
+			{
+				case 1: 
+					JoystickHeld[Event.jhat.which][JOYSTICK_UP] = true;
+					break;
+				case 2: 
+					JoystickHeld[Event.jhat.which][JOYSTICK_RIGHT] = true;
+					break;
+				case 4: 
+					JoystickHeld[Event.jhat.which][JOYSTICK_DOWN] = true;
+					break;
+				case 8: 
+					JoystickHeld[Event.jhat.which][JOYSTICK_LEFT] = true;
+					break;
+				default:
+					JoystickHeld[Event.jhat.which][JOYSTICK_UP] = false;
+					JoystickHeld[Event.jhat.which][JOYSTICK_RIGHT] = false;
+					JoystickHeld[Event.jhat.which][JOYSTICK_DOWN] = false;
+					JoystickHeld[Event.jhat.which][JOYSTICK_LEFT] = false;
+					break;			
+			}
+		}
+		
 		if(Event.type == SDL_JOYAXISMOTION)
 		{
             if(Event.jaxis.axis == 0)
