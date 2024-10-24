@@ -50,16 +50,20 @@ void StageSelect()
 		WorldParts.Draw(Buffer);
 		boxRGBA(Buffer,0,0,320*UI_WIDTH_SCALE,13*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
 		rectangleRGBA(Buffer,0,-1,320*UI_WIDTH_SCALE,13*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-		if (SelectedLevel ==0)
-			sprintf(Tekst,"Level Pack: %s -> %d Levels - (A) Create New Level",LevelPackName,InstalledLevels);
-		else
-			if(LevelEditorMode)
-				sprintf(Tekst,"Level Pack: %s Level:%d/%d - (A) Edit Level (X) Delete Level",LevelPackName,SelectedLevel,InstalledLevels);
+		if(LevelEditorMode)
+		{
+			if (SelectedLevel == 0)
+				sprintf(Tekst,"Level Pack: %s -> %d Levels - (A) Create New Level",LevelPackName,InstalledLevels);
 			else
-				if(SelectedLevel <= UnlockedLevels)
-					sprintf(Tekst,"Level Pack: %s Level:%d/%d - (A) Play Level",LevelPackName,SelectedLevel,InstalledLevels);
-				else
-					sprintf(Tekst,"Level Pack: %s Level:%d/%d - Level is locked!",LevelPackName,SelectedLevel,InstalledLevels);
+				sprintf(Tekst,"Level Pack: %s Level:%d/%d - (A) Edit Level (X) Delete Level",LevelPackName,SelectedLevel,InstalledLevels);
+		}
+		else
+		{
+			if(SelectedLevel <= UnlockedLevels)
+				sprintf(Tekst,"Level Pack: %s Level:%d/%d - (A) Play Level",LevelPackName,SelectedLevel,InstalledLevels);
+			else
+				sprintf(Tekst,"Level Pack: %s Level:%d/%d - Level is locked!",LevelPackName,SelectedLevel,InstalledLevels);
+		}
 		WriteText(Buffer,font,Tekst,strlen(Tekst),2*UI_WIDTH_SCALE,2*UI_HEIGHT_SCALE,0,MenuTextColor);
 
         Input->Update();
