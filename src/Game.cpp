@@ -173,7 +173,8 @@ void Game()
 					Moves--;
 			}
 
-			if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_RIGHT)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_RIGHT)]))
+			if ( Input->Ready() && !(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]) &&
+				(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_RIGHT)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_RIGHT)]))
 			{
 				if (Player->CanMoveTo(Player->GetPlayFieldX() + 1, Player->GetPlayFieldY()))
 				{
@@ -183,7 +184,8 @@ void Game()
 				Player->MoveTo(Player->GetPlayFieldX() + 1, Player->GetPlayFieldY(),false);
 			}
 
-			if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_LEFT)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_LEFT)]))
+			if ( Input->Ready() &&  !(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]) && 
+				(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_LEFT)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_LEFT)]))
 			{
 				if (Player->CanMoveTo(Player->GetPlayFieldX() - 1, Player->GetPlayFieldY()))
 				{
@@ -193,7 +195,8 @@ void Game()
 				Player->MoveTo(Player->GetPlayFieldX() - 1, Player->GetPlayFieldY(),false);
 			}
 
-			if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_UP)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_UP)]))
+			if ( Input->Ready() && !(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]) &&
+				(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_UP)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_UP)]))
 			{
 				if (Player->CanMoveTo(Player->GetPlayFieldX() , Player->GetPlayFieldY()-1))
 				{
@@ -203,7 +206,8 @@ void Game()
 				Player->MoveTo(Player->GetPlayFieldX(), Player->GetPlayFieldY() - 1,false);
 			}
 
-			if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_DOWN)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_DOWN)]))
+			if ( Input->Ready() && !(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]) &&
+				(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_DOWN)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_DOWN)]))
 			{
 				if (Player->CanMoveTo(Player->GetPlayFieldX() , Player->GetPlayFieldY()+1))
 				{
