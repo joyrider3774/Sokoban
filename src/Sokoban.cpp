@@ -67,13 +67,15 @@ int main(int argc, char **argv)
 		Uint32 flags = SDL_SWSURFACE;
 		if(fullscreen)
 			flags |= SDL_FULLSCREEN;
-        Screen = SDL_SetVideoMode( WINDOW_WIDTH, WINDOW_HEIGHT,SCREEN_BPP, flags);
+        Screen = SDL_SetVideoMode( WINDOW_WIDTH, WINDOW_HEIGHT,0, flags);
 		if(Screen)
 		{
 			Icon = IMG_Load("./graphics/sokoban.png");
         	SDL_WM_SetIcon(Icon,NULL);
 			SDL_WM_SetCaption( "Sokoban GP2X - Created By Willems Davy", NULL );
-		    Buffer = SDL_CreateRGBSurface(SDL_SWSURFACE,ORIG_WINDOW_WIDTH,ORIG_WINDOW_HEIGHT,SCREEN_BPP,Screen->format->Rmask,Screen->format->Gmask,Screen->format->Bmask,Screen->format->Amask);
+		    SDL_Surface *Tmp = SDL_CreateRGBSurface(SDL_SWSURFACE,ORIG_WINDOW_WIDTH,ORIG_WINDOW_HEIGHT,SCREEN_BPP,Screen->format->Rmask,Screen->format->Gmask,Screen->format->Bmask,Screen->format->Amask);
+			Buffer = SDL_DisplayFormat(Tmp);
+			SDL_FreeSurface(Tmp);
 			printf("Succesfully Set %dx%dx%d\n",WINDOW_WIDTH,WINDOW_HEIGHT,SCREEN_BPP);
 			SDL_ShowCursor(SDL_DISABLE);
 				if (Mix_OpenAudio(22050,AUDIO_S16,MIX_DEFAULT_CHANNELS,1024) < 0)

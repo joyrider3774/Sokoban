@@ -2,7 +2,7 @@
 #define DEFINES_H
 #define ORIG_WINDOW_WIDTH 640
 #define ORIG_WINDOW_HEIGHT 360 
-#define SCREEN_BPP 16
+#define SCREEN_BPP 32
 #define FPS 60
 #define UI_WIDTH_SCALE 2
 #define UI_HEIGHT_SCALE 1.5
