@@ -177,4 +177,5 @@ void TitleScreen()
         SDL_framerateDelay(&Fpsman);
 	}
 	delete[] Tekst;
+	delete Input;
 }
