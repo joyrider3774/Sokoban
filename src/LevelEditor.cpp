@@ -4,6 +4,7 @@
 #include <SDL_image.h>
 #include <SDL_gfxPrimitives.h>
 #include <SDL_rotozoom.h>
+#include <sys/stat.h>
 #include "LevelEditor.h"
 #include "Common.h"
 #include "GameFuncs.h"
