@@ -31,21 +31,21 @@ bool LevelErrorsFound()
 	{
 		if (GlobalSoundEnabled)
 			Mix_PlayChannel(-1,Sounds[SND_ERROR],0);
-		PrintForm("Can not save this level because there's\nno player in the level! Please add a Player\nand try again or cancel saving.\n\nPress 'A' to continue");
+		PrintForm("Can not save this level because there's\nno player in the level! Please add a Player\nand try again or cancel saving.\n\nPress (A) to continue");
 		return true;
 	}
 	if (NumBoxes < NumSpots)
 	{
 		if (GlobalSoundEnabled)
 			Mix_PlayChannel(-1,Sounds[SND_ERROR],0);
-		PrintForm("Can not save this level because the number\nof spots is greater then the number of boxes!\nPlease Add some more boxes and try again\nor cancel saving.\nPress 'A' to continue");
+		PrintForm("Can not save this level because the number\nof spots is greater then the number of boxes!\nPlease Add some more boxes and try again\nor cancel saving.\nPress (A) to continue");
 		return true;
 	}
 	if (NumSpots-NumFilledSpots == 0)
 	{
 		if (GlobalSoundEnabled)
 			Mix_PlayChannel(-1,Sounds[SND_ERROR],0);
-		PrintForm("Can not save this level because there are\nno empty spots in this level! Please Add at least\none empty spot and try again or cancel saving.\n\nPress 'A' to continue");
+		PrintForm("Can not save this level because there are\nno empty spots in this level! Please Add at least\none empty spot and try again or cancel saving.\n\nPress (A) to continue");
 		return true;
 	}
 	return false;
