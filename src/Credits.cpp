@@ -80,4 +80,5 @@ void Credits()
 	}
 	delete[] Tekst;
 	delete[] LevelPackCreator;
+	delete Input;
 }
