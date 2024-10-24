@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 		Uint32 flags = SDL_SWSURFACE;
 		if(fullscreen)
 			flags |= SDL_FULLSCREEN;
-        Screen = SDL_SetVideoMode( WINDOW_WIDTH, WINDOW_HEIGHT,16, flags);
+        Screen = SDL_SetVideoMode( WINDOW_WIDTH, WINDOW_HEIGHT,SCREEN_BPP, flags);
 		if(Screen)
 		{
 			Icon = IMG_Load("./graphics/sokoban.png");
