@@ -457,6 +457,8 @@ char *GetString(char *NameIn,char *Msg)
 
         if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_X)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_X)] ))
         {
+			if (GlobalSoundEnabled)
+                Mix_PlayChannel(-1,Sounds[SND_BACK],0);
             End=true;
             SubmitChanges=false;
         }
@@ -759,4 +761,7 @@ void LoadJoystickSettings()
     JoystickSetup->AddDefinition(BUT_Y,"New Level / Erase all parts",3,3,SDLK_y,SDLK_y,"Y");
     JoystickSetup->AddDefinition(BUT_SELECT,"Hide position / Statistics",6,6,SDLK_b,SDLK_b,"SELECT");
     JoystickSetup->AddDefinition(BUT_START,"Restart / Test level",7,7,SDLK_RETURN,SDLK_RETURN,"START");
+	char FileName[FILENAME_MAX];
+	sprintf(FileName,"%s/.sokoban_joystick.def", getenv("HOME") == NULL ? ".": getenv("HOME"));
+	JoystickSetup->LoadCurrentButtonValues(FileName);
 }

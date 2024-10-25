@@ -89,7 +89,7 @@ void TitleScreen()
 
 					if (Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_DOWN)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_DOWN)]))
 					{
-						if (Selection < 5)
+						if (Selection < 6)
 						{
 							Selection++;
 							if (GlobalSoundEnabled)
@@ -133,11 +133,16 @@ void TitleScreen()
 									Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
 								break;
 							case 4:
-								GameState=GSCredits;
+								GameState = GSJoystickSetup;
 								if (GlobalSoundEnabled)
 									Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
 								break;
 							case 5:
+								GameState=GSCredits;
+								if (GlobalSoundEnabled)
+									Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+								break;
+							case 6:
 								GameState = GSQuit;
 								if (GlobalSoundEnabled)
 									Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
@@ -147,11 +152,11 @@ void TitleScreen()
 					}
 
 
-		boxRGBA(Buffer,60*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,260*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
-		rectangleRGBA(Buffer,60*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,260*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-		rectangleRGBA(Buffer,61*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,259*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-		sprintf(Tekst,"Play Selected LevelPack\nLevel Editor\n<%s>\nCredits\nQuit",LevelPackName);
-		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),90*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
+		boxRGBA(Buffer,60*UI_WIDTH_SCALE,70*UI_HEIGHT_SCALE,260*UI_WIDTH_SCALE,170*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
+		rectangleRGBA(Buffer,60*UI_WIDTH_SCALE,70*UI_HEIGHT_SCALE,260*UI_WIDTH_SCALE,170*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
+		rectangleRGBA(Buffer,61*UI_WIDTH_SCALE,71.5*UI_HEIGHT_SCALE,259*UI_WIDTH_SCALE,169*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
+		sprintf(Tekst,"Play Selected LevelPack\nLevel Editor\n<%s>\nControls\nCredits\nQuit",LevelPackName);
+		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),90*UI_WIDTH_SCALE,77*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
 		if (Selection > 1)
 		{
 			strcpy(Tekst,"\n");
@@ -161,7 +166,7 @@ void TitleScreen()
 		}
 		else
 			strcpy(Tekst,">>");
-		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),65*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2,MenuTextColor);
+		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),65*UI_WIDTH_SCALE,77*UI_HEIGHT_SCALE,2,MenuTextColor);
 		SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
         if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
 		{

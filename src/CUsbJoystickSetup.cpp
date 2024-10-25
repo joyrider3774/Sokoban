@@ -19,7 +19,7 @@ CUsbJoystickSetup::~CUsbJoystickSetup()
 {
 }
 
-bool CUsbJoystickSetup::AddDefinition(int Button, char* Definition, int Value, int DefaultValue, int keyValue, int defaultKeyValue, char *DisplayValue) 
+bool CUsbJoystickSetup::AddDefinition(int Button, char* Definition, int Value, int DefaultValue, SDLKey keyValue, SDLKey defaultKeyValue, char *DisplayValue) 
 {
     if (Button >=0 && Button < NROFBUTTONS)
     {
@@ -66,7 +66,7 @@ void CUsbJoystickSetup::DrawCurrentSetup(SDL_Surface *Surface,TTF_Font* FontIn,i
 
             if(Keyboard)
             {
-                sprintf(ButtonText, "Button: %s",PJoystickButtons[Teller].KeyboardDisplayValue);
+                sprintf(ButtonText, "Button: %s",SDL_GetKeyName(PJoystickButtons[Teller].CurrentKeyValue));
             }
             else
             if(PJoystickButtons[Teller].CurrentButtonValue >= -1 && PJoystickButtons[Teller].CurrentButtonValue < MAXJOYSTICKBUTTONS)
@@ -77,7 +77,7 @@ void CUsbJoystickSetup::DrawCurrentSetup(SDL_Surface *Surface,TTF_Font* FontIn,i
                     case JOYSTICK_UP : sprintf(ButtonText,"Button: Up"); break;
                     case JOYSTICK_RIGHT : sprintf(ButtonText,"Button: Right"); break;
                     case JOYSTICK_DOWN : sprintf(ButtonText,"Button: Down"); break;
-                    default: sprintf(ButtonText,"Button: %d",PJoystickButtons[Teller].CurrentButtonValue+1); break;
+                    default: sprintf(ButtonText,"Button: %d", PJoystickButtons[Teller].CurrentButtonValue+1); break;
                 }
 
             if(Selection == Teller)
@@ -106,7 +106,7 @@ void CUsbJoystickSetup::SetButtonValue(int Button, int Value)
     }
 }
 
-void CUsbJoystickSetup::SetKeyValue(int Button, int Value) 
+void CUsbJoystickSetup::SetKeyValue(int Button, SDLKey Value) 
 {
     int Teller;
     char Tmp[100];
@@ -118,9 +118,9 @@ void CUsbJoystickSetup::SetKeyValue(int Button, int Value)
                 PJoystickButtons[Teller].CurrentKeyValue = PJoystickButtons[Button].CurrentKeyValue;
                 sprintf(Tmp,"%s",PJoystickButtons[Button].KeyboardDisplayValue);
                 sprintf(PJoystickButtons[Button].KeyboardDisplayValue,"%s",PJoystickButtons[Teller].KeyboardDisplayValue);
-                sprintf(PJoystickButtons[Teller].KeyboardDisplayValue,"%s",Tmp);
-                PJoystickButtons[Button].CurrentKeyValue = Value;
+                sprintf(PJoystickButtons[Teller].KeyboardDisplayValue,"%s",Tmp);               
             }
+		 PJoystickButtons[Button].CurrentKeyValue = Value;
     }
 }
 
@@ -151,7 +151,7 @@ bool CUsbJoystickSetup::LoadCurrentButtonValues(char *Filename)
     {
         for(Teller = 0;Teller < NROFBUTTONS;Teller++)
         {
-            fscanf(f,"%d %d %s\n",&PJoystickButtons[Teller].CurrentButtonValue,&PJoystickButtons[Teller].CurrentKeyValue, &PJoystickButtons[Teller].KeyboardDisplayValue[0]);
+            fscanf(f,"%d %d %s\n",&PJoystickButtons[Teller].CurrentButtonValue,(int*)&PJoystickButtons[Teller].CurrentKeyValue, &PJoystickButtons[Teller].KeyboardDisplayValue[0]);
         }
         fclose(f);
         return true;

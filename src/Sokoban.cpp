@@ -31,7 +31,7 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-	srand((int) time(NULL));
+	srand(time(NULL));
 	if (SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_VIDEO | SDL_INIT_AUDIO ) == 0)
 	{
 		bool fullscreen = false;
@@ -130,6 +130,9 @@ int main(int argc, char **argv)
 									break;
 								case GSLevelEditor:
 									LevelEditor();
+									break;
+								case GSJoystickSetup:
+									SetupUsbJoystickButtons();
 									break;
 								case GSLevelEditorMenu:
 									LevelEditorMode = true;
