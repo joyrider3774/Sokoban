@@ -59,7 +59,6 @@ void CUsbJoystickSetup::DrawCurrentSetup(SDL_Surface *Surface,TTF_Font* FontIn,i
     char SelectedDescText[DESCRIPTIONSIZE+4];
     for (int Teller=0; Teller < NROFBUTTONS; Teller++)
     {
-        //printf("%d) %s\n",Teller,PJoystickButtons[Teller].ButtonDescription);
         if (strlen(PJoystickButtons[Teller].ButtonDescription) > 0)
         {
             WriteText(Surface,FontIn,PJoystickButtons[Teller].ButtonDescription,strlen(PJoystickButtons[Teller].ButtonDescription),X ,Y + (YSpacing*Teller),0,TextColor);
@@ -87,13 +86,11 @@ void CUsbJoystickSetup::DrawCurrentSetup(SDL_Surface *Surface,TTF_Font* FontIn,i
             }
             else
                 WriteText(Surface,FontIn,ButtonText,strlen(ButtonText),X + XSpacing ,Y + (YSpacing*Teller),0,TextColor);
-             //
         }
     }
 }
 
 
-//Aanpassen voor gp2x zoals met keys hieronder !
 void CUsbJoystickSetup::SetButtonValue(int Button, int Value) 
 {
     int Teller;

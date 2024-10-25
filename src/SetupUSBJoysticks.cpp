@@ -177,9 +177,6 @@ void SetupUsbJoystickButtons()
                         done = true;
                     }
 
-                   // if(Input->Ready() && (Input->JoystickHeld[0][GP2X_BUTTON_A] || Input->JoystickHeld[1][JoystickSetup->GetButtonValue(BUT_A)] ||Input->KeyboardHeld[DINGOO_BUTTON_A]))
-                   //     done = true;
-
                     if((!done) && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_B)] || Input->SpecialsHeld[SPECIAL_QUIT_EV] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_B)]))
 					{
 						if (GlobalSoundEnabled)

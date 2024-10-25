@@ -276,10 +276,8 @@ void CBox::Event_ArrivedOnNewSpot()
 {
 	int Teller;
 	AnimPhase = 0;
-	//printf("Arrive Event fired\n");
 	if (ParentList)
 	{
-		//printf("Parent List Set\n");
 		for (Teller=0;Teller< ParentList->ItemCount;Teller++)
 		{
 			if( ParentList->Items[Teller]->GetType() == IDSpot)
@@ -304,10 +302,8 @@ CSpot::CSpot(const int PlayFieldXin,const int PlayFieldYin) : CWorldPart(PlayFie
 void CSpot::Event_ArrivedOnNewSpot()
 {
 	int Teller;
-	//printf("Arrive Event fired\n");
 	if (ParentList)
 	{
-		//printf("Parent List Set\n");
 		for (Teller=0;Teller< ParentList->ItemCount;Teller++)
 		{
 			if( ParentList->Items[Teller]->GetType() == IDBox)

@@ -163,7 +163,6 @@ void Game()
 					}
 
 
-		//printf("Start while\n");
 		if (!Player->IsMoving)
 		{
 			if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]))
@@ -217,20 +216,9 @@ void Game()
 				Player->MoveTo(Player->GetPlayFieldX(), Player->GetPlayFieldY() +1,false);
 			}
 		}
-
-		//SDL_FillRect(Buffer,NULL,SDL_MapRGB(Buffer->format,255,255,255));
 		SDL_BlitSurface(IMGBackground,NULL,Buffer,NULL);
-
-		//printf("voor Move all objects\n");
 		WorldParts.Move();
-		//printf("voor Draw all objects\n");
 		WorldParts.Draw(Buffer);
-		//StartTime = EndTime;
-		//EndTime = SDL_GetTicks();
-		//sprintf(ChrDebug,"fps %d",1000 / (EndTime-StartTime));
-		//WriteText(Buffer,font,ChrDebug,strlen(ChrDebug),0,0,0,MenuTextColor);
-		//printf("voor fps show: Endtime:%d StartTime:%d End-start:%d\n",EndTime,StartTime,EndTime-StartTime);
-		//printf("Na Fps Show\n");
 		SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
         if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
 		{
@@ -306,7 +294,6 @@ void Game()
 			}
 		}
 		SDL_framerateDelay(&Fpsman);
-		//printf("Start End while\n");
 	}
 	delete Input;
 	if (GlobalSoundEnabled)

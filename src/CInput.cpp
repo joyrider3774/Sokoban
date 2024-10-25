@@ -4,7 +4,6 @@
 CInput::CInput(int UpdateCounterDelay) {
     Reset();
     PNumJoysticks = SDL_NumJoysticks();
-    //PNumJoysticks = 1;
     for (int teller=0;teller< PNumJoysticks;teller++)
         SDL_JoystickOpen(teller);
     SDL_JoystickEventState(SDL_ENABLE);
@@ -16,7 +15,6 @@ CInput::~CInput() {
 }
 
 void CInput::Update() {
-    //printf("Cinput::update:0\n");
     SDL_Event Event;
     if (UpdateCounter > 0)
         UpdateCounter--;

@@ -226,5 +226,4 @@ CWorldParts::~CWorldParts()
 		delete Items[Teller];
 		Items[Teller] = NULL;
 	}
-	//printf("Deleted worldparts\n");
 }

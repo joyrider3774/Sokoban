@@ -94,7 +94,6 @@ void SearchForMusic()
 			{
 				if(strncmp(".", Entry->d_name, 1) && (strcmp("title.wav",Entry->d_name) != 0) && (Teller< MaxMusicFiles))
 				{
-				//	printf("%s\n",Entry->d_name);
 					if (GlobalSoundEnabled)
 					{
 						Music[Teller] = Mix_LoadMUS(FileName);
@@ -720,7 +719,6 @@ void UnloadMusic()
 			if (Music[Teller])
 				Mix_FreeMusic(Music[Teller]);
 	}
-	//Mix_FreeMusic(Music[0]);
 }
 
 void LoadSounds()
