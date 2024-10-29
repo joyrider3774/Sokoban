@@ -83,6 +83,9 @@ void SetupUsbJoystickButtons()
         }
 
         SDL_BlitSurface(IMGTitleScreen,NULL,Tmp,NULL);
+
+		printTitleInfo(Tmp);
+
         boxRGBA(Tmp,45*UI_WIDTH_SCALE,50*UI_HEIGHT_SCALE,295*UI_WIDTH_SCALE,173*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
 		rectangleRGBA(Tmp,45*UI_WIDTH_SCALE,50*UI_HEIGHT_SCALE,295*UI_WIDTH_SCALE,173*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
 		rectangleRGBA(Tmp,46*UI_WIDTH_SCALE,51*UI_HEIGHT_SCALE,294*UI_WIDTH_SCALE,172*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
@@ -121,7 +124,9 @@ void SetupUsbJoystickButtons()
                 {
                     Input->Update();
                     SDL_BlitSurface(IMGTitleScreen,NULL,Tmp,NULL);
-                    boxRGBA(Tmp,45*UI_WIDTH_SCALE,50*UI_HEIGHT_SCALE,295*UI_WIDTH_SCALE,173*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
+                    printTitleInfo(Tmp);
+
+					boxRGBA(Tmp,45*UI_WIDTH_SCALE,50*UI_HEIGHT_SCALE,295*UI_WIDTH_SCALE,173*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
 					rectangleRGBA(Tmp,45*UI_WIDTH_SCALE,50*UI_HEIGHT_SCALE,295*UI_WIDTH_SCALE,173*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
 					rectangleRGBA(Tmp,46*UI_WIDTH_SCALE,51*UI_HEIGHT_SCALE,294*UI_WIDTH_SCALE,172*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
 					if(keyboard)

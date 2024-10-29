@@ -18,9 +18,10 @@ void Credits()
 	FILE *Fp;
 	SDL_PollEvent(&Event);
 	char *Tekst = new char[500];
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/credits.dat", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName);
+	char *Tekst2 = new char[500];
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s/credits.dat", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/credits.dat",LevelPackFileName);
+		sprintf(FileName,"./levelpacks/%s/credits.dat",LevelPackName);
 	if(InstalledLevelPacksCount > 0)
 	{
 		Fp = fopen(FileName,"rt");
@@ -31,7 +32,7 @@ void Credits()
 			sprintf(Tekst,"Sokoban GP2X was created by\nWillems Davy - Willems Soft 2006-2024.\nHttps://joyrider3774.itch.io\n\nLevelpack %s was created\nby %s.",LevelPackName,LevelPackCreator);
 		}
 		else
-			sprintf(Tekst,"Sokoban GP2X was created by\nWillems Davy - Willems Soft 2006-2024.\nHttps://joyrider3774.itch.io\n\nLevelpack %s was created\nby unknown person.",LevelPackName);
+			sprintf(Tekst,"Sokoban GP2X was created by\nWillems Davy - Willems Soft 2006-2024.\nHttps://joyrider3774.itch.io\n\nLevelpack %s was created\nby %s.",LevelPackName, LevelPackFile->author);
 	}
 	else
 		sprintf(Tekst,"Sokoban GP2X was created by\nWillems Davy - Willems Soft 2006-2024\nHttps://joyrider3774.itch.io");
@@ -59,11 +60,14 @@ void Credits()
 				Mix_PlayChannel(-1,Sounds[SND_BACK],0);
 		    GameState = GSTitleScreen;
 		}
+       
+		boxRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
+		rectangleRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
+		rectangleRGBA(Buffer,51*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,269*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
+		WriteText(Buffer,font,Tekst,strlen(Tekst),55*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
 
-		boxRGBA(Buffer,60*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,260*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
-		rectangleRGBA(Buffer,60*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,260*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-		rectangleRGBA(Buffer,61*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,259*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-		WriteText(Buffer,font,Tekst,strlen(Tekst),65*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
+		printTitleInfo(Buffer);		
+
 		SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
         if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
 		{
@@ -79,6 +83,7 @@ void Credits()
         SDL_framerateDelay(&Fpsman);
 	}
 	delete[] Tekst;
+	delete[] Tekst2;
 	delete[] LevelPackCreator;
 	delete Input;
 }

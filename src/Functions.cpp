@@ -62,19 +62,3 @@ int ord(char chr)
 {
 	return((int)chr);
 }
-
-void AddUnderScores (char *string)
-{
-	int Teller;
-	for(Teller=0;Teller<strlen(string);Teller++)
-		if(string[Teller] == ' ')
-			string[Teller] = '_';
-}
-
-void RemoveUnderScores (char *string)
-{
-	int Teller;
-	for(Teller=0;Teller<strlen(string);Teller++)
-		if(string[Teller] == '_')
-			string[Teller] = ' ';
-}

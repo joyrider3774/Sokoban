@@ -26,6 +26,7 @@
 #include "StageSelect.h"
 #include "Credits.h"
 #include "Titlescreen.h"
+#include "CInput.h"
 
 using namespace std;
 
@@ -94,6 +95,8 @@ int main(int argc, char **argv)
 					font = TTF_OpenFont("./fonts/font.ttf",17*UI_HEIGHT_SCALE);
 					BigFont = TTF_OpenFont("./fonts/font.ttf",20*UI_HEIGHT_SCALE);
 					MonoFont = TTF_OpenFont("./fonts/font1.ttf",17*UI_HEIGHT_SCALE);
+					RobotoBig = TTF_OpenFont("./fonts/Roboto-Black.ttf",60);
+					RobotoMedium = TTF_OpenFont("./fonts/Roboto-Black.ttf",30);
 					if (font && BigFont && MonoFont)
 					{
 						printf("Succesfully Loaded fonts\n");
@@ -105,9 +108,10 @@ int main(int argc, char **argv)
 						TTF_SetFontStyle(font,TTF_STYLE_NORMAL);
 						SearchForLevelPacks();
 						SearchForMusic();
-						LoadSounds();
-						LoadGraphics();
 						LoadSettings();
+						LoadSounds();
+						LoadGraphics();						
+						LevelPackFile = new CLevelPackFile();
 						while (GameState != GSQuit)
 						{
 							switch(GameState)
@@ -140,6 +144,7 @@ int main(int argc, char **argv)
 									break;
 							}
 						}
+						delete LevelPackFile;
 						SaveSettings();
 						UnLoadGraphics();
 						UnloadSounds();
@@ -147,6 +152,8 @@ int main(int argc, char **argv)
 						TTF_CloseFont(font);
 						TTF_CloseFont(BigFont);
 						TTF_CloseFont(MonoFont);
+						TTF_CloseFont(RobotoBig);
+						TTF_CloseFont(RobotoMedium);
 						MonoFont=NULL;
 				    	font=NULL;
 				    	BigFont=NULL;

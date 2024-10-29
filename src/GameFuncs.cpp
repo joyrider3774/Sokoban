@@ -44,31 +44,37 @@ void MusicFinished()
 
 void LoadSettings()
 {
-//	FILE *Fp;
-//	Fp = fopen("./settings.dat","rt");
-//	if (Fp)
-//	{
-//		fscanf(Fp,"Volume=%d",&Volume);
-//		fclose(Fp);
-//		sync();
-//	}
-//	else
+	FILE *Fp;
+	char Filename[FILENAME_MAX];
+	sprintf(Filename, "%s/.sokoban_settings.dat", getenv("HOME") == NULL ? ".": getenv("HOME"));
+	Fp = fopen(Filename,"rt");
+	if (Fp)
 	{
-		Volume = 100;
+		char tmpName[100];
+		fscanf(Fp,"SelectedLevelPack=%100[^\n]\n",&tmpName);
+		for (int i = 0; i < InstalledLevelPacksCount; i++)
+			if(strcasecmp(tmpName, InstalledLevelPacks[i]) == 0)
+			{
+				SelectedLevelPack = i;
+				sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
+				break;
+			}
+		fclose(Fp);
 	}
-	SetVolume(Volume);
+
 }
 
 void SaveSettings()
 {
-//	FILE *Fp;
-//	Fp = fopen("./settings.dat","wt");
-//	if (Fp)
-//	{
-//		fprintf(Fp,"Volume=%d",Volume);
-//		fclose(Fp);
-//		sync();
-//	}
+	FILE *Fp;
+	char Filename[FILENAME_MAX];
+	sprintf(Filename, "%s/.sokoban_settings.dat", getenv("HOME") == NULL ? ".": getenv("HOME"));
+	Fp = fopen(Filename,"wt");
+	if (Fp)
+	{
+		fprintf(Fp,"SelectedLevelPack=%s\n",LevelPackName);
+		fclose(Fp);
+	}
 }
 
 
@@ -115,7 +121,7 @@ void DoSearchForLevelPacks(char* Path)
 	DIR *Directory;
 	struct stat Stats;
 	char FileName[FILENAME_MAX];
-	char Name[21];
+	char Name[MaxLevelPackNameLength];
 	Directory = opendir(Path);
 	if (Directory)
 	{
@@ -126,10 +132,9 @@ void DoSearchForLevelPacks(char* Path)
 			stat(FileName,&Stats);
 			if(S_ISDIR(Stats.st_mode))
 			{
-				if(strncmp(".", Entry->d_name, 1)  && (InstalledLevelPacksCount< MaxLevelPacks) && (strlen(Entry->d_name) < 21))
+				if(strncmp(".", Entry->d_name, 1)  && (InstalledLevelPacksCount< MaxLevelPacks) && (strlen(Entry->d_name) < MaxLevelPackNameLength))
 				{
 					sprintf(Name,"%s",Entry->d_name);
-					RemoveUnderScores(Name);
 					bool found = false;
 					for (int i = 0; i < InstalledLevelPacksCount; i++)
 					{
@@ -143,8 +148,39 @@ void DoSearchForLevelPacks(char* Path)
 					if(!found)
 					{
 						sprintf(InstalledLevelPacks[InstalledLevelPacksCount],"%s",Entry->d_name);
-						RemoveUnderScores(InstalledLevelPacks[InstalledLevelPacksCount]);
 						InstalledLevelPacksCount++;
+					}
+				}
+			}
+			//levelpackfiles
+			else
+			{
+				if((InstalledLevelPacksCount< MaxLevelPacks) && (strlen(Entry->d_name) < MaxLevelPackNameLength))
+				{
+					char *ext;
+					char *dot = strrchr(Entry->d_name, '.');
+					if(dot &&  !(dot == Entry->d_name)) 
+					{
+						ext = dot +1;
+						if(strcasecmp(ext, "sok") == 0)
+						{
+							sprintf(Name,"%s",Entry->d_name);
+							bool found = false;
+							for (int i = 0; i < InstalledLevelPacksCount; i++)
+							{
+								if(strcmp(Name, InstalledLevelPacks[i]) == 0)
+								{
+									found = true;
+									break;
+								}
+							}
+							
+							if(!found)
+							{
+								sprintf(InstalledLevelPacks[InstalledLevelPacksCount],"%s",Entry->d_name);
+								InstalledLevelPacksCount++;
+							}
+						}
 					}
 				}
 			}
@@ -165,14 +201,10 @@ void SearchForLevelPacks()
 	if (InstalledLevelPacksCount > 0)
 	{
 		sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
-		sprintf(LevelPackFileName,"%s",InstalledLevelPacks[SelectedLevelPack]);
-		AddUnderScores(LevelPackFileName);
-
 	}
 	else
 	{
 		sprintf(LevelPackName,"%s","");
-		sprintf(LevelPackFileName,"%s","");
 	}
 }
 
@@ -181,10 +213,10 @@ bool AskQuestion(char *Msg)
 {
 	bool Result = false;
 	CInput *Input = new CInput(InputDelay);
-	boxRGBA(Buffer,60*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,260*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
-	rectangleRGBA(Buffer,60*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,260*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-	rectangleRGBA(Buffer,61*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,259*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-	WriteText(Buffer,font,Msg,strlen(Msg),65*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
+	boxRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
+	rectangleRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
+	rectangleRGBA(Buffer,51*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,269*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
+	WriteText(Buffer,font,Msg,strlen(Msg),55*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
 	SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
     if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
 	{
@@ -232,10 +264,10 @@ bool AskQuestion(char *Msg)
 void PrintForm(char *msg)
 {
     CInput *Input = new CInput(InputDelay);
-	boxRGBA(Buffer,60*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,260*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
-	rectangleRGBA(Buffer,60*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,260*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-	rectangleRGBA(Buffer,61*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,259*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-	WriteText(Buffer,font,msg,strlen(msg),65*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
+	boxRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
+	rectangleRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
+	rectangleRGBA(Buffer,51*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,269*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
+	WriteText(Buffer,font,msg,strlen(msg),55*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
 	SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
     if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
 	{
@@ -277,11 +309,11 @@ void SaveUnlockData()
 	LevelHash[1] = HashTable[UnlockedLevels];
 	LevelHash[2] = HashTable[UnlockedLevels+1];
 	LevelHash[3] = HashTable[UnlockedLevels+2];
-	sprintf(Filename,"%s/%s.dat",getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackFileName);
+	sprintf(Filename,"%s/%s.dat",getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
 	for (Teller=0;Teller<4;Teller++)
-		LevelHash[Teller] = LevelHash[Teller] ^ LevelPackFileName[strlen(LevelPackFileName)-1];
-	for (Teller=0;Teller<strlen(LevelPackFileName);Teller++)
-		LevelHash[Teller%4] = LevelHash[Teller%4] ^ LevelPackFileName[Teller];
+		LevelHash[Teller] = LevelHash[Teller] ^ LevelPackName[strlen(LevelPackName)-1];
+	for (Teller=0;Teller<strlen(LevelPackName);Teller++)
+		LevelHash[Teller%4] = LevelHash[Teller%4] ^ LevelPackName[Teller];
 	LevelHash[0] = LevelHash[0] ^ LevelHash[2];
 	LevelHash[1] = LevelHash[1] ^ LevelHash[0];
 	LevelHash[2] = LevelHash[2] ^ LevelHash[3];
@@ -314,7 +346,7 @@ void LoadUnlockData()
 	int Teller=0;
 	unsigned char HashBuffer[64];
 	char Filename[FILENAME_MAX];
-	sprintf(Filename,"%s/%s.dat",getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackFileName);
+	sprintf(Filename,"%s/%s.dat",getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
 	Fp = fopen(Filename,"rb");
 	int CheckSum,ValidCheckSum=0;
 	if (Fp)
@@ -336,10 +368,10 @@ void LoadUnlockData()
 			LevelHash[2] = LevelHash[2] ^ LevelHash[3];
 			LevelHash[1] = LevelHash[1] ^ LevelHash[0];
 			LevelHash[0] = LevelHash[0] ^ LevelHash[2];
-			for (Teller=0;Teller<strlen(LevelPackFileName);Teller++)
-				LevelHash[Teller%4] = LevelHash[Teller%4] ^ LevelPackFileName[Teller];
+			for (Teller=0;Teller<strlen(LevelPackName);Teller++)
+				LevelHash[Teller%4] = LevelHash[Teller%4] ^ LevelPackName[Teller];
 			for (Teller=0;Teller<4;Teller++)
-				LevelHash[Teller] = LevelHash[Teller] ^ LevelPackFileName[strlen(LevelPackFileName)-1];
+				LevelHash[Teller] = LevelHash[Teller] ^ LevelPackName[strlen(LevelPackName)-1];
 
 			Teller=0;
 			while (LevelHash[0] != HashTable[Teller] || LevelHash[1] != HashTable[Teller+1] || 	LevelHash[2] != HashTable[Teller+2] || LevelHash[3] != HashTable[Teller+3] && Teller+3 < 1004)
@@ -464,12 +496,12 @@ char *GetString(char *NameIn,char *Msg)
 
 
 		SDL_BlitSurface(IMGTitleScreen,NULL,Buffer,NULL);
-		boxRGBA(Buffer,60*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,260*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
-		rectangleRGBA(Buffer,60*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,260*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-		rectangleRGBA(Buffer,61*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,259*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-		WriteText(Buffer,font,Msg,strlen(Msg),65*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
+		boxRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
+		rectangleRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
+		rectangleRGBA(Buffer,51*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,269*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
+		WriteText(Buffer,font,Msg,strlen(Msg),55*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
 	
-		WriteText(Buffer,MonoFont,PackName,strlen(PackName),85*UI_WIDTH_SCALE,110*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
+		WriteText(Buffer,MonoFont,PackName,strlen(PackName),75*UI_WIDTH_SCALE,110*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
 		if (Selection > 0)
 		{
 			sprintf(Tekst," ");
@@ -479,7 +511,7 @@ char *GetString(char *NameIn,char *Msg)
 		}
 		else
 			sprintf(Tekst,"_");
-		WriteText(Buffer,MonoFont,Tekst,strlen(Tekst),85*UI_WIDTH_SCALE,112*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
+		WriteText(Buffer,MonoFont,Tekst,strlen(Tekst),75*UI_WIDTH_SCALE,112*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
 		sprintf(Tekst,"Use Up,Down,Left,right\n %s=Ok %s=Cancel",JoystickSetup->GetKeyNameForDefinition(BUT_A),JoystickSetup->GetKeyNameForDefinition(BUT_X) );
 		WriteText(Buffer,font,Tekst,strlen(Tekst),65*UI_WIDTH_SCALE,135*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
         SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
@@ -517,23 +549,24 @@ char *GetString(char *NameIn,char *Msg)
 
 void FindLevels()
 {
-	int Teller=1;
+	int InstalledLevelsFile = LevelPackFile->LevelCount;
+	int Teller=InstalledLevelsFile + 1;
 	char *FileName = new char[FILENAME_MAX];
 	char *FileName2 = new char[FILENAME_MAX];
-	InstalledLevels = 0;
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName, Teller);
-	sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackFileName,Teller);		
+	
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
+	sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackName,Teller);		
 	while (FileExists(FileName) || FileExists(FileName2))
 	{
 		Teller+=30;
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName, Teller);
-		sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackFileName,Teller);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
+		sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackName,Teller);
 	}
-	while (!FileExists(FileName) && !FileExists(FileName2) && (Teller >=1) )
+	while (!FileExists(FileName) && !FileExists(FileName2) && (Teller > InstalledLevelsFile) )
 	{
 		Teller--;
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName, Teller);
-		sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackFileName,Teller);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
+		sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackName,Teller);
 	}
 	InstalledLevels=Teller;
 	delete[] FileName;
@@ -565,9 +598,9 @@ void LoadGraphics()
 
 
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/floor.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s/floor.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/floor.png",LevelPackFileName);
+		sprintf(FileName,"./levelpacks/%s/floor.png",LevelPackName);
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -576,9 +609,9 @@ void LoadGraphics()
 	IMGFloor = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/wall.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s/wall.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/wall.png",LevelPackFileName);
+		sprintf(FileName,"./levelpacks/%s/wall.png",LevelPackName);
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -587,9 +620,9 @@ void LoadGraphics()
 	IMGWall = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/box.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s/box.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/box.png",LevelPackFileName);
+		sprintf(FileName,"./levelpacks/%s/box.png",LevelPackName);
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -598,9 +631,9 @@ void LoadGraphics()
 	IMGBox = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/spot.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s/spot.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/spot.png",LevelPackFileName);
+		sprintf(FileName,"./levelpacks/%s/spot.png",LevelPackName);
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -609,9 +642,9 @@ void LoadGraphics()
 	IMGSpot = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/player.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s/player.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/player.png",LevelPackFileName);
+		sprintf(FileName,"./levelpacks/%s/player.png",LevelPackName);
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -620,9 +653,9 @@ void LoadGraphics()
 	IMGPlayer = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/empty.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s/empty.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/empty.png",LevelPackFileName);
+		sprintf(FileName,"./levelpacks/%s/empty.png",LevelPackName);
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -631,9 +664,9 @@ void LoadGraphics()
 	IMGEmpty = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/background.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s/background.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/background.png",LevelPackFileName);
+		sprintf(FileName,"./levelpacks/%s/background.png",LevelPackName);
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -641,9 +674,9 @@ void LoadGraphics()
 	IMGBackground = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/titlescreen.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s/titlescreen.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/titlescreen.png",LevelPackFileName);
+		sprintf(FileName,"./levelpacks/%s/titlescreen.png",LevelPackName);
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -651,9 +684,9 @@ void LoadGraphics()
 	IMGTitleScreen = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/colors.txt", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s/colors.txt", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/colors.txt",LevelPackFileName);
+		sprintf(FileName,"./levelpacks/%s/colors.txt",LevelPackName);
 	ColorsFile = fopen(FileName,"rt");
 	if (ColorsFile)
 	{
@@ -744,6 +777,26 @@ void UnloadSounds()
 			Mix_FreeChunk(Sounds[Teller]);
 }
 
+void printTitleInfo(SDL_Surface *Surface)
+{
+	char Tekst[250];
+	int w;
+	if(LevelPackFile->Loaded)
+	{
+		strcpy(Tekst, "Sokoban");
+		TTF_SizeText(RobotoBig, Tekst, &w, NULL);
+		SDL_Color TitleColor = {174,198,234,255};
+		WriteText(Surface, RobotoBig, Tekst, strlen(Tekst), (ORIG_WINDOW_WIDTH - w) / 2, 10, 0, TitleColor);
+
+		if(strlen(LevelPackFile->author) > 0)
+		{
+			strcpy(Tekst, "Levels By ");
+			strcat(Tekst, LevelPackFile->author);
+			TTF_SizeText(RobotoMedium, Tekst, &w, NULL);
+			WriteText(Surface, RobotoMedium, Tekst, strlen(Tekst), (ORIG_WINDOW_WIDTH - w) / 2, 290, 0, TitleColor);
+		}
+	}
+}
 
 void LoadJoystickSettings()
 {

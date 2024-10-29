@@ -11,11 +11,28 @@
 
 void TitleScreen()
 {
+	//http://sokobano.de/en/levels.php
+
+	int total = 0;
+
+	// char FileName[FILENAME_MAX];
+	// if (InstalledLevelPacksCount > 0)
+	// 	for(SelectedLevelPack = 0; SelectedLevelPack < InstalledLevelPacksCount; SelectedLevelPack++)
+	// 	{
+	// 		sprintf(FileName,"%s/.sokoban_levelpacks/%s",getenv("HOME") == NULL ? ".": getenv("HOME"), InstalledLevelPacks[SelectedLevelPack]);
+	// 		if(!FileExists(FileName))
+	// 			sprintf(FileName,"./levelpacks/%s",InstalledLevelPacks[SelectedLevelPack]);
+	// 		LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows);									
+	// 		//WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
+	// 		total += LevelPackFile->LevelCount;
+	// 	}
+	// printf("total levels:%d\n", total);
     CInput *Input = new CInput(InputDelay);
 	int Teller, Selection = 1;
 	SDL_Event Event;
 	SDL_PollEvent(&Event);
 	char *Tekst = new char[300];
+	char FileName[FILENAME_MAX];
 	if(MusicCount > 0)
 		if (! Mix_PlayingMusic())
 			if(GlobalSoundEnabled)
@@ -25,6 +42,14 @@ void TitleScreen()
 				//Mix_HookMusicFinished(MusicFinished);
 				SetVolume(Volume);
 			}
+	
+	if (InstalledLevelPacksCount >0)
+	{		
+		sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
+		if(!FileExists(FileName))
+			sprintf(FileName,"./levelpacks/%s",LevelPackName);
+		LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);	
+	}
 	while (GameState == GSTitleScreen)
 	{
 		if (ReloadMusic)
@@ -50,8 +75,11 @@ void TitleScreen()
 								{
 									SelectedLevelPack--;
 									sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
-									sprintf(LevelPackFileName,"%s",InstalledLevelPacks[SelectedLevelPack]);
-									AddUnderScores(LevelPackFileName);
+									sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
+									sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
+									if(!FileExists(FileName))
+										sprintf(FileName,"./levelpacks/%s",LevelPackName);
+									LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);									
 									LoadGraphics();
 									if (GlobalSoundEnabled)
 										Mix_PlayChannel(-1,Sounds[SND_MENU],0);
@@ -67,8 +95,11 @@ void TitleScreen()
 								{
 									SelectedLevelPack++;
 									sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
-									sprintf(LevelPackFileName,"%s",InstalledLevelPacks[SelectedLevelPack]);
-									AddUnderScores(LevelPackFileName);
+									sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
+									sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
+									if(!FileExists(FileName))
+										sprintf(FileName,"./levelpacks/%s",LevelPackName);
+									LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
 									LoadGraphics();
 									if (GlobalSoundEnabled)
 										Mix_PlayChannel(-1,Sounds[SND_MENU],0);
@@ -105,6 +136,11 @@ void TitleScreen()
 							case 1:
 								if (InstalledLevelPacksCount >0)
 								{
+									sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
+									if(!FileExists(FileName))
+										sprintf(FileName,"./levelpacks/%s",LevelPackName);
+									LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, false);
+								
 									FindLevels();
 								    if(InstalledLevels > 0)
 									{										
@@ -151,12 +187,14 @@ void TitleScreen()
 						Input->Delay();
 					}
 
+		printTitleInfo(Buffer);
 
-		boxRGBA(Buffer,60*UI_WIDTH_SCALE,70*UI_HEIGHT_SCALE,260*UI_WIDTH_SCALE,170*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
-		rectangleRGBA(Buffer,60*UI_WIDTH_SCALE,70*UI_HEIGHT_SCALE,260*UI_WIDTH_SCALE,170*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-		rectangleRGBA(Buffer,61*UI_WIDTH_SCALE,71.5*UI_HEIGHT_SCALE,259*UI_WIDTH_SCALE,169*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
+
+		boxRGBA(Buffer,50*UI_WIDTH_SCALE,70*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,170*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
+		rectangleRGBA(Buffer,50*UI_WIDTH_SCALE,70*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,170*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
+		rectangleRGBA(Buffer,51*UI_WIDTH_SCALE,71.5*UI_HEIGHT_SCALE,269*UI_WIDTH_SCALE,169*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
 		sprintf(Tekst,"Play Selected LevelPack\nLevel Editor\n<%s>\nControls\nCredits\nQuit",LevelPackName);
-		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),90*UI_WIDTH_SCALE,77*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
+		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),80*UI_WIDTH_SCALE,77*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
 		if (Selection > 1)
 		{
 			strcpy(Tekst,"\n");
@@ -166,7 +204,7 @@ void TitleScreen()
 		}
 		else
 			strcpy(Tekst,">>");
-		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),65*UI_WIDTH_SCALE,77*UI_HEIGHT_SCALE,2,MenuTextColor);
+		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),55*UI_WIDTH_SCALE,77*UI_HEIGHT_SCALE,2,MenuTextColor);
 		SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
         if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
 		{

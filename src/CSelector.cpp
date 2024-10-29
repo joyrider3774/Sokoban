@@ -32,7 +32,7 @@ void CSelector::IncSelection()
 {
 	int X,Y;
 	Selection++;
-	if (Selection > 6)
+	if (Selection > 5)
 		Selection = 1;
 	X = Part->GetPlayFieldX();
 	Y = Part->GetPlayFieldY();
@@ -66,7 +66,7 @@ void CSelector::DecSelection()
 	int X,Y;
 	Selection--;
 	if (Selection < 1)
-		Selection = 6;
+		Selection = 5;
 	X = Part->GetPlayFieldX();
 	Y = Part->GetPlayFieldY();
 	delete Part;

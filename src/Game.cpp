@@ -133,10 +133,13 @@ void Game()
 						WorldParts.Draw(Buffer);
 						if(AskQuestion("You are about to restart this level\nAre you sure you want to restart?\n\nPress (A) to Restart (X) to Cancel"))
 						{
-							sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
+							sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
 							if(!FileExists(FileName))
-								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
-							WorldParts.Load(FileName, true);
+								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+							if(FileExists(FileName))
+								WorldParts.Load(FileName, true);
+							else
+								WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
 							Moves=0;
 							for (Teller=0;Teller<WorldParts.ItemCount;Teller++)
 							{
@@ -218,7 +221,9 @@ void Game()
 		}
 		SDL_BlitSurface(IMGBackground,NULL,Buffer,NULL);
 		WorldParts.Move();
+		WorldParts.DrawFloor(Buffer, WorldParts.Player);
 		WorldParts.Draw(Buffer);
+		
 		SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
         if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
 		{

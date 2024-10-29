@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <SDL_gfxPrimitives.h>
 #include <SDL_rotozoom.h>
 #include "StageSelect.h"
@@ -26,13 +27,17 @@ void StageSelect()
 				//Mix_HookMusicFinished(MusicFinished);
 				SetVolume(Volume);
 			}
+
 	if (SelectedLevel > 0)
 	{
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName, SelectedLevel);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
 		if(!FileExists(FileName))
-			sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
-		WorldParts.Load(FileName, true);
-
+			sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+		if(FileExists(FileName))
+			WorldParts.Load(FileName, true);
+		else
+			WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
+		
 	}
 	else
 		WorldParts.RemoveAll();
@@ -46,8 +51,28 @@ void StageSelect()
 			SetVolume(Volume);
 		}
 		SDL_BlitSurface(IMGBackground,NULL,Buffer,NULL);
-		WorldParts.Move();
-		WorldParts.Draw(Buffer);
+		if (SelectedLevel > 0)
+		{
+			WorldParts.Move();
+			WorldParts.DrawFloor(Buffer, WorldParts.Player);
+			WorldParts.Draw(Buffer);
+			if((InstalledLevels > 0))
+			{
+				boxRGBA(Buffer,0,ORIG_WINDOW_HEIGHT- 13*UI_HEIGHT_SCALE,320*UI_WIDTH_SCALE,ORIG_WINDOW_HEIGHT,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxBorderColor.unused);
+				rectangleRGBA(Buffer,0,ORIG_WINDOW_HEIGHT- 13*UI_HEIGHT_SCALE,320*UI_WIDTH_SCALE,ORIG_WINDOW_HEIGHT,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
+				if(WorldParts.isLevelPackFileLevel)
+				{
+					if ((strlen(LevelPackFile->LevelsMeta[SelectedLevel-1].title) > 0) || (strlen(LevelPackFile->LevelsMeta[SelectedLevel-1].author) > 0))
+					{
+						sprintf(Tekst, "%s by %s", LevelPackFile->LevelsMeta[SelectedLevel-1].title, LevelPackFile->LevelsMeta[SelectedLevel-1].author);
+						int w;
+						TTF_SizeText(font, Tekst, &w, NULL);
+						WriteText(Buffer,font,Tekst,strlen(Tekst),(ORIG_WINDOW_WIDTH - w) / 2,ORIG_WINDOW_HEIGHT- 11*UI_HEIGHT_SCALE,0,MenuTextColor);
+					}
+					WriteText(Buffer,font,LevelPackFile->LevelsMeta[SelectedLevel-1].comments,strlen(LevelPackFile->LevelsMeta[SelectedLevel-1].comments),0,50,0,{0,0,0,0});
+				}
+			}
+		}
 		boxRGBA(Buffer,0,0,320*UI_WIDTH_SCALE,13*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
 		rectangleRGBA(Buffer,0,-1,320*UI_WIDTH_SCALE,13*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
 		if(LevelEditorMode)
@@ -105,21 +130,30 @@ void StageSelect()
 							sprintf(Tekst,"Are you sure you want to delete this level:\n%s - Level %d\n\nPress (A) to Delete (X) to Cancel",LevelPackName,SelectedLevel);
 							if (AskQuestion(Tekst))
 							{
-								sprintf(Tekst,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName, SelectedLevel);
+								sprintf(Tekst,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+								//to edit default levels
+								//sprintf(Tekst,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 								if(FileExists(Tekst))
 								{
 									remove(Tekst);
-									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
+									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 									//only swap levels if we did not edit a level that also exists as a default level
-									if(!FileExists(FileName))
+									if(!FileExists(FileName) && (SelectedLevel > LevelPackFile->LevelCount))
 									{
 										for(Teller=SelectedLevel;Teller<InstalledLevels;Teller++)
 										{
-											sprintf(Tekst,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName, Teller+1);
-											sprintf(Tekst1,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,Teller);                      
+											sprintf(Tekst,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller+1);
+											sprintf(Tekst1,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName,Teller);                      
 											rename(Tekst,Tekst1);
 										}
 									}
+									//to edit default levels
+									// for(Teller=SelectedLevel;Teller<InstalledLevels;Teller++)
+									// {
+									// 	sprintf(Tekst,"./levelpacks/%s/level%d.lev", LevelPackName, Teller+1);
+									// 	sprintf(Tekst1,"./levelpacks/%s/level%d.lev", LevelPackName,Teller);                      
+									// 	rename(Tekst,Tekst1);
+									// }
 									FindLevels();
 									if (SelectedLevel > InstalledLevels)
 										SelectedLevel = InstalledLevels;
@@ -127,10 +161,13 @@ void StageSelect()
 										WorldParts.RemoveAll();
 									else
 									{
-										sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
+										sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
 										if(!FileExists(FileName))
-											sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
-										WorldParts.Load(FileName, true);
+											sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+										if(FileExists(FileName))
+											WorldParts.Load(FileName, true);
+										else
+											WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
 									}
 								}
 							}
@@ -158,10 +195,13 @@ void StageSelect()
 								if	(AskQuestion(Tekst))
 								{									
 									SelectedLevel = UnlockedLevels;
-									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
+									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
 									if(!FileExists(FileName))
-										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
-									WorldParts.Load(FileName, true);
+										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+									if(FileExists(FileName))
+										WorldParts.Load(FileName, true);
+									else
+										WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
 									GameState = GSGame;
 								}
 								Input->Reset();
@@ -187,10 +227,13 @@ void StageSelect()
 								}
 								else
 								{
-									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
+									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
 									if(!FileExists(FileName))
-										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
-									WorldParts.Load(FileName, true);
+										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+									if(FileExists(FileName))
+										WorldParts.Load(FileName, true);
+									else
+										WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
 								}
 							}
 						}
@@ -204,10 +247,13 @@ void StageSelect()
 								SelectedLevel -= 5;	
 								if (SelectedLevel < 1)
 									SelectedLevel = 1;
-								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
+								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
 								if(!FileExists(FileName))
-									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
-								WorldParts.Load(FileName, true);
+									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+								if(FileExists(FileName))
+									WorldParts.Load(FileName, true);
+								else
+									WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
 							}
 						}
                         Input->Delay();
@@ -223,10 +269,13 @@ void StageSelect()
 							SelectedLevel +=5;
 							if (SelectedLevel > InstalledLevels)
 								SelectedLevel = InstalledLevels;
-							sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
+							sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
 							if(!FileExists(FileName))
-								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
-							WorldParts.Load(FileName, true);
+								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+							if(FileExists(FileName))
+								WorldParts.Load(FileName, true);
+							else
+								WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
 						}
 						Input->Delay();
 					}
@@ -248,10 +297,13 @@ void StageSelect()
 								}
 								else
 								{
-									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
+									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
 									if(!FileExists(FileName))
-										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
-									WorldParts.Load(FileName,true);
+										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+									if(FileExists(FileName))
+										WorldParts.Load(FileName, true);
+									else
+										WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
 								}
 							}
 						}
@@ -265,10 +317,13 @@ void StageSelect()
 								SelectedLevel--;
 								if (SelectedLevel < 1)
 									SelectedLevel = 1;
-								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
+								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
 								if(!FileExists(FileName))
-									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
-								WorldParts.Load(FileName,true);
+									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+								if(FileExists(FileName))
+									WorldParts.Load(FileName, true);
+								else
+									WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
 							}
 						}
                         Input->Delay();
@@ -283,10 +338,13 @@ void StageSelect()
 								Mix_PlayChannel(-1,Sounds[SND_MENU],0);
 							if (SelectedLevel > InstalledLevels)
 								SelectedLevel = InstalledLevels;
-							sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName,SelectedLevel);
+							sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
 							if(!FileExists(FileName))
-								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackFileName,SelectedLevel);
-							WorldParts.Load(FileName,true);
+								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+							if(FileExists(FileName))
+								WorldParts.Load(FileName, true);
+							else
+								WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
 						}
                         Input->Delay();
 					}

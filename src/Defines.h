@@ -33,6 +33,7 @@
 #define SND_BACK 4
 #define SND_MOVE 5
 #define InputDelay 16
+#define MaxLevelPackNameLength 100
 
 #define GSTitleScreen 1 
 #define GSCredits 2

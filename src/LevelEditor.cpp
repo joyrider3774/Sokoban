@@ -342,16 +342,22 @@ void LevelEditor()
 #else
                         			mkdir(FileName,S_IRWXO|S_IRWXU|S_IRWXG);
 #endif
-									sprintf(FileName,"%s/.sokoban_levelpacks/%s",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackFileName);
+									sprintf(FileName,"%s/.sokoban_levelpacks/%s",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 #ifdef WIN32
                        				mkdir(FileName);
 #else
                        				mkdir(FileName,S_IRWXO|S_IRWXU|S_IRWXG);
 #endif
                         			if (SelectedLevel==0)
-                            			sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackFileName,InstalledLevels+1);
+                            			sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName,InstalledLevels+1);
                         			else
-                            			sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackFileName,SelectedLevel);
+                            			sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName,SelectedLevel);
+
+									//to edit default levels
+									// if (SelectedLevel==0)
+                            		// 	sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,InstalledLevels+1);
+                        			// else
+                            		// 	sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 
 									WorldParts.Save(FileName);
 									FindLevels();

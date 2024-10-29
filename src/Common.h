@@ -9,11 +9,12 @@
 #include "Defines.h"
 #include "CWorldParts.h"
 #include "CUsbJoystickSetup.h"
+#include "CLevelPackFile.h"
 
 extern SDL_Surface *IMGBackground,*IMGFloor,*IMGPlayer,*IMGBox,*IMGSpot,*IMGEmpty,*IMGWall,*IMGTitleScreen;
 extern unsigned char HashTable[1004];
 extern SDL_Surface* Screen,*Buffer,*Icon;
-extern TTF_Font* font,* BigFont,*MonoFont;
+extern TTF_Font* font,* BigFont,*MonoFont, *RobotoBig, *RobotoMedium;
 extern SDL_Joystick *Joystick;
 extern int GameState;
 extern int MusicCount,SelectedMusic,InstalledLevelPacksCount,InstalledLevels,SelectedLevel,SelectedLevelPack,UnlockedLevels;
@@ -21,10 +22,11 @@ extern bool TvOutMode,GlobalSoundEnabled,LevelEditorMode,LevelHasChanged,StageRe
 extern SDL_Color MenuBoxColor, MenuBoxBorderColor, MenuTextColor;
 extern CWorldParts WorldParts;
 extern Uint32 NextTime;
+extern CLevelPackFile *LevelPackFile;
 extern int Volume;
-extern char LevelPackName[21];
-extern char LevelPackFileName[21];
-extern char InstalledLevelPacks[MaxLevelPacks][21];
+extern char LevelPackName[100];
+extern char LevelPackName[100];
+extern char InstalledLevelPacks[MaxLevelPacks][100];
 extern Mix_Music *Music[MaxMusicFiles];
 extern Mix_Chunk *Sounds[NrOfSounds];
 extern CUsbJoystickSetup *JoystickSetup;

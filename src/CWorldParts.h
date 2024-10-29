@@ -3,6 +3,7 @@
 
 #include "CWorldPart.h"
 #include "CWorldParts.h"
+#include "CLevelPackFile.h"
 
 class CWorldPart;
 
@@ -13,6 +14,8 @@ class CWorldParts
 		bool DisableSorting;
 	public:
 		CWorldPart *Items[NrOfRows*NrOfCols*3];
+		CWorldPart *Player;
+		bool isLevelPackFileLevel;
 		int ItemCount;
 		CWorldParts();
 		bool CenterLevel();
@@ -26,6 +29,9 @@ class CWorldParts
 		void RemoveAll();
 		void Save(char *Filename);
 		void Load(char *Filename, bool doCenterLevel);
+		bool LoadFromLevelPackFile(CLevelPackFile* LPFile, int level, bool doCenterLevel);
+		bool ItemExists(int PlayFieldXin,int PlayFieldYin, int Type);
+		void DrawFloor(SDL_Surface* Surface, CWorldPart* Player);
 		~CWorldParts();
 };
 

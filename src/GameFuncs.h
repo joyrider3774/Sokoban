@@ -1,6 +1,8 @@
 #ifndef GAMEFUNCS_H
 #define GAMEFUNCS_H
 
+#include <SDL.h>
+
 void SetVolume(const int VolumeIn);
 void IncVolume();
 void DecVolume();
@@ -21,4 +23,5 @@ void LoadSounds();
 void UnloadMusic();
 void UnLoadGraphics();
 void LoadJoystickSettings();
+void printTitleInfo(SDL_Surface *Surface);	
 #endif

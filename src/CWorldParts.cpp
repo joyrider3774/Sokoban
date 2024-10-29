@@ -4,11 +4,13 @@
 #include "CWorldPart.h"
 #include "Common.h"
 #include "Defines.h"
+#include "CLevelPackFile.h"
 
 CWorldParts::CWorldParts()
 {
 	ItemCount = 0;
 	DisableSorting = false;
+	Player = NULL;
 }
 
 void CWorldParts::RemoveAll()
@@ -51,6 +53,72 @@ void CWorldParts::Remove(int PlayFieldXin,int PlayFieldYin,int Type)
 			Teller1--;
 		}
 	}
+}
+
+
+// Recursive Floodfill function
+void FloodFill(CWorldParts *aWorldParts, SDL_Surface* Surface, bool **visited, int X, int Y)
+{
+    // Check bounds and whether the tile has been visited
+    if (X < 0 || X >= NrOfCols || Y < 0 || Y >= NrOfRows || visited[Y][X])
+	{
+        return;
+	}
+
+	if(aWorldParts->ItemExists(X, Y, IDWall))
+	{
+        return;
+	}
+
+    // Mark the tile as visited
+    visited[Y][X] = true;
+
+	SDL_Rect Dest;
+
+	Dest.x = (X * TileWidth);
+	Dest.y = (Y * TileWidth);
+	Dest.w = TileWidth;
+	Dest.h = TileHeight;
+    // Draw the floor tile
+    SDL_BlitSurface(IMGFloor, NULL, Surface, &Dest );
+
+    // Recur for neighboring tiles
+    FloodFill(aWorldParts, Surface, visited, X + 1, Y);
+    FloodFill(aWorldParts, Surface, visited, X - 1, Y);
+    FloodFill(aWorldParts, Surface, visited, X, Y + 1);
+    FloodFill(aWorldParts, Surface, visited, X, Y - 1);
+}
+
+void  CWorldParts::DrawFloor(SDL_Surface* Surface, CWorldPart* Player)
+{
+	if(!Player)
+		return;
+    // Allocate memory for the visited array using malloc
+    bool **visited = (bool**)malloc(NrOfRows * sizeof(bool*));
+    for (int i = 0; i < NrOfRows; ++i)
+    {
+        visited[i] = (bool*)malloc(NrOfCols * sizeof(bool));
+        for (int j = 0; j < NrOfCols; ++j)
+            visited[i][j] = false; // Initialize the array to false
+    }
+
+	FloodFill(this, Surface, visited, Player->GetPlayFieldX(), Player->GetPlayFieldY());
+
+    // Free the allocated memory for the visited array
+    for (int i = 0; i < NrOfRows; ++i)
+        free(visited[i]);
+    free(visited);
+}
+
+
+bool CWorldParts::ItemExists(int PlayFieldXin,int PlayFieldYin, int Type)
+{
+	for (int Teller1=0;Teller1<ItemCount;Teller1++)
+	{
+		if ((Items[Teller1]->GetPlayFieldX() == PlayFieldXin) && (Items[Teller1]->GetPlayFieldY() == PlayFieldYin) && (Items[Teller1]->GetType() == Type))
+			return true;
+	}
+	return false;
 }
 
 void CWorldParts::HistoryAdd()
@@ -123,8 +191,52 @@ void CWorldParts::Save(char *Filename)
 	delete[] Buffer;
 }
 
+bool CWorldParts::LoadFromLevelPackFile(CLevelPackFile* LPFile, int level, bool doCenterLevel)
+{
+	isLevelPackFileLevel = false;
+	RemoveAll();
+	if(level <= LPFile->LevelCount)
+	{
+		isLevelPackFileLevel = true;
+		DisableSorting=true;
+		for (int i=0; i< LPFile->LevelsMeta[level-1].parts; i++ )
+		{
+			int Type = LPFile->Levels[level-1][i].id;
+			int X = LPFile->Levels[level-1][i].x;
+			int Y = LPFile->Levels[level-1][i].y;
+			switch(Type)
+			{
+				case IDPlayer:
+					Player = new CPlayer(X,Y);
+					Add(Player);
+					break;
+				case IDBox:
+					Add(new CBox(X,Y));
+					break;
+				case IDSpot:
+					Add(new CSpot(X,Y));
+					break;
+				case IDWall:
+					Add(new CWall(X,Y));
+					break;
+				//case IDFloor:
+				//	Add(new CFloor(X,Y));
+				//	break;
+
+			}
+		}
+		DisableSorting=false;
+		Sort();
+		if(doCenterLevel)
+			CenterLevel();
+		return true;
+	}
+	return false;
+}
+
 void CWorldParts::Load(char *Filename, bool doCenterLevel)
 {
+	isLevelPackFileLevel = false;
 	int X,Y,Type;
 	FILE *Fp;
 	int BufferPosition=0;
@@ -149,7 +261,8 @@ void CWorldParts::Load(char *Filename, bool doCenterLevel)
 			switch(Type)
 			{
 				case IDPlayer:
-					Add(new CPlayer(X,Y));
+					Player = new CPlayer(X,Y);
+					Add(Player);
 					break;
 				case IDBox:
 					Add(new CBox(X,Y));
@@ -160,9 +273,9 @@ void CWorldParts::Load(char *Filename, bool doCenterLevel)
 				case IDWall:
 					Add(new CWall(X,Y));
 					break;
-				case IDFloor:
-					Add(new CFloor(X,Y));
-					break;
+				//case IDFloor:
+				//	Add(new CFloor(X,Y));
+				//	break;
 
 			}
 		}
