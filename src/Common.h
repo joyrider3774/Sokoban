@@ -12,7 +12,6 @@
 #include "CLevelPackFile.h"
 
 extern SDL_Surface *IMGBackground,*IMGFloor,*IMGPlayer,*IMGBox,*IMGSpot,*IMGEmpty,*IMGWall,*IMGTitleScreen;
-extern unsigned char HashTable[1004];
 extern SDL_Surface* Screen,*Buffer,*Icon;
 extern TTF_Font* font,* BigFont,*MonoFont, *RobotoBig, *RobotoMedium;
 extern SDL_Joystick *Joystick;

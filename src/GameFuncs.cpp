@@ -300,41 +300,12 @@ void PrintForm(char *msg)
 void SaveUnlockData()
 {
 	FILE *Fp;
-	int Teller;
 	char Filename[FILENAME_MAX];
-	unsigned char LevelHash[4];
-	unsigned char HashBuffer[64];
-	int CheckSum = 0;
-	LevelHash[0] = HashTable[UnlockedLevels-1] ;
-	LevelHash[1] = HashTable[UnlockedLevels];
-	LevelHash[2] = HashTable[UnlockedLevels+1];
-	LevelHash[3] = HashTable[UnlockedLevels+2];
 	sprintf(Filename,"%s/%s.dat",getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
-	for (Teller=0;Teller<4;Teller++)
-		LevelHash[Teller] = LevelHash[Teller] ^ LevelPackName[strlen(LevelPackName)-1];
-	for (Teller=0;Teller<strlen(LevelPackName);Teller++)
-		LevelHash[Teller%4] = LevelHash[Teller%4] ^ LevelPackName[Teller];
-	LevelHash[0] = LevelHash[0] ^ LevelHash[2];
-	LevelHash[1] = LevelHash[1] ^ LevelHash[0];
-	LevelHash[2] = LevelHash[2] ^ LevelHash[3];
-	LevelHash[3] = LevelHash[3] ^ LevelHash[2];
-	for (Teller=0;Teller<64;Teller++)
-		if ((Teller+1) % 16 == 0)
-		{
-			HashBuffer[Teller] = LevelHash[(Teller)/16];
-			CheckSum += HashBuffer[Teller];
-		}
-		else
-		{
-			HashBuffer[Teller] = rand() % 256;
-			CheckSum += HashBuffer[Teller];
-		}
-	CheckSum = CheckSum ^ 50;
 	Fp = fopen(Filename,"wb");
 	if (Fp)
 	{
-		fwrite(HashBuffer,1,64,Fp);
-		fwrite(&CheckSum,sizeof(int),1,Fp);
+		fwrite(&UnlockedLevels,sizeof(int),1,Fp);
 		fclose(Fp);
 	}
 }
@@ -342,51 +313,17 @@ void SaveUnlockData()
 void LoadUnlockData()
 {
 	FILE *Fp;
-	unsigned char LevelHash[4];
-	int Teller=0;
-	unsigned char HashBuffer[64];
+ 	UnlockedLevels = 1;
 	char Filename[FILENAME_MAX];
 	sprintf(Filename,"%s/%s.dat",getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
 	Fp = fopen(Filename,"rb");
-	int CheckSum,ValidCheckSum=0;
 	if (Fp)
 	{
-		fflush(Fp);
-		fread(HashBuffer,1,64,Fp);
-		fread(&CheckSum,sizeof(int),1,Fp);
+		fread(&UnlockedLevels,sizeof(int),1,Fp);
 		fclose(Fp);
-		for (Teller = 0 ;Teller<64;Teller++)
-		{
-			ValidCheckSum += HashBuffer[Teller];
-			if ((Teller+1)%16 == 0)
-				LevelHash[Teller/16] = HashBuffer[Teller];
-		}
-		CheckSum = CheckSum ^ 50;
-		if (CheckSum == ValidCheckSum)
-		{
-			LevelHash[3] = LevelHash[3] ^ LevelHash[2];
-			LevelHash[2] = LevelHash[2] ^ LevelHash[3];
-			LevelHash[1] = LevelHash[1] ^ LevelHash[0];
-			LevelHash[0] = LevelHash[0] ^ LevelHash[2];
-			for (Teller=0;Teller<strlen(LevelPackName);Teller++)
-				LevelHash[Teller%4] = LevelHash[Teller%4] ^ LevelPackName[Teller];
-			for (Teller=0;Teller<4;Teller++)
-				LevelHash[Teller] = LevelHash[Teller] ^ LevelPackName[strlen(LevelPackName)-1];
-
-			Teller=0;
-			while (LevelHash[0] != HashTable[Teller] || LevelHash[1] != HashTable[Teller+1] || 	LevelHash[2] != HashTable[Teller+2] || LevelHash[3] != HashTable[Teller+3] && Teller+3 < 1004)
-				Teller++;
-			if (Teller < InstalledLevels)
-				UnlockedLevels = Teller+1;
-			else
-				UnlockedLevels = 1;
-		}
-		else
+		if ((UnlockedLevels > InstalledLevels) || (UnlockedLevels < 1))
 			UnlockedLevels = 1;
 	}
-	else
-	 	UnlockedLevels = 1;
-
 }
 
 
