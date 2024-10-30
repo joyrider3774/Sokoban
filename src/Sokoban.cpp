@@ -13,7 +13,6 @@
 #include <SDL/SDL_gfxPrimitives.h>
 #include <SDL/SDL_framerate.h>
 #include "GameFuncs.h"
-#include "Functions.h"
 #include "CUsbJoystickSetup.h"
 #include "CWorldParts.h"
 #include "Common.h"

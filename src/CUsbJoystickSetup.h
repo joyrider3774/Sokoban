@@ -1,9 +1,9 @@
 #ifndef CUSBJOYSTICK_H
 #define CUSBJOYSTICK_H
 
-#include <SDL/SDL.h>
+#include <SDL.h>
+#include <SDL_ttf.h>
 #include <stdio.h>
-#include "Functions.h"
 
 #define MAXDEFINITIONS 50
 #define DESCRIPTIONSIZE 1024

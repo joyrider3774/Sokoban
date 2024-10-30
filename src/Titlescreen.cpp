@@ -13,7 +13,7 @@ void TitleScreen()
 {
 	//http://sokobano.de/en/levels.php
 
-	int total = 0;
+	//int total = 0;
 
 	// char FileName[FILENAME_MAX];
 	// if (InstalledLevelPacksCount > 0)

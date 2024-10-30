@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <SDL.h>
-#include <SDL/SDL_gfxPrimitives.h>
+#include <SDL_gfxPrimitives.h>
+#include "GameFuncs.h"
 #include "CUsbJoystickSetup.h"
 #include "CInput.h"
 #include "Defines.h"
