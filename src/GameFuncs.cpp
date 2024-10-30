@@ -611,13 +611,17 @@ void LoadGraphics()
 	IMGBackground = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
+	isCustomnTitleScreen = true;
 	sprintf(FileName,"%s/.sokoban_levelpacks/%s/titlescreen.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
 		sprintf(FileName,"./levelpacks/%s/titlescreen.png",LevelPackName);
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
+	{
+		isCustomnTitleScreen = false;
 		Tmp = IMG_Load("./graphics/titlescreen.png");
+	}
 	IMGTitleScreen = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
@@ -731,6 +735,16 @@ void printTitleInfo(SDL_Surface *Surface)
 			strcat(Tekst, LevelPackFile->author);
 			TTF_SizeText(RobotoMedium, Tekst, &w, NULL);
 			WriteText(Surface, RobotoMedium, Tekst, strlen(Tekst), (ORIG_WINDOW_WIDTH - w) / 2, 290, 0, TitleColor);
+		}
+	}
+	else
+	{
+		if(!isCustomnTitleScreen)
+		{
+			strcpy(Tekst, "Sokoban");
+			TTF_SizeText(RobotoBig, Tekst, &w, NULL);
+			SDL_Color TitleColor = {174,198,234,255};
+			WriteText(Surface, RobotoBig, Tekst, strlen(Tekst), (ORIG_WINDOW_WIDTH - w) / 2, 10, 0, TitleColor);
 		}
 	}
 }

@@ -29,6 +29,7 @@ extern char InstalledLevelPacks[MaxLevelPacks][100];
 extern Mix_Music *Music[MaxMusicFiles];
 extern Mix_Chunk *Sounds[NrOfSounds];
 extern CUsbJoystickSetup *JoystickSetup;
+extern bool isCustomnTitleScreen;
 extern FPSmanager Fpsman;
 extern int WINDOW_WIDTH;
 extern int WINDOW_HEIGHT;

@@ -25,6 +25,7 @@ char InstalledLevelPacks[MaxLevelPacks][MaxLevelPackNameLength];
 Mix_Music *Music[MaxMusicFiles];
 Mix_Chunk *Sounds[NrOfSounds];
 CUsbJoystickSetup *JoystickSetup;
+bool isCustomnTitleScreen;
 FPSmanager Fpsman;
 int WINDOW_WIDTH = 640;
 int WINDOW_HEIGHT = 360;
