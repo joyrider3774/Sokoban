@@ -245,7 +245,8 @@ void Game()
 			SDL_Delay(250);
 			if (LevelEditorMode)
 			{
-				if (AskQuestion("Congratulations !\nYou Succesfully Solved this level\nDo you want to return to the\nlevel editor ?\n(A) Leveleditor (X) Play Again"))
+				sprintf(Msg, "Congratulations !\nYou Succesfully Solved this level in\n%d moves and %d pushes\nDo you want to return to the\nlevel editor ?\n(A) Leveleditor (X) Play Again", WorldParts.Moves, WorldParts.Pushes);
+				if (AskQuestion(Msg))
 				{
 					GameState = GSLevelEditor;
 					Input->Reset();
@@ -273,7 +274,7 @@ void Game()
 				{
 					if ( UnlockedLevels < InstalledLevels)
 					{
-						sprintf(Msg,"Congratulations !\nYou Succesfully Solved Level %d/%d\nThe next level has now been unlocked!\n\nPress (A) to continue",SelectedLevel,InstalledLevels);
+						sprintf(Msg,"Congratulations !\nYou Succesfully Solved Level %d/%d in\n%d moves and %d pushes\nThe next level has now been unlocked!\n\nPress (A) to continue",SelectedLevel,InstalledLevels,WorldParts.Moves, WorldParts.Pushes);
 						PrintForm(Msg);
 						UnlockedLevels++;
 						SelectedLevel++;
@@ -283,7 +284,7 @@ void Game()
 					}
 					else
 					{
-						sprintf(Msg,"Congratulations !\nYou Succesfully Solved Level %d/%d\nlevelpack %s\nis now finished, try out another one!\n\nPress (A) to continue",SelectedLevel,InstalledLevels,LevelPackName);
+						sprintf(Msg,"Congratulations !\nYou Succesfully Solved Level %d/%d in\n%d moves and %d pushes\nlevelpack %s\nis now finished, try out another one!\nPress (A) to continue",SelectedLevel,InstalledLevels,WorldParts.Moves, WorldParts.Pushes,LevelPackName);
 						PrintForm(Msg);
 						GameState = GSTitleScreen;
 						Input->Reset();
@@ -291,7 +292,7 @@ void Game()
 				}
 				else
 				{
-					sprintf(Msg,"Congratulations !\nYou Succesfully Solved Level %d/%d\n\nPress (A) to continue",SelectedLevel,InstalledLevels);
+					sprintf(Msg,"Congratulations !\nYou Succesfully Solved Level %d/%d in\n%d moves and %d pushes\n\n\nPress (A) to continue",SelectedLevel,InstalledLevels,WorldParts.Moves, WorldParts.Pushes);
 					PrintForm(Msg);
 					GameState = GSStageSelect;
 					Input->Reset();
