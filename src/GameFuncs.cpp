@@ -292,6 +292,8 @@ void PrintForm(char *msg)
         }
         SDL_framerateDelay(&Fpsman);
     }
+	if(Input->SpecialsHeld[SPECIAL_QUIT_EV])
+	    GameState = GSQuit;
 	if (GlobalSoundEnabled)
 		Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
 	delete Input;
@@ -350,7 +352,11 @@ char *GetString(char *NameIn,char *Msg)
         Input->Update();
 
         if(Input->SpecialsHeld[SPECIAL_QUIT_EV])
+		{
+			End = true;
+            SubmitChanges=false;
             GameState = GSQuit;
+		}
 
         if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_LEFT)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_LEFT)]))
         {
