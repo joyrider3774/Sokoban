@@ -228,7 +228,7 @@ bool CWorldParts::LoadFromLevelPackFile(CLevelPackFile* LPFile, int level, bool 
 			}
 		}
 		DisableSorting=false;
-		//Sort();
+		Sort();
 		if(doCenterLevel)
 			CenterLevel();
 		return true;
