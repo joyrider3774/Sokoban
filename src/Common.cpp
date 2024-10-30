@@ -14,7 +14,7 @@ TTF_Font* font,* BigFont,*MonoFont, *RobotoBig, *RobotoMedium;
 SDL_Joystick *Joystick;
 int GameState = GSTitleScreen;
 int MusicCount=0,SelectedMusic=0,InstalledLevelPacksCount=0,InstalledLevels=0,SelectedLevel=0,SelectedLevelPack=0,UnlockedLevels=1;
-bool TvOutMode=false,GlobalSoundEnabled = true,LevelEditorMode=false,LevelHasChanged=false,StageReload=false,ReloadMusic=false;
+bool GlobalSoundEnabled = true,LevelEditorMode=false,LevelHasChanged=false,StageReload=false,ReloadMusic=false;
 SDL_Color MenuBoxColor = {132,155,189,255}, MenuBoxBorderColor = {82,117,156,255}, MenuTextColor = {33,75,123,0};
 CWorldParts WorldParts;
 Uint32 NextTime=0;
