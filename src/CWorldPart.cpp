@@ -178,7 +178,7 @@ void CWorldPart::Draw(SDL_Surface* Surface)
 		SrcRect.y = 0;
 		SrcRect.w = TileWidth;
 		SrcRect.h = TileHeight;
-		DstRect.x = X;
+		DstRect.x = X + 8; // + 8 because 640/24 is not possible
 		DstRect.y = Y;
 		DstRect.w = TileWidth;
 		DstRect.h = TileHeight;
@@ -186,8 +186,8 @@ void CWorldPart::Draw(SDL_Surface* Surface)
 	}
 	if (Selected)
 	{
-		boxRGBA(Surface,X,Y,X+TileWidth-1,Y+TileHeight-1,0,0,200,125);
-		rectangleRGBA(Surface,X,Y,X+TileWidth-1,Y+TileHeight-1,0,0,255,125);
+		boxRGBA(Surface,X+8,Y,X+8+TileWidth-1,Y+TileHeight-1,0,0,200,125);
+		rectangleRGBA(Surface,X+8,Y,X+8+TileWidth-1,Y+TileHeight-1,0,0,255,125);
 	}
 
 }

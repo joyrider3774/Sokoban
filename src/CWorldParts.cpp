@@ -75,7 +75,7 @@ void FloodFill(CWorldParts *aWorldParts, SDL_Surface* Surface, bool **visited, i
 
 	SDL_Rect Dest;
 
-	Dest.x = (X * TileWidth);
+	Dest.x = (X * TileWidth) + 8; // + 8 because 640/24 is not possible
 	Dest.y = (Y * TileWidth);
 	Dest.w = TileWidth;
 	Dest.h = TileHeight;
