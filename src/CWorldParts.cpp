@@ -199,6 +199,8 @@ bool CWorldParts::LoadFromLevelPackFile(CLevelPackFile* LPFile, int level, bool 
 	{
 		isLevelPackFileLevel = true;
 		DisableSorting=true;
+		Pushes = 0;
+		Moves = 0;
 		for (int i=0; i< LPFile->LevelsMeta[level-1].parts; i++ )
 		{
 			int Type = LPFile->Levels[level-1][i].id;
@@ -247,6 +249,8 @@ void CWorldParts::Load(char *Filename, bool doCenterLevel)
 	{
 		RemoveAll();
 		DisableSorting=true;
+		Pushes = 0;
+		Moves = 0;
 		fseek (Fp , 0 , SEEK_END);
   		FileSize = ftell (Fp);
   		rewind (Fp);

@@ -27,14 +27,13 @@ bool StageDone()
 void Game()
 {
     CInput *Input = new CInput(InputDelay);
-	int Teller,Moves=0;
+	int Teller;
 	char Msg[300];
 	char FileName[FILENAME_MAX];
 	SDL_Event Event;
 	SDL_PollEvent(&Event);
 	if (GlobalSoundEnabled)
 		Mix_HaltMusic();
-	Moves=0;
 	if (MusicCount > 1)
  	{
  		SelectedMusic =	1+rand()%(MusicCount-1);
@@ -140,7 +139,7 @@ void Game()
 								WorldParts.Load(FileName, true);
 							else
 								WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
-							Moves=0;
+
 							for (Teller=0;Teller<WorldParts.ItemCount;Teller++)
 							{
 								if (WorldParts.Items[Teller]->GetType() == IDPlayer)
@@ -162,12 +161,12 @@ void Game()
 						if(LevelPackFile->Loaded)
 						{
 							if(strlen(LevelPackFile->LevelsMeta[SelectedLevel-1].author) > 0)
-								sprintf(Msg,"Level Pack: %s\nLevel: %d/%d - Moves: %d\nAuthor: %s\nComments: %s",LevelPackName,SelectedLevel,InstalledLevels,Moves,LevelPackFile->LevelsMeta[SelectedLevel-1].author,LevelPackFile->LevelsMeta[SelectedLevel-1].comments);
+								sprintf(Msg,"Level Pack: %s\nLevel: %d/%d - Moves: %d - Pushes: %d\nAuthor: %s\nComments: %s",LevelPackName,SelectedLevel,InstalledLevels,WorldParts.Moves,WorldParts.Pushes,LevelPackFile->LevelsMeta[SelectedLevel-1].author,LevelPackFile->LevelsMeta[SelectedLevel-1].comments);
 							else
-								sprintf(Msg,"Level Pack: %s\nLevel: %d/%d - Moves: %d\nAuthor: %s\nComments: %s",LevelPackName,SelectedLevel,InstalledLevels,Moves,LevelPackFile->author,LevelPackFile->LevelsMeta[SelectedLevel-1].comments);
+								sprintf(Msg,"Level Pack: %s\nLevel: %d/%d - Moves: %d - Pushes: %d\nAuthor: %s\nComments: %s",LevelPackName,SelectedLevel,InstalledLevels,WorldParts.Moves,WorldParts.Pushes,LevelPackFile->author,LevelPackFile->LevelsMeta[SelectedLevel-1].comments);
 						}
 						else
-							sprintf(Msg,"Level Pack: %s\nLevel: %d/%d - Moves: %d\n\nPress (A) To continue playing",LevelPackName,SelectedLevel,InstalledLevels,Moves);
+							sprintf(Msg,"Level Pack: %s\nLevel: %d/%d - Moves: %d - Pushes: %d",LevelPackName,SelectedLevel,InstalledLevels,WorldParts.Moves,WorldParts.Pushes);
 						PrintForm(Msg);
 						SDL_Delay(250);
 						Input->Delay();
@@ -180,8 +179,6 @@ void Game()
 			if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]))
 			{
 				WorldParts.HistoryGoBack();
-				if (Moves > 0)
-					Moves--;
 			}
 
 			if ( Input->Ready() && !(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]) &&
@@ -190,7 +187,6 @@ void Game()
 				if (Player->CanMoveTo(Player->GetPlayFieldX() + 1, Player->GetPlayFieldY()))
 				{
 					WorldParts.HistoryAdd();
-					Moves++;
 				}
 				Player->MoveTo(Player->GetPlayFieldX() + 1, Player->GetPlayFieldY(),false);
 			}
@@ -201,7 +197,6 @@ void Game()
 				if (Player->CanMoveTo(Player->GetPlayFieldX() - 1, Player->GetPlayFieldY()))
 				{
 					WorldParts.HistoryAdd();
-					Moves++;
 				}
 				Player->MoveTo(Player->GetPlayFieldX() - 1, Player->GetPlayFieldY(),false);
 			}
@@ -212,7 +207,6 @@ void Game()
 				if (Player->CanMoveTo(Player->GetPlayFieldX() , Player->GetPlayFieldY()-1))
 				{
 					WorldParts.HistoryAdd();
-					Moves++;
 				}
 				Player->MoveTo(Player->GetPlayFieldX(), Player->GetPlayFieldY() - 1,false);
 			}
@@ -223,7 +217,6 @@ void Game()
 				if (Player->CanMoveTo(Player->GetPlayFieldX() , Player->GetPlayFieldY()+1))
 				{
 					WorldParts.HistoryAdd();
-					Moves++;
 				}
 				Player->MoveTo(Player->GetPlayFieldX(), Player->GetPlayFieldY() +1,false);
 			}
@@ -262,7 +255,6 @@ void Game()
 					sprintf(FileName,"%s/.sokoban_temp.lev",getenv("HOME") == NULL ? ".": getenv("HOME"));
 					WorldParts.RemoveAll();
 					WorldParts.Load(FileName, true);
-					Moves=0;
 					for (Teller=0;Teller<WorldParts.ItemCount;Teller++)
 					{
 						if (WorldParts.Items[Teller]->GetType() == IDPlayer)

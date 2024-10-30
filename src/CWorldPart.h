@@ -71,7 +71,7 @@ class CBox : public CWorldPart
 		void Event_ArrivedOnNewSpot();
 		bool CanMoveTo(const int PlayFieldXin,const int PlayFieldYin);
 		void Event_LeaveCurrentSpot();
-	
+		void MoveTo(const int PlayFieldXin,const int PlayFieldYin,bool BackWards);
 	public:
 		CBox(const int PlayFieldXin,const int PlayFieldYin);
 };

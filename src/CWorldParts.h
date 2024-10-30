@@ -15,6 +15,7 @@ class CWorldParts
 	public:
 		CWorldPart *Items[NrOfRows*NrOfCols*3];
 		CWorldPart *Player;
+		int Pushes, Moves;
 		bool isLevelPackFileLevel;
 		int ItemCount;
 		CWorldParts();

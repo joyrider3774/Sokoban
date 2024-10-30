@@ -231,6 +231,37 @@ CBox::CBox(const int PlayFieldXin,const int PlayFieldYin) : CWorldPart(PlayField
 	Z = ZBox;
 }
 
+void CBox::MoveTo(const int PlayFieldXin,const int PlayFieldYin,bool BackWards)
+{
+	if(!IsMoving)
+	{
+		if((PlayFieldXin != PlayFieldX) || (PlayFieldYin != PlayFieldY))
+			if(this->CanMoveTo(PlayFieldXin,PlayFieldYin) || BackWards)
+			{
+				if(ParentList)
+				{
+					if(BackWards)
+						ParentList->Pushes--;
+					else
+						ParentList->Pushes++;
+				}
+				PlayFieldX = PlayFieldXin;
+				PlayFieldY = PlayFieldYin;
+				if(X < PlayFieldX*TileWidth)
+					Xi = MoveSpeed;
+				if(X > PlayFieldX*TileWidth)
+					Xi = -MoveSpeed;
+				if(Y > PlayFieldY*TileHeight)
+					Yi = -MoveSpeed;
+				if(Y < PlayFieldY*TileHeight)
+					Yi = MoveSpeed;
+				IsMoving = true;
+				Event_LeaveCurrentSpot();
+			}
+	}
+	
+}
+
 void CBox::Event_LeaveCurrentSpot()
 {
 	if (ParentList)
@@ -401,6 +432,13 @@ void CPlayer::MoveTo(const int PlayFieldXin,const int PlayFieldYin,bool BackWard
 	{
 		if(this->CanMoveTo(PlayFieldXin,PlayFieldYin) || BackWards)
 		{
+			if(ParentList)
+			{
+				if(BackWards)
+					ParentList->Moves--;
+				else
+					ParentList->Moves++;
+			}
 			AnimPhases = 4;
 			PlayFieldX = PlayFieldXin;
 			PlayFieldY = PlayFieldYin;
