@@ -51,7 +51,6 @@ bool CLevelPackFile::parseText(char* text, int maxWidth, int maxHeight, bool Met
 	char* pdoublepoint, *pset, *pauthor;
 	int y;
 	bool inlevel = false;
-	bool incomment = false;
 	LevelCount = 0;
 	while(*pchar != '\0')
 	{
@@ -98,14 +97,17 @@ bool CLevelPackFile::parseText(char* text, int maxWidth, int maxHeight, bool Met
 		{
 			if(strlen(levelField) > 0)
 			{
+				char* ptmp = levelFieldValue;
+				while(*ptmp == ' ')
+					ptmp++;
 				if (strcasecmp(levelField, "title") == 0)
-					strcpy(LevelsMeta[LevelCount].title, levelFieldValue);
+					strcpy(LevelsMeta[LevelCount].title, ptmp);
 
 				if (strcasecmp(levelField, "author") == 0)
-					strcpy(LevelsMeta[LevelCount].author, levelFieldValue);
+					strcpy(LevelsMeta[LevelCount].author, ptmp);
 			
 				if (strcasecmp(levelField, "comment") == 0)
-					strcpy(LevelsMeta[LevelCount].comments, levelFieldValue);
+					strcpy(LevelsMeta[LevelCount].comments, ptmp);
 			}	
 			memset(levelFieldValue, 0, 2000);
 			memset(levelField, 0, 100);
@@ -128,14 +130,17 @@ bool CLevelPackFile::parseText(char* text, int maxWidth, int maxHeight, bool Met
 		{
 			if(strlen(levelField) > 0)
 			{
+				char* ptmp = levelFieldValue;
+				while(*ptmp == ' ')
+					ptmp++;
 				if (strcasecmp(levelField, "title") == 0)
-					strcpy(LevelsMeta[LevelCount].title, levelFieldValue);
+					strcpy(LevelsMeta[LevelCount].title, ptmp);
 
 				if (strcasecmp(levelField, "author") == 0)
-					strcpy(LevelsMeta[LevelCount].author, levelFieldValue);
+					strcpy(LevelsMeta[LevelCount].author, ptmp);
 			
 				if (strcasecmp(levelField, "comment") == 0)
-					strcpy(LevelsMeta[LevelCount].comments, levelFieldValue);
+					strcpy(LevelsMeta[LevelCount].comments, ptmp);
 			}
 			//clear them for if condition above conerning level start
 			memset(levelFieldValue, 0, 2000);
@@ -155,9 +160,9 @@ bool CLevelPackFile::parseText(char* text, int maxWidth, int maxHeight, bool Met
 			y = 0;
 			LevelsMeta[LevelCount].width = 0;
 			LevelsMeta[LevelCount].height = 0;
-			LevelsMeta[LevelCount].author[0] = '\0';
-			LevelsMeta[LevelCount].title[0] = '\0';
-			LevelsMeta[LevelCount].author[0] = '\0';
+			memset(LevelsMeta[LevelCount].author, 0, 100);
+			memset(LevelsMeta[LevelCount].title, 0, 100);
+			memset(LevelsMeta[LevelCount].author, 0, 100);
 			LevelsMeta[LevelCount].parts = 0;
 		}
 
