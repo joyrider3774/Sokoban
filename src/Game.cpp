@@ -238,7 +238,7 @@ void Game()
 			SDL_BlitSurface(Buffer, NULL, Screen, NULL);
 		}
         SDL_Flip(Screen);
-		if (!Player->IsMoving && StageDone())
+		if (!Player->IsMoving && (WorldParts.Moves >0) && StageDone())
 		{
 			if (GlobalSoundEnabled)
 				Mix_PlayChannel(-1,Sounds[SND_STAGEEND],0);
