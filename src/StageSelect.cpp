@@ -64,7 +64,10 @@ void StageSelect()
 				{
 					if ((strlen(LevelPackFile->LevelsMeta[SelectedLevel-1].title) > 0) || (strlen(LevelPackFile->LevelsMeta[SelectedLevel-1].author) > 0))
 					{
-						sprintf(Tekst, "%s by %s", LevelPackFile->LevelsMeta[SelectedLevel-1].title, LevelPackFile->LevelsMeta[SelectedLevel-1].author);
+						if(strlen(LevelPackFile->LevelsMeta[SelectedLevel-1].author) > 0)
+							sprintf(Tekst, "%s by %s", LevelPackFile->LevelsMeta[SelectedLevel-1].title, LevelPackFile->LevelsMeta[SelectedLevel-1].author);
+						else
+							sprintf(Tekst, "%s by %s", LevelPackFile->LevelsMeta[SelectedLevel-1].title, LevelPackFile->author);
 						int w;
 						TTF_SizeText(font, Tekst, &w, NULL);
 						WriteText(Buffer,font,Tekst,strlen(Tekst),(ORIG_WINDOW_WIDTH - w) / 2,ORIG_WINDOW_HEIGHT- 11*UI_HEIGHT_SCALE,0,MenuTextColor);
