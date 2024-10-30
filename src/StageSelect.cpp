@@ -71,8 +71,7 @@ void StageSelect()
 						int w;
 						TTF_SizeText(font, Tekst, &w, NULL);
 						WriteText(Buffer,font,Tekst,strlen(Tekst),(ORIG_WINDOW_WIDTH - w) / 2,ORIG_WINDOW_HEIGHT- 11*UI_HEIGHT_SCALE,0,MenuTextColor);
-					}
-					WriteText(Buffer,font,LevelPackFile->LevelsMeta[SelectedLevel-1].comments,strlen(LevelPackFile->LevelsMeta[SelectedLevel-1].comments),0,50,0,{0,0,0,0});
+					}					
 				}
 			}
 		}

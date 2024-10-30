@@ -157,8 +157,17 @@ void Game()
 					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_SELECT)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_SELECT)]))
 					{
 						SDL_BlitSurface(IMGBackground,NULL,Buffer,NULL);
+						WorldParts.DrawFloor(Buffer, Player);
 						WorldParts.Draw(Buffer);
-						sprintf(Msg,"Level Pack: %s\nLevel: %d/%d - Moves: %d\n\nPress (A) To continue playing",LevelPackName,SelectedLevel,InstalledLevels,Moves);
+						if(LevelPackFile->Loaded)
+						{
+							if(strlen(LevelPackFile->LevelsMeta[SelectedLevel-1].author) > 0)
+								sprintf(Msg,"Level Pack: %s\nLevel: %d/%d - Moves: %d\nAuthor: %s\nComments: %s",LevelPackName,SelectedLevel,InstalledLevels,Moves,LevelPackFile->LevelsMeta[SelectedLevel-1].author,LevelPackFile->LevelsMeta[SelectedLevel-1].comments);
+							else
+								sprintf(Msg,"Level Pack: %s\nLevel: %d/%d - Moves: %d\nAuthor: %s\nComments: %s",LevelPackName,SelectedLevel,InstalledLevels,Moves,LevelPackFile->author,LevelPackFile->LevelsMeta[SelectedLevel-1].comments);
+						}
+						else
+							sprintf(Msg,"Level Pack: %s\nLevel: %d/%d - Moves: %d\n\nPress (A) To continue playing",LevelPackName,SelectedLevel,InstalledLevels,Moves);
 						PrintForm(Msg);
 						SDL_Delay(250);
 						Input->Delay();
