@@ -53,14 +53,12 @@ User made levels and packs are saved in the ".sokoban_levelpacks" folder.
 On the windows this folder is located in the same directory as the executable.
 In linux or if a HOME environment variable is set it will be located in "$HOME/.sokoban_levelpacks"
 
-### Sok (ascii) Level Packs
-This version of sokoban supports .sok files that define sokoban levels in a text file format. 
-There are only a select few of these preinstalled but you can however get extra of such sock files from the following sites:
+### Sok/txt (ascii) Level Packs
+This version of sokoban supports .sok and .txt files that define sokoban levels in a text file format. 
+There are only a select few of these preinstalled but you can however get extra of such files from the following sites:
 
 * http://sokobano.de/en/levels.php  (use exception to allow http) click the little blue download icons
-* https://www.sourcecode.se/sokoban/levels.php click a level pack and click on the little T icon to download a levelpack
-
-if any of those files downloaded have a ".txt" extension rename the file so it has a ".sok" extension
+* https://www.sourcecode.se/sokoban/levels.php click a level pack and click on the little T icon to download a text level pack
 
 ## Controls Gamepad (xbox controller)
 

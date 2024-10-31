@@ -162,7 +162,7 @@ void DoSearchForLevelPacks(char* Path)
 					if(dot &&  !(dot == Entry->d_name)) 
 					{
 						ext = dot +1;
-						if(strcasecmp(ext, "sok") == 0)
+						if((strcasecmp(ext, "sok") == 0) || (strcasecmp(ext, "txt") == 0))
 						{
 							sprintf(Name,"%s",Entry->d_name);
 							bool found = false;
