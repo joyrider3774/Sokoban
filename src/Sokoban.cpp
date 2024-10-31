@@ -91,9 +91,9 @@ int main(int argc, char **argv)
 				if (TTF_Init() == 0)
 				{
 					printf("Succesfully initialized TTF\n");
-					font = TTF_OpenFont("./fonts/font.ttf",17*UI_HEIGHT_SCALE);
-					BigFont = TTF_OpenFont("./fonts/font.ttf",20*UI_HEIGHT_SCALE);
-					MonoFont = TTF_OpenFont("./fonts/font1.ttf",17*UI_HEIGHT_SCALE);
+					font = TTF_OpenFont("./fonts/Roboto-Light.ttf",9*UI_HEIGHT_SCALE);
+					BigFont = TTF_OpenFont("./fonts/Roboto-Light.ttf",11*UI_HEIGHT_SCALE);
+					MonoFont = TTF_OpenFont("./fonts/SpaceMono-Regular.ttf",12*UI_HEIGHT_SCALE);
 					RobotoBig = TTF_OpenFont("./fonts/Roboto-Black.ttf",60);
 					RobotoMedium = TTF_OpenFont("./fonts/Roboto-Black.ttf",30);
 					if (font && BigFont && MonoFont)

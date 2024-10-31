@@ -100,6 +100,11 @@ Game is an adaptation from the gp2x version i (willems davy, aka joyrider3774) i
 - SDL_GFX
 - SDL_IMAGE
 
+### Fonts
+- Roboto-Black by google
+- SpaceMono-Regular by google
+- SpaceMono-Regular by google
+
 ### Graphics
 - wall: [1001.com](https://opengameart.org/content/sokoban-pack) - [Attribution-ShareAlike 3.0 Unported](https://creativecommons.org/licenses/by-sa/3.0/)
 - floor: [Kenney Sokoban tiles](https://opengameart.org/content/sokoban-100-tiles) - [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/)
