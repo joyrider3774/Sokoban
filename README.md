@@ -203,6 +203,10 @@ Below you can find all authors and details for the different .sok files that is 
 - Author: Lee J Haywood
 - Homepage:  https://leehaywood.org/games/sokoban/
 
+#### Erim Sever Collection.sok
+- Author: Erim Sever
+- Homepage: https://web.archive.org/web/20191029215423/http://www.erimsever.com/e_sokoban.htm
+
 #### Pimpernel
 - Homepage: http://www.pimpernel.com/sokoban/game.html
 
