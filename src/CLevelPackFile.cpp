@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <cstring>
+#include <sys/stat.h>
+#include "GameFuncs.h"
 #include "CLevelPackFile.h"
 #include "Defines.h"
 
@@ -24,19 +26,25 @@ bool CLevelPackFile::loadFile(char* filename, int maxWidth, int maxHeight, bool 
 	Loaded = false;
 	memset(author, 0, 250);
 	memset(set, 0, 250);
-	FILE* Fp = fopen(filename,"rb");
-	if(Fp)
+    struct stat statbuf;
+    stat(filename, &statbuf);
+    // test for a regular file
+    if (S_ISREG(statbuf.st_mode))
 	{
-		fseek (Fp , 0 , SEEK_END);
-		long FileSize = ftell (Fp);
-		rewind (Fp);
-		char* tmp = new char[FileSize + 2];
-		fread(tmp,1,FileSize,Fp);		
-		tmp[FileSize] = '\0';
-		Result = parseText(tmp, maxWidth, maxHeight, MetaOnly);		
-		delete[] tmp;
-		fclose(Fp);
-		Loaded = true;
+		FILE* Fp = fopen(filename,"rb");
+		if(Fp)
+		{
+			fseek (Fp , 0 , SEEK_END);
+			long FileSize = ftell (Fp);
+			rewind (Fp);
+			char* tmp = new char[FileSize + 2];
+			fread(tmp,1,FileSize,Fp);		
+			tmp[FileSize] = '\0';
+			Result = parseText(tmp, maxWidth, maxHeight, MetaOnly);		
+			delete[] tmp;
+			fclose(Fp);
+			Loaded = true;
+		}
 	}
 	return Result;
 }
