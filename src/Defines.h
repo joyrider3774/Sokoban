@@ -23,7 +23,7 @@
 #define IDSpot 4
 #define IDEmpty 5
 #define IDFloor 6
-#define MaxLevelPacks 200
+#define MaxLevelPacks 1000
 #define MaxMusicFiles 26
 #define NrOfSounds 6
 #define SND_MENU 0

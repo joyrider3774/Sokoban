@@ -18,9 +18,10 @@ This version is a cleanup of my old gp2x version, using open source assets and a
 ![screenshot 4](screenshots/screenshot4.png)
 
 ## Game Features:
-- Multiple Levels spread over different (default) levelpacks 
+- Multiple Levels spread over different (default) level packs (Max 1000 level packs)
+- Max 26x15 level size, will filter ascii sets if levels are too big
 - Level Editor (Create your own Level Packs)
-- Supports ascii (.sok) level sets
+- Supports ascii (.sok / .txt) level sets
 - Autosaves progress
 - Add your own music files
 - Customize Levelpack colors and graphics
