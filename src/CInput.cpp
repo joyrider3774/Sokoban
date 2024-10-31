@@ -5,8 +5,13 @@ CInput::CInput(int UpdateCounterDelay) {
     Reset();
     PNumJoysticks = SDL_NumJoysticks();
     for (int teller=0;teller< PNumJoysticks;teller++)
-        SDL_JoystickOpen(teller);
-    SDL_JoystickEventState(SDL_ENABLE);
+	{
+    	SDL_JoystickOpen(teller);
+	}
+	if (PNumJoysticks > 0)
+	{
+    	SDL_JoystickEventState(SDL_ENABLE);
+	}
     PUpdateCounterDelay = UpdateCounterDelay;
     UpdateCounter = 0;
 }
