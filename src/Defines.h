@@ -46,7 +46,7 @@
 #define GSLevelEditorMenu 9 
 #define GSJoystickSetup 10
 
-#define NROFBUTTONS 14
+#define NROFBUTTONS 12
 
 #define BUT_UP 0
 #define BUT_RIGHT 1
@@ -60,8 +60,6 @@
 #define BUT_SELECT 9
 #define BUT_L 10
 #define BUT_R 11
-#define BUT_VOLMIN 12
-#define BUT_VOLUP 13
 
 
 #endif
