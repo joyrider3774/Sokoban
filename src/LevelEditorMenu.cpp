@@ -245,7 +245,7 @@ void LevelEditorMenu()
 		rectangleRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
 		rectangleRGBA(Buffer,51*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,269*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
 		sprintf(Tekst,"Create New Levelpack\nLoad Selected LevelPack\nDelete Selected Levelpack\n<%s>\nMain Menu",LevelPackName);
-		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),80*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2,MenuTextColor);
+		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),80*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
 		if (Selection > 1)
 		{
 			strcpy(Tekst,"\n");
@@ -255,7 +255,7 @@ void LevelEditorMenu()
 		}
 		else
 			strcpy(Tekst,">>");
-		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),55*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2,MenuTextColor);
+		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),55*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
 		SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
         if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
 		{

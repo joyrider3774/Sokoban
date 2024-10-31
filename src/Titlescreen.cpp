@@ -204,7 +204,7 @@ void TitleScreen()
 		}
 		else
 			strcpy(Tekst,">>");
-		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),55*UI_WIDTH_SCALE,77*UI_HEIGHT_SCALE,2,MenuTextColor);
+		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),55*UI_WIDTH_SCALE,77*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
 		SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
         if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
 		{
