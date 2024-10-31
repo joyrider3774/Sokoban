@@ -804,7 +804,7 @@ void WriteText(SDL_Surface* Surface,TTF_Font* FontIn,char* Tekst,int NrOfChars,i
 	{
 		if(strlen(List[Teller]) > 0)
 		{
-			TmpSurface1 = TTF_RenderText_Blended(FontIn,List[Teller],ColorIn);
+			TmpSurface1 = TTF_RenderUTF8_Blended(FontIn,List[Teller],ColorIn);
 			DstRect.x = X;
 			DstRect.y = Y + (Teller) * TTF_FontLineSkip(FontIn) + (Teller*YSpacing);
 			DstRect.w = TmpSurface1->w;
