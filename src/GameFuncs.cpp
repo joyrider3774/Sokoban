@@ -818,11 +818,19 @@ void WriteText(SDL_Surface* Surface,TTF_Font* FontIn,char* Tekst,int NrOfChars,i
 bool FileExists(char * FileName)
 {
 	FILE *Fp;
-	Fp = fopen(FileName,"rb");
-	if (Fp)
+	struct stat statbuf;
+	stat(FileName, &statbuf);
+    // test for a regular file
+    if (S_ISREG(statbuf.st_mode))
 	{
-		fclose(Fp);
-		return true;
+		Fp = fopen(FileName,"rb");
+		if (Fp)
+		{
+			fclose(Fp);
+			return true;
+		}
+		else
+			return false;
 	}
 	else
 		return false;
