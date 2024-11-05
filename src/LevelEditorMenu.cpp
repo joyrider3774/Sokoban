@@ -154,7 +154,7 @@ void LevelEditorMenu()
 #else
 							mkdir(Tekst,S_IRWXO|S_IRWXU|S_IRWXG);
 #endif
-							sprintf(FileName,"./.sokoban_levelpacks/%s/colors.txt",LevelPackName);
+							sprintf(FileName,"%s/.sokoban_levelpacks/%s/colors.txt", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 							ColorsFile = fopen(FileName,"wt");
 							if (ColorsFile)
 							{
