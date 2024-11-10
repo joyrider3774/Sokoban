@@ -50,8 +50,8 @@ void LoadSettings()
 	Fp = fopen(Filename,"rt");
 	if (Fp)
 	{
-		char tmpName[100];
-		fscanf(Fp,"SelectedLevelPack=%100[^\n]\n",&tmpName);
+		char* tmpName = (char*)malloc(sizeof(char) * 100);
+		fscanf(Fp,"SelectedLevelPack=%100[^\n]\n",tmpName);
 		for (int i = 0; i < InstalledLevelPacksCount; i++)
 			if(strcasecmp(tmpName, InstalledLevelPacks[i]) == 0)
 			{
@@ -60,6 +60,7 @@ void LoadSettings()
 				break;
 			}
 		fclose(Fp);
+		free(tmpName);
 	}
 
 }
