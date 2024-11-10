@@ -3,6 +3,7 @@
 #include <SDL_image.h>
 #include <SDL_gfxPrimitives.h>
 #include <SDL_rotozoom.h>
+#include <stdbool.h>
 #include "SetupUSBJoysticks.h"
 #include "Common.h"
 #include "GameFuncs.h"
@@ -13,13 +14,12 @@ void SetupUsbJoystickButtons()
 {
     SDL_Surface *Tmp,*Tmp1;
 	int Teller, Selection = 0;
-	char *Tekst = new char[300];
 	Tmp1 = SDL_CreateRGBSurface(SDL_SWSURFACE,ORIG_WINDOW_WIDTH,ORIG_WINDOW_HEIGHT,SCREEN_BPP,Screen->format->Rmask,Screen->format->Gmask,Screen->format->Bmask,Screen->format->Amask);
 	Tmp = SDL_DisplayFormat(Tmp1);
 	SDL_FreeSurface(Tmp1);
 	bool done = false;
 	bool keyboard = true;
-	CInput *Input = new CInput(10);
+	CInput *Input = CInput_Create(10);
 	while (GameState == GSJoystickSetup)
 	{
         if(MusicCount > 0)
@@ -34,52 +34,52 @@ void SetupUsbJoystickButtons()
                 }
 			}
 		}
-		Input->Update();
+		CInput_Update(Input);
 
 		if(Input->SpecialsHeld[SPECIAL_QUIT_EV])
             GameState = GSQuit;
 
-		if(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_B)]||  Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_B)])
+		if(Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_B)]||  Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_B)])
 		{
 			char FileName[FILENAME_MAX];
 			sprintf(FileName,"%s/.sokoban_joystick.def", getenv("HOME") == NULL ? ".": getenv("HOME"));
-			JoystickSetup->SaveCurrentButtonValues(FileName);
+			CUsbJoystickSetup_SaveCurrentButtonValues(JoystickSetup, FileName);
 			if (GlobalSoundEnabled)
 				Mix_PlayChannel(-1,Sounds[SND_BACK],0);
             GameState = GSTitleScreen;
 		}
 
-        if(Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_UP)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_UP)]))
+        if(CInput_Ready(Input) && (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_UP)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_UP)]))
         {
             Selection--;
             if( Selection < 0)
                 Selection = 11;
             if (GlobalSoundEnabled)
                     Mix_PlayChannel(-1,Sounds[SND_MENU],0);
-            Input->Delay();
+            CInput_Delay(Input);
         }
 
-		if(Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_LEFT)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_LEFT)] ||
-			Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_RIGHT)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_RIGHT)]))
+		if(CInput_Ready(Input) && (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_LEFT)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_LEFT)] ||
+			Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_RIGHT)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_RIGHT)]))
 		{
 			if (GlobalSoundEnabled)
             	Mix_PlayChannel(-1,Sounds[SND_MENU],0);
 			keyboard = !keyboard;
-			Input->Delay();
+			CInput_Delay(Input);
 		}
 
-        if ((Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_R)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_R)]) && 
-	        (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_L)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_L)]))
-            JoystickSetup->ResetToDefaults();
+        if ((Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_R)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_R)]) && 
+	        (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_L)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_L)]))
+            CUsbJoystickSetup_ResetToDefaults(JoystickSetup);
 
-        if(Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_DOWN)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_DOWN)]))
+        if(CInput_Ready(Input) && (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_DOWN)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_DOWN)]))
         {
             Selection++;
             if( Selection >=12)
                 Selection = 0;
             if (GlobalSoundEnabled)
                     Mix_PlayChannel(-1,Sounds[SND_MENU],0);
-            Input->Delay();
+            CInput_Delay(Input);
         }
 
         SDL_BlitSurface(IMGTitleScreen,NULL,Tmp,NULL);
@@ -100,7 +100,7 @@ void SetupUsbJoystickButtons()
 			WriteText(Tmp,font, "Joypad <<", 9, 170*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor);
 		}
 
-        JoystickSetup->DrawCurrentSetup(Tmp,font,55*UI_WIDTH_SCALE,61*UI_HEIGHT_SCALE,155*UI_WIDTH_SCALE,9*UI_HEIGHT_SCALE,Selection,MenuTextColor,MenuBoxBorderColor,keyboard);
+        CUsbJoystickSetup_DrawCurrentSetup(JoystickSetup,Tmp,font,55*UI_WIDTH_SCALE,61*UI_HEIGHT_SCALE,155*UI_WIDTH_SCALE,9*UI_HEIGHT_SCALE,Selection,MenuTextColor,MenuBoxBorderColor,keyboard);
         SDL_BlitSurface(Tmp,NULL,Buffer,NULL);
         SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
         if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
@@ -115,14 +115,14 @@ void SetupUsbJoystickButtons()
 		}
         SDL_Flip(Screen);
 
-        if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)] ||  Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]))
+        if(CInput_Ready(Input) && (Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_A)] ||  Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_A)]))
         {
                if (GlobalSoundEnabled)
                     Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
-                Input->Reset();
+                CInput_Reset(Input);
                 while (!done)
                 {
-                    Input->Update();
+                    CInput_Update(Input);
                     SDL_BlitSurface(IMGTitleScreen,NULL,Tmp,NULL);
                     printTitleInfo(Tmp);
 
@@ -140,7 +140,7 @@ void SetupUsbJoystickButtons()
 						WriteText(Tmp,font, "Joypad <<", 9, 170*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor);
 					}
 
-					JoystickSetup->DrawCurrentSetup(Tmp,font,55*UI_WIDTH_SCALE,61*UI_HEIGHT_SCALE,155*UI_WIDTH_SCALE,9*UI_HEIGHT_SCALE,Selection,MenuTextColor,MenuBoxBorderColor,keyboard);
+					CUsbJoystickSetup_DrawCurrentSetup(JoystickSetup,Tmp,font,55*UI_WIDTH_SCALE,61*UI_HEIGHT_SCALE,155*UI_WIDTH_SCALE,9*UI_HEIGHT_SCALE,Selection,MenuTextColor,MenuBoxBorderColor,keyboard);
 					SDL_BlitSurface(Tmp,NULL,Buffer,NULL);
                     SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
                     if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
@@ -161,7 +161,7 @@ void SetupUsbJoystickButtons()
 							if (GlobalSoundEnabled)
                 				Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
                             done = true;
-                            JoystickSetup->SetKeyValue(Selection,(SDLKey)Teller);
+                            CUsbJoystickSetup_SetKeyValue(JoystickSetup,Selection,(SDLKey)Teller);
                             break;
                         }
 
@@ -172,7 +172,7 @@ void SetupUsbJoystickButtons()
 							if (GlobalSoundEnabled)
                 				Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
                             done = true;
-                            JoystickSetup->SetButtonValue(Selection,Teller);
+                            CUsbJoystickSetup_SetButtonValue(JoystickSetup,Selection,Teller);
                             break;
                         }
 
@@ -182,7 +182,7 @@ void SetupUsbJoystickButtons()
                         done = true;
                     }
 
-                    if((!done) && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_B)] || Input->SpecialsHeld[SPECIAL_QUIT_EV] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_B)]))
+                    if((!done) && (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_B)] || Input->SpecialsHeld[SPECIAL_QUIT_EV] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_B)]))
 					{
 						if (GlobalSoundEnabled)
                 			Mix_PlayChannel(-1,Sounds[SND_BACK],0);
@@ -190,15 +190,14 @@ void SetupUsbJoystickButtons()
 					}
                     SDL_framerateDelay(&Fpsman);
                 }
-                Input->Reset();
-                Input->Delay();
+                CInput_Reset(Input);
+                CInput_Delay(Input);
                 done= false;
 
         }
         SDL_framerateDelay(&Fpsman);
 
 	}
-	delete[] Tekst;
-	delete Input;
+	CInput_Destroy(Input);
 	SDL_FreeSurface(Tmp);
 }

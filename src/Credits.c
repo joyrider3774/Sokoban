@@ -3,6 +3,7 @@
 #include <SDL_image.h>
 #include <SDL_gfxPrimitives.h>
 #include <SDL_rotozoom.h>
+#include <stdbool.h>
 #include "Credits.h"
 #include "Common.h"
 #include "GameFuncs.h"
@@ -11,14 +12,13 @@
 
 void Credits()
 {
-    CInput *Input = new CInput(InputDelay);
+    CInput *Input = CInput_Create(InputDelay);
 	SDL_Event Event;
-	char *LevelPackCreator = new char[21];
+	char LevelPackCreator[21];
 	char FileName[FILENAME_MAX];
 	FILE *Fp;
 	SDL_PollEvent(&Event);
-	char *Tekst = new char[500];
-	char *Tekst2 = new char[500];
+	char Tekst[1000];
 	sprintf(FileName,"%s/.sokoban_levelpacks/%s/credits.dat", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
 		sprintf(FileName,"./levelpacks/%s/credits.dat",LevelPackName);
@@ -47,14 +47,14 @@ void Credits()
 		}
 		SDL_BlitSurface(IMGTitleScreen,NULL,Buffer,NULL);
 
-        Input->Update();
+        CInput_Update(Input);
 
         if(Input->SpecialsHeld[SPECIAL_QUIT_EV])
             GameState = GSQuit;
 
 
-        if (Input->Ready() && ((Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_X)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_Y)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_B)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_START)] ) ||
-			(Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_X)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_Y)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_B)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_START)] )))
+        if (CInput_Ready(Input) && ((Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_A)] || Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_X)] || Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_Y)] || Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_B)] || Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_START)] ) ||
+			(Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_A)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_X)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_Y)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_B)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_START)] )))
         {
 			if (GlobalSoundEnabled)
 				Mix_PlayChannel(-1,Sounds[SND_BACK],0);
@@ -82,8 +82,5 @@ void Credits()
         SDL_Flip(Screen);
         SDL_framerateDelay(&Fpsman);
 	}
-	delete[] Tekst;
-	delete[] Tekst2;
-	delete[] LevelPackCreator;
-	delete Input;
+	CInput_Destroy(Input);
 }

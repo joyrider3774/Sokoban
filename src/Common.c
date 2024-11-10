@@ -2,6 +2,7 @@
 #include <SDL_ttf.h>
 #include <SDL_framerate.h>
 #include <SDL_mixer.h>
+#include <stdbool.h>
 #include "Common.h"
 #include "Defines.h"
 #include "CWorldParts.h"
@@ -16,7 +17,7 @@ int GameState = GSTitleScreen;
 int MusicCount=0,SelectedMusic=0,InstalledLevelPacksCount=0,InstalledLevels=0,SelectedLevel=0,SelectedLevelPack=0,UnlockedLevels=1;
 bool GlobalSoundEnabled = true,LevelEditorMode=false,LevelHasChanged=false,StageReload=false,ReloadMusic=false;
 SDL_Color MenuBoxColor = {132,155,189,255}, MenuBoxBorderColor = {82,117,156,255}, MenuTextColor = {33,75,123,0};
-CWorldParts WorldParts;
+CWorldParts* WorldParts;
 Uint32 NextTime=0;
 CLevelPackFile *LevelPackFile;
 int Volume = 100;

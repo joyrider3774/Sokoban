@@ -4,98 +4,47 @@
 #include <SDL.h>
 #include "CHistory.h"
 #include "CWorldParts.h"
+#include <stdbool.h>
 
-class CWorldParts;
+typedef struct CWorldParts CWorldParts;
+typedef struct CHistory CHistory;
 
-class CWorldPart
+typedef struct CWorldPart CWorldPart;
+struct CWorldPart
 {
-	private:
-		int MoveDelayCounter;
-		bool FirstArriveEventFired;
-	
-	protected:
-		int Type,MoveSpeed,MoveDelay,Xi,Yi,X,Y,AnimPhase,PlayFieldX,PlayFieldY,Z;
-		bool BHistory;
-		SDL_Surface * Image;
-
-	public:
-		CWorldParts *ParentList;
-		bool IsMoving;
-		CHistory *History;
-		bool Selected;
-		CWorldPart(const int PlayFieldXin,const int PlayFieldYin,bool CreateHistory);
-		int GetType(); 
-		int GetX();
-		int GetY();
-		int GetPlayFieldX();
-		int GetPlayFieldY();
-		int GetZ();
-		int GetAnimPhase();
-		bool HasHistory();
-		void HistoryAdd();
-		void HistoryGoBack();
-		void SetAnimPhase(int AnimPhaseIn);
-		virtual void Event_ArrivedOnNewSpot();
-		virtual void Event_BeforeDraw();
-		virtual void Event_LeaveCurrentSpot();
-		void SetPosition(const int PlayFieldXin,const int PlayFieldYin);
-		virtual void MoveTo(const int PlayFieldXin,const int PlayFieldYin,bool BackWards);
-		virtual bool CanMoveTo(const int PlayFieldXin,const int PlayFieldYin);
-		virtual void Move();
-		virtual void Draw(SDL_Surface* Surface);
-		virtual ~CWorldPart();
-};
- 	
-class CEmpty : public CWorldPart
-{
-	public:
-		CEmpty(const int PlayFieldXin,const int PlayFieldYin);
+	int MoveDelayCounter;
+	bool FirstArriveEventFired;
+	int AnimCounter,AnimBase,AnimDelay,AnimDelayCounter,AnimPhases;
+	int Type,MoveSpeed,MoveDelay,Xi,Yi,X,Y,AnimPhase,PlayFieldX,PlayFieldY,Z;
+	bool BHistory;
+	SDL_Surface * Image;
+	CWorldParts *ParentList;
+	bool IsMoving;
+	CHistory *History;
+	bool Selected;
 };
 
-class CFloor : public CWorldPart
-{
-	public:
-		CFloor(const int PlayFieldXin,const int PlayFieldYin);
-};
-
-class CWall : public CWorldPart
-{
-	public:
- 		CWall(const int PlayFieldXin,const int PlayFieldYin);
-
-};
-
-class CBox : public CWorldPart
-{
-	private:
-		void Event_ArrivedOnNewSpot();
-		bool CanMoveTo(const int PlayFieldXin,const int PlayFieldYin);
-		void Event_LeaveCurrentSpot();
-		void MoveTo(const int PlayFieldXin,const int PlayFieldYin,bool BackWards);
-	public:
-		CBox(const int PlayFieldXin,const int PlayFieldYin);
-};
-
-class CSpot : public CWorldPart
-{
-	private:
- 		void Event_ArrivedOnNewSpot();
- 	public:
- 		CSpot(const int PlayFieldXin,const int PlayFieldYin);
-};
-
-class CPlayer : public CWorldPart
-{
-	private:
- 		int AnimCounter,AnimBase,AnimDelay,AnimDelayCounter,AnimPhases;
- 		void Event_BeforeDraw();
-
- 	public:
- 		bool CanMoveTo(const int PlayFieldXin,const int PlayFieldYin);
- 		void MoveTo(const int PlayFieldXin,const int PlayFieldYin,bool BackWards);
- 		CPlayer(const int PlayFieldXin,const int PlayFieldYin);
- 		void MoveTo(const int PlayFieldXin,const int PlayFieldYin);
-};
+CWorldPart* CWorldPart_Create(const int PlayFieldXin,const int PlayFieldYin,bool CreateHistory, const int aType);
+void CWorldPart_Destroy(CWorldPart* WorldPart);
+int CWorldPart_GetType(CWorldPart* WorldPart); 
+int CWorldPart_GetX(CWorldPart* WorldPart);
+int CWorldPart_GetY(CWorldPart* WorldPart);
+int CWorldPart_GetPlayFieldX(CWorldPart* WorldPart);
+int CWorldPart_GetPlayFieldY(CWorldPart* WorldPart);
+int CWorldPart_GetZ(CWorldPart* WorldPart);
+int CWorldPart_GetAnimPhase(CWorldPart* WorldPart);
+bool CWorldPart_HasHistory(CWorldPart* WorldPart);
+void CWorldPart_HistoryAdd(CWorldPart* WorldPart);
+void CWorldPart_HistoryGoBack(CWorldPart* WorldPart);
+void CWorldPart_SetAnimPhase(CWorldPart* WorldPart, int AnimPhaseIn);
+void CWorldPart_Event_ArrivedOnNewSpot(CWorldPart* WorldPart);
+void CWorldPart_Event_BeforeDraw(CWorldPart* WorldPart);
+void CWorldPart_Event_LeaveCurrentSpot(CWorldPart* WorldPart);
+void CWorldPart_SetPosition(CWorldPart* WorldPart,const int PlayFieldXin,const int PlayFieldYin);
+void CWorldPart_MoveTo(CWorldPart* WorldPart,const int PlayFieldXin,const int PlayFieldYin,bool BackWards);
+bool CWorldPart_CanMoveTo(CWorldPart* WorldPart,const int PlayFieldXin,const int PlayFieldYin);
+void CWorldPart_Move(CWorldPart* WorldPart);
+void CWorldPart_Draw(CWorldPart* WorldPart,SDL_Surface* Surface);
 
 
 #endif

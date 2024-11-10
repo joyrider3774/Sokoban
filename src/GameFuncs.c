@@ -5,6 +5,7 @@
 #include <SDL_rotozoom.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <stdbool.h>
 #include "GameFuncs.h"
 #include "Common.h"
 #include "CInput.h"
@@ -50,8 +51,8 @@ void LoadSettings()
 	Fp = fopen(Filename,"rt");
 	if (Fp)
 	{
-		char tmpName[100];
-		fscanf(Fp,"SelectedLevelPack=%100[^\n]\n",&tmpName);
+		char * tmpName = (char *)malloc(sizeof(char) * 260);
+		fscanf(Fp,"SelectedLevelPack=%100[^\n]\n",tmpName);
 		for (int i = 0; i < InstalledLevelPacksCount; i++)
 			if(strcasecmp(tmpName, InstalledLevelPacks[i]) == 0)
 			{
@@ -59,6 +60,7 @@ void LoadSettings()
 				sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
 				break;
 			}
+		free(tmpName);
 		fclose(Fp);
 	}
 
@@ -84,7 +86,7 @@ void SearchForMusic()
 	DIR *Directory;
 	struct stat Stats;
 	int Teller;
-	char FileName[FILENAME_MAX];
+	char FileName[FILENAME_MAX+20];
 	if (GlobalSoundEnabled)
 		Music[0] = Mix_LoadMUS("./music/title.wav");
 	Teller=1;
@@ -120,8 +122,8 @@ void DoSearchForLevelPacks(char* Path)
 	struct dirent *Entry;
 	DIR *Directory;
 	struct stat Stats;
-	char FileName[FILENAME_MAX];
-	char Name[MaxLevelPackNameLength];
+	char FileName[FILENAME_MAX+2];
+	char Name[500];
 	Directory = opendir(Path);
 	if (Directory)
 	{
@@ -212,7 +214,7 @@ void SearchForLevelPacks()
 bool AskQuestion(char *Msg)
 {
 	bool Result = false;
-	CInput *Input = new CInput(InputDelay);
+	CInput *Input = CInput_Create(InputDelay);
 	boxRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
 	rectangleRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
 	rectangleRGBA(Buffer,51*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,269*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
@@ -230,9 +232,9 @@ bool AskQuestion(char *Msg)
 	}
     SDL_Flip(Screen);
 	{
-		while (!( Input->SpecialsHeld[SPECIAL_QUIT_EV] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_X)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_X)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]))
+		while (!( Input->SpecialsHeld[SPECIAL_QUIT_EV] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_A)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_X)] || Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_X)] || Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_A)]))
 		{
-		    Input->Update();
+		    CInput_Update(Input);
 			if(GlobalSoundEnabled)
 			if(!Mix_PlayingMusic())
 			{
@@ -243,7 +245,7 @@ bool AskQuestion(char *Msg)
 		}
 		if (Input->SpecialsHeld[SPECIAL_QUIT_EV])
             GameState = GSQuit;
-		if (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)])
+		if (Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_A)] || Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_A)])
 		{
 			if (GlobalSoundEnabled)
 				Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
@@ -257,13 +259,13 @@ bool AskQuestion(char *Msg)
 		}
 
 	}
-	delete Input;
+	CInput_Destroy(Input);
 	return Result;
 }
 
 void PrintForm(char *msg)
 {
-    CInput *Input = new CInput(InputDelay);
+    CInput *Input = CInput_Create(InputDelay);
 	boxRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
 	rectangleRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
 	rectangleRGBA(Buffer,51*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,269*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
@@ -280,9 +282,9 @@ void PrintForm(char *msg)
 		SDL_BlitSurface(Buffer, NULL, Screen, NULL);
 	}
     SDL_Flip(Screen);
-    while (!( Input->SpecialsHeld[SPECIAL_QUIT_EV] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]))
+    while (!( Input->SpecialsHeld[SPECIAL_QUIT_EV] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_A)] || Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_A)]))
     {
-        Input->Update();
+        CInput_Update(Input);
         if(GlobalSoundEnabled)
         if(!Mix_PlayingMusic())
         {
@@ -296,7 +298,7 @@ void PrintForm(char *msg)
 	    GameState = GSQuit;
 	if (GlobalSoundEnabled)
 		Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
-	delete Input;
+	CInput_Destroy(Input);
 }
 
 void SaveUnlockData()
@@ -331,10 +333,10 @@ void LoadUnlockData()
 
 char *GetString(char *NameIn,char *Msg)
 {
-	char *PackName = new char[21];
+	char *PackName = (char*) malloc(sizeof(char) *21);
 	bool End=false,SubmitChanges=false;
 	int Teller,MaxSelection=0, Selection = 0,asci=97;
-	CInput *Input = new CInput(InputDelay);
+	CInput *Input = CInput_Create(InputDelay);
 	sprintf(PackName,"%s",NameIn);
 	MaxSelection = strlen(NameIn);
 	PackName[Selection+1]='\0';
@@ -349,7 +351,7 @@ char *GetString(char *NameIn,char *Msg)
             Mix_PlayMusic(Music[SelectedMusic],0);
             SetVolume(Volume);
         }
-        Input->Update();
+        CInput_Update(Input);
 
         if(Input->SpecialsHeld[SPECIAL_QUIT_EV])
 		{
@@ -358,16 +360,16 @@ char *GetString(char *NameIn,char *Msg)
             GameState = GSQuit;
 		}
 
-        if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_LEFT)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_LEFT)]))
+        if(CInput_Ready(Input) && (Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_LEFT)] || Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_LEFT)]))
         {
             if (Selection > 0)
             {	Selection--;
                 asci = ord(PackName[Selection]);
             }
-            Input->Delay();
+            CInput_Delay(Input);
         }
 
-        if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_RIGHT)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_RIGHT)]))
+        if(CInput_Ready(Input) && (Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_RIGHT)] || Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_RIGHT)]))
         {
             if (Selection < 19)
             {
@@ -380,10 +382,10 @@ char *GetString(char *NameIn,char *Msg)
                 }
                 asci = ord(PackName[Selection]);
             }
-            Input->Delay();
+            CInput_Delay(Input);
         }
 
-        if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_UP)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_UP)]))
+        if(CInput_Ready(Input) && (Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_UP)] || Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_UP)]))
         {
             asci++;
             if (asci==123)
@@ -399,10 +401,10 @@ char *GetString(char *NameIn,char *Msg)
                 asci=97;
 			}
             PackName[Selection] = chr(asci);
-            Input->Delay();
+            CInput_Delay(Input);
         }
 
-        if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_DOWN)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_DOWN)]))
+        if(CInput_Ready(Input) && (Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_DOWN)] || Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_DOWN)]))
         {
             asci--;
             if(asci==96)
@@ -418,10 +420,10 @@ char *GetString(char *NameIn,char *Msg)
                 asci=122;
 			}
             PackName[Selection] = chr(asci);
-            Input->Delay();
+            CInput_Delay(Input);
         }
 
-        if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)] ||Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]))
+        if(CInput_Ready(Input) && (Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_A)] ||Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_A)]))
         {
             if (GlobalSoundEnabled)
                 Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
@@ -429,7 +431,7 @@ char *GetString(char *NameIn,char *Msg)
             SubmitChanges=true;
         }
 
-        if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_X)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_X)] ))
+        if(CInput_Ready(Input) && (Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_X)] || Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_X)] ))
         {
 			if (GlobalSoundEnabled)
                 Mix_PlayChannel(-1,Sounds[SND_BACK],0);
@@ -447,15 +449,15 @@ char *GetString(char *NameIn,char *Msg)
 		WriteText(Buffer,MonoFont,PackName,strlen(PackName),75*UI_WIDTH_SCALE,110*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
 		if (Selection > 0)
 		{
-			sprintf(Tekst," ");
+			strcpy(Tekst," ");
 			for (Teller=1;Teller<Selection;Teller++)
-				sprintf(Tekst,"%s ",Tekst);
-			sprintf(Tekst,"%s_",Tekst);
+				strcat(Tekst," ");
+			strcat(Tekst,"_");
 		}
 		else
-			sprintf(Tekst,"_");
+			strcpy(Tekst,"_");
 		WriteText(Buffer,MonoFont,Tekst,strlen(Tekst),75*UI_WIDTH_SCALE,112*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
-		sprintf(Tekst,"Use Up, Down, Left, Right, %s=Ok %s=Cancel",JoystickSetup->GetKeyNameForDefinition(BUT_A),JoystickSetup->GetKeyNameForDefinition(BUT_X) );
+		sprintf(Tekst,"Use Up, Down, Left, Right, %s=Ok %s=Cancel",CUsbJoystickSetup_GetKeyNameForDefinition(JoystickSetup,BUT_A),CUsbJoystickSetup_GetKeyNameForDefinition(JoystickSetup,BUT_X) );
 		WriteText(Buffer,font,Tekst,strlen(Tekst),65*UI_WIDTH_SCALE,135*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
         SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
         if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
@@ -486,7 +488,7 @@ char *GetString(char *NameIn,char *Msg)
 		}
 	if (!SubmitChanges)
 		sprintf(PackName,"%s","\0");
-    delete Input;
+    CInput_Destroy(Input);
 	return PackName;
 }
 
@@ -494,8 +496,8 @@ void FindLevels()
 {
 	int InstalledLevelsFile = LevelPackFile->LevelCount;
 	int Teller=InstalledLevelsFile + 1;
-	char *FileName = new char[FILENAME_MAX];
-	char *FileName2 = new char[FILENAME_MAX];
+	char FileName[FILENAME_MAX];
+	char FileName2[FILENAME_MAX];
 	
 	sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
 	sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackName,Teller);		
@@ -512,8 +514,6 @@ void FindLevels()
 		sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackName,Teller);
 	}
 	InstalledLevels=Teller;
-	delete[] FileName;
-	delete[] FileName2;
 }
 
 void LoadGraphics()
@@ -757,21 +757,21 @@ void printTitleInfo(SDL_Surface *Surface)
 
 void LoadJoystickSettings()
 {
-    JoystickSetup->AddDefinition(BUT_B,"Go back / Quit",1,1,SDLK_ESCAPE,SDLK_ESCAPE,"B");
-    JoystickSetup->AddDefinition(BUT_R,"Next Music / Inc Level +5",5,5,SDLK_PAGEUP,SDLK_PAGEUP,"R");
-    JoystickSetup->AddDefinition(BUT_L,"Prev Music / Dec Level -5",4,4,SDLK_PAGEDOWN,SDLK_PAGEDOWN,"L");
-    JoystickSetup->AddDefinition(BUT_LEFT,"Left",JOYSTICK_LEFT,JOYSTICK_LEFT,SDLK_LEFT,SDLK_LEFT,"LEFT");
-    JoystickSetup->AddDefinition(BUT_RIGHT,"Right",JOYSTICK_RIGHT,JOYSTICK_RIGHT,SDLK_RIGHT,SDLK_RIGHT,"RIGHT");
-    JoystickSetup->AddDefinition(BUT_DOWN,"Down",JOYSTICK_DOWN,JOYSTICK_DOWN,SDLK_DOWN,SDLK_DOWN,"DOWN");
-    JoystickSetup->AddDefinition(BUT_UP,"Up",JOYSTICK_UP,JOYSTICK_UP,SDLK_UP,SDLK_UP,"UP");
-    JoystickSetup->AddDefinition(BUT_A,"Select / Place part",0,0,SDLK_SPACE,SDLK_SPACE,"A");
-    JoystickSetup->AddDefinition(BUT_X,"Center level",2,2,SDLK_x,SDLK_x,"X");
-    JoystickSetup->AddDefinition(BUT_Y,"New Level / Erase all parts",3,3,SDLK_y,SDLK_y,"Y");
-    JoystickSetup->AddDefinition(BUT_SELECT,"Hide position / Statistics",6,6,SDLK_b,SDLK_b,"SELECT");
-    JoystickSetup->AddDefinition(BUT_START,"Restart / Test level",7,7,SDLK_RETURN,SDLK_RETURN,"START");
+    CUsbJoystickSetup_AddDefinition(JoystickSetup,BUT_B,"Go back / Quit",1,1,SDLK_ESCAPE,SDLK_ESCAPE,"B");
+    CUsbJoystickSetup_AddDefinition(JoystickSetup,BUT_R,"Next Music / Inc Level +5",5,5,SDLK_PAGEUP,SDLK_PAGEUP,"R");
+    CUsbJoystickSetup_AddDefinition(JoystickSetup,BUT_L,"Prev Music / Dec Level -5",4,4,SDLK_PAGEDOWN,SDLK_PAGEDOWN,"L");
+    CUsbJoystickSetup_AddDefinition(JoystickSetup,BUT_LEFT,"Left",JOYSTICK_LEFT,JOYSTICK_LEFT,SDLK_LEFT,SDLK_LEFT,"LEFT");
+    CUsbJoystickSetup_AddDefinition(JoystickSetup,BUT_RIGHT,"Right",JOYSTICK_RIGHT,JOYSTICK_RIGHT,SDLK_RIGHT,SDLK_RIGHT,"RIGHT");
+    CUsbJoystickSetup_AddDefinition(JoystickSetup,BUT_DOWN,"Down",JOYSTICK_DOWN,JOYSTICK_DOWN,SDLK_DOWN,SDLK_DOWN,"DOWN");
+    CUsbJoystickSetup_AddDefinition(JoystickSetup,BUT_UP,"Up",JOYSTICK_UP,JOYSTICK_UP,SDLK_UP,SDLK_UP,"UP");
+    CUsbJoystickSetup_AddDefinition(JoystickSetup,BUT_A,"Select / Place part",0,0,SDLK_SPACE,SDLK_SPACE,"A");
+    CUsbJoystickSetup_AddDefinition(JoystickSetup,BUT_X,"Center level",2,2,SDLK_x,SDLK_x,"X");
+    CUsbJoystickSetup_AddDefinition(JoystickSetup,BUT_Y,"New Level / Erase all parts",3,3,SDLK_y,SDLK_y,"Y");
+    CUsbJoystickSetup_AddDefinition(JoystickSetup,BUT_SELECT,"Hide position / Statistics",6,6,SDLK_b,SDLK_b,"SELECT");
+    CUsbJoystickSetup_AddDefinition(JoystickSetup,BUT_START,"Restart / Test level",7,7,SDLK_RETURN,SDLK_RETURN,"START");
 	char FileName[FILENAME_MAX];
 	sprintf(FileName,"%s/.sokoban_joystick.def", getenv("HOME") == NULL ? ".": getenv("HOME"));
-	JoystickSetup->LoadCurrentButtonValues(FileName);
+	CUsbJoystickSetup_LoadCurrentButtonValues(JoystickSetup,FileName);
 }
 
 

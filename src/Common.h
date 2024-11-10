@@ -5,6 +5,7 @@
 #include <SDL_ttf.h>
 #include <SDL_framerate.h>
 #include <SDL_mixer.h>
+#include <stdbool.h>
 #include "Common.h"
 #include "Defines.h"
 #include "CWorldParts.h"
@@ -19,12 +20,12 @@ extern int GameState;
 extern int MusicCount,SelectedMusic,InstalledLevelPacksCount,InstalledLevels,SelectedLevel,SelectedLevelPack,UnlockedLevels;
 extern bool GlobalSoundEnabled,LevelEditorMode,LevelHasChanged,StageReload,ReloadMusic;
 extern SDL_Color MenuBoxColor, MenuBoxBorderColor, MenuTextColor;
-extern CWorldParts WorldParts;
+extern CWorldParts* WorldParts;
 extern Uint32 NextTime;
 extern CLevelPackFile *LevelPackFile;
 extern int Volume;
-extern char LevelPackName[100];
-extern char InstalledLevelPacks[MaxLevelPacks][100];
+extern char LevelPackName[MaxLevelPackNameLength];
+extern char InstalledLevelPacks[MaxLevelPacks][MaxLevelPackNameLength];
 extern Mix_Music *Music[MaxMusicFiles];
 extern Mix_Chunk *Sounds[NrOfSounds];
 extern CUsbJoystickSetup *JoystickSetup;

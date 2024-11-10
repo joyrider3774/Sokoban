@@ -4,6 +4,7 @@
 #include <SDL_ttf.h>
 #include <SDL_gfxPrimitives.h>
 #include <SDL_rotozoom.h>
+#include <stdbool.h>
 #include "StageSelect.h"
 #include "Common.h"
 #include "GameFuncs.h"
@@ -11,13 +12,13 @@
 
 void StageSelect()
 {
-    CInput *Input = new CInput(InputDelay);
+    CInput *Input = CInput_Create(InputDelay);
 	SDL_Event Event;
 	SDL_PollEvent(&Event);
 	int Teller;
-	char *FileName = new char[FILENAME_MAX];
-	char Tekst[300];
-	char Tekst1[300];
+	char FileName[FILENAME_MAX];
+	char Tekst[400];
+	char Tekst1[400];
 	SelectedMusic = 0;
 	if(MusicCount > 0)
 		if (! Mix_PlayingMusic())
@@ -34,13 +35,13 @@ void StageSelect()
 		if(!FileExists(FileName))
 			sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 		if(FileExists(FileName))
-			WorldParts.Load(FileName, true);
+			CWorldParts_Load(WorldParts,FileName, true);
 		else
-			WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
+			CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
 		
 	}
 	else
-		WorldParts.RemoveAll();
+		CWorldParts_RemoveAll(WorldParts);
 	while (GameState == GSStageSelect)
 	{
 		if (ReloadMusic)
@@ -53,14 +54,14 @@ void StageSelect()
 		SDL_BlitSurface(IMGBackground,NULL,Buffer,NULL);
 		if (SelectedLevel > 0)
 		{
-			WorldParts.Move();
-			WorldParts.DrawFloor(Buffer, WorldParts.Player);
-			WorldParts.Draw(Buffer);
+			CWorldParts_Move(WorldParts);
+			CWorldParts_DrawFloor(WorldParts, Buffer, WorldParts->Player);
+			CWorldParts_Draw(WorldParts,Buffer);
 			if((InstalledLevels > 0))
 			{
 				boxRGBA(Buffer,0,ORIG_WINDOW_HEIGHT- 13*UI_HEIGHT_SCALE,320*UI_WIDTH_SCALE,ORIG_WINDOW_HEIGHT,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxBorderColor.unused);
 				rectangleRGBA(Buffer,0,ORIG_WINDOW_HEIGHT- 13*UI_HEIGHT_SCALE,320*UI_WIDTH_SCALE,ORIG_WINDOW_HEIGHT,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-				if(WorldParts.isLevelPackFileLevel)
+				if(WorldParts->isLevelPackFileLevel)
 				{
 					if ((strlen(LevelPackFile->LevelsMeta[SelectedLevel-1].title) > 0) || (strlen(LevelPackFile->LevelsMeta[SelectedLevel-1].author) > 0))
 					{
@@ -93,25 +94,25 @@ void StageSelect()
 		}
 		WriteText(Buffer,font,Tekst,strlen(Tekst),2*UI_WIDTH_SCALE,2*UI_HEIGHT_SCALE,0,MenuTextColor);
 
-        Input->Update();
+        CInput_Update(Input);
 
         if(Input->SpecialsHeld[SPECIAL_QUIT_EV])
             GameState = GSQuit;
 
 
-                    if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_Y)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_Y)]))
+                    if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_Y)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_Y)]))
                     {
                         if(LevelEditorMode)
 						{
 							SelectedLevel = 0;
-							WorldParts.RemoveAll();
+							CWorldParts_RemoveAll(WorldParts);
 							LevelHasChanged = false;
 							GameState = GSLevelEditor;
 						}
-						Input->Delay();
+						CInput_Delay(Input);
                     }
 
-					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_B)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_B)]))
+					if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_B)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_B)]))
 					{
 						if(LevelEditorMode)
 							GameState= GSLevelEditorMenu;
@@ -119,11 +120,11 @@ void StageSelect()
 							GameState= GSTitleScreen;
 						if (GlobalSoundEnabled)
 							Mix_PlayChannel(-1,Sounds[SND_BACK],0);
-						WorldParts.RemoveAll();
-						Input->Delay();
+						CWorldParts_RemoveAll(WorldParts);
+						CInput_Delay(Input);
 					}
 
-					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_X)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_X)]))
+					if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_X)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_X)]))
 					{
 						if(LevelEditorMode && (SelectedLevel > 0))
 						{
@@ -160,25 +161,25 @@ void StageSelect()
 									if (SelectedLevel > InstalledLevels)
 										SelectedLevel = InstalledLevels;
 									if (SelectedLevel==0)
-										WorldParts.RemoveAll();
+										CWorldParts_RemoveAll(WorldParts);
 									else
 									{
 										sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
 										if(!FileExists(FileName))
 											sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 										if(FileExists(FileName))
-											WorldParts.Load(FileName, true);
+											CWorldParts_Load(WorldParts,FileName, true);
 										else
-											WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
+											CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
 									}
 								}
 							}
-							Input->Reset();
+							CInput_Reset(Input);
 						}
-						Input->Delay();
+						CInput_Delay(Input);
 					}
 
-					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]))
+					if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_A)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_A)]))
 					{
 						if (GlobalSoundEnabled)
 							Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
@@ -201,18 +202,18 @@ void StageSelect()
 									if(!FileExists(FileName))
 										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 									if(FileExists(FileName))
-										WorldParts.Load(FileName, true);
+										CWorldParts_Load(WorldParts,FileName, true);
 									else
-										WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
+										CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
 									GameState = GSGame;
 								}
-								Input->Reset();
+								CInput_Reset(Input);
 							}
 						}
-						Input->Delay();
+						CInput_Delay(Input);
 					}
 
-					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_L)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_L)]))
+					if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_L)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_L)]))
 					{
 						if(LevelEditorMode)
 						{
@@ -225,7 +226,7 @@ void StageSelect()
 								if (SelectedLevel <= 0)
 								{
 									SelectedLevel = 0;
-									WorldParts.RemoveAll();
+									CWorldParts_RemoveAll(WorldParts);
 								}
 								else
 								{
@@ -233,9 +234,9 @@ void StageSelect()
 									if(!FileExists(FileName))
 										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 									if(FileExists(FileName))
-										WorldParts.Load(FileName, true);
+										CWorldParts_Load(WorldParts,FileName, true);
 									else
-										WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
+										CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
 								}
 							}
 						}
@@ -253,15 +254,15 @@ void StageSelect()
 								if(!FileExists(FileName))
 									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 								if(FileExists(FileName))
-									WorldParts.Load(FileName, true);
+									CWorldParts_Load(WorldParts,FileName, true);
 								else
-									WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
+									CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
 							}
 						}
-                        Input->Delay();
+                        CInput_Delay(Input);
 					}
 
-					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_R)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_R)]))
+					if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_R)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_R)]))
 					{
 						if(SelectedLevel != InstalledLevels)
 						{
@@ -275,14 +276,14 @@ void StageSelect()
 							if(!FileExists(FileName))
 								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 							if(FileExists(FileName))
-								WorldParts.Load(FileName, true);
+								CWorldParts_Load(WorldParts,FileName, true);
 							else
-								WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
+								CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
 						}
-						Input->Delay();
+						CInput_Delay(Input);
 					}
 
-					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_LEFT)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_LEFT)]))
+					if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_LEFT)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_LEFT)]))
 					{
 						if(LevelEditorMode)
 						{
@@ -295,7 +296,7 @@ void StageSelect()
 								if (SelectedLevel <= 0)
 								{
 									SelectedLevel = 0;
-									WorldParts.RemoveAll();
+									CWorldParts_RemoveAll(WorldParts);
 								}
 								else
 								{
@@ -303,9 +304,9 @@ void StageSelect()
 									if(!FileExists(FileName))
 										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 									if(FileExists(FileName))
-										WorldParts.Load(FileName, true);
+										CWorldParts_Load(WorldParts,FileName, true);
 									else
-										WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
+										CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
 								}
 							}
 						}
@@ -323,15 +324,15 @@ void StageSelect()
 								if(!FileExists(FileName))
 									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 								if(FileExists(FileName))
-									WorldParts.Load(FileName, true);
+									CWorldParts_Load(WorldParts,FileName, true);
 								else
-									WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
+									CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
 							}
 						}
-                        Input->Delay();
+                        CInput_Delay(Input);
 					}
 
-					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_RIGHT)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_RIGHT)]))
+					if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_RIGHT)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_RIGHT)]))
 					{
 						if(SelectedLevel != InstalledLevels)
 						{
@@ -344,11 +345,11 @@ void StageSelect()
 							if(!FileExists(FileName))
 								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 							if(FileExists(FileName))
-								WorldParts.Load(FileName, true);
+								CWorldParts_Load(WorldParts,FileName, true);
 							else
-								WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
+								CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
 						}
-                        Input->Delay();
+                        CInput_Delay(Input);
 					}
 
 		SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
@@ -366,6 +367,5 @@ void StageSelect()
         SDL_framerateDelay(&Fpsman);
 
 	}
-	delete Input;
-	delete[] FileName;
+	CInput_Destroy(Input);
 }

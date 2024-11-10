@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fstream>
 #include <dirent.h>
 #include <unistd.h>
+#include <stdbool.h>
+#include <time.h>
 #include <SDL/SDL_keysym.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
@@ -27,7 +28,6 @@
 #include "Titlescreen.h"
 #include "CInput.h"
 
-using namespace std;
 
 int main(int argc, char **argv)
 {
@@ -99,7 +99,8 @@ int main(int argc, char **argv)
 					if (font && BigFont && MonoFont)
 					{
 						printf("Succesfully Loaded fonts\n");
-						JoystickSetup = new CUsbJoystickSetup();
+						WorldParts = CWorldParts_Create();
+						JoystickSetup = CUsbJoystickSetup_Create();
                         LoadJoystickSettings();
                         SDL_initFramerate(&Fpsman);
                         SDL_setFramerate(&Fpsman,FPS);
@@ -110,7 +111,7 @@ int main(int argc, char **argv)
 						LoadSettings();
 						LoadSounds();
 						LoadGraphics();						
-						LevelPackFile = new CLevelPackFile();
+						LevelPackFile = CLevelPackFile_Create();
 						while (GameState != GSQuit)
 						{
 							switch(GameState)
@@ -143,7 +144,7 @@ int main(int argc, char **argv)
 									break;
 							}
 						}
-						delete LevelPackFile;
+						CLevelPackFile_Destroy(LevelPackFile);
 						SaveSettings();
 						UnLoadGraphics();
 						UnloadSounds();
@@ -156,7 +157,9 @@ int main(int argc, char **argv)
 						MonoFont=NULL;
 				    	font=NULL;
 				    	BigFont=NULL;
-                        delete JoystickSetup;
+                        CUsbJoystickSetup_Destroy(JoystickSetup);
+						CWorldParts_RemoveAll(WorldParts);
+						CWorldParts_Destroy(WorldParts);
 					}
 					else
 					{
@@ -185,7 +188,6 @@ int main(int argc, char **argv)
 	{
 		printf("Couldn't initialise SDL!\n");
 	}
-	WorldParts.RemoveAll();
 	return 0;
 
 }

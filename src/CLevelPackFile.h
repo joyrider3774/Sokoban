@@ -1,6 +1,8 @@
 #ifndef CLEVELPACKFILE_H
 #define CLEVELPACKFILE_H
 
+#include <stdbool.h>
+
 #define MAXLEVELTEXTSIZE 500000
 #define MAXLEVELS 2250
 #define MAXITEMCOUNT 50*50
@@ -33,19 +35,20 @@ struct LevelMeta
 
 };
 
-class CLevelPackFile
+typedef struct CLevelPackFile CLevelPackFile;
+struct CLevelPackFile
 {
-	public:
-		LevelPart Levels[MAXLEVELS][MAXITEMCOUNT];
-		LevelMeta LevelsMeta[MAXLEVELS];
-		char author[250];
-		char set[250];
-		int LevelCount;
-		bool Loaded;
-		CLevelPackFile();
-		~CLevelPackFile();
-		bool parseText(char* text, int maxWidth, int maxHeight, bool MetaOnly);
-		bool loadFile(char* filename, int maxWidth, int maxHeight, bool MetaOnly);
+	LevelPart Levels[MAXLEVELS][MAXITEMCOUNT];
+	LevelMeta LevelsMeta[MAXLEVELS];
+	char author[250];
+	char set[250];
+	int LevelCount;
+	bool Loaded;
 };
+
+CLevelPackFile* CLevelPackFile_Create();
+void CLevelPackFile_Destroy(CLevelPackFile* LevelPackFile);
+bool CLevelPackFile_parseText(CLevelPackFile* LevelPackFile, char* text, int maxWidth, int maxHeight, bool MetaOnly);
+bool CLevelPackFile_loadFile(CLevelPackFile* LevelPackFile, char* filename, int maxWidth, int maxHeight, bool MetaOnly);
 
 #endif

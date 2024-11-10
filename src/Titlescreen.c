@@ -3,6 +3,7 @@
 #include <SDL_image.h>
 #include <SDL_gfxPrimitives.h>
 #include <SDL_rotozoom.h>
+#include <stdbool.h>
 #include "Titlescreen.h"
 #include "Common.h"
 #include "GameFuncs.h"
@@ -22,16 +23,16 @@ void TitleScreen()
 	// 		sprintf(FileName,"%s/.sokoban_levelpacks/%s",getenv("HOME") == NULL ? ".": getenv("HOME"), InstalledLevelPacks[SelectedLevelPack]);
 	// 		if(!FileExists(FileName))
 	// 			sprintf(FileName,"./levelpacks/%s",InstalledLevelPacks[SelectedLevelPack]);
-	// 		LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows);									
-	// 		//WorldParts.LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
+	// 		CLevelPackFile_loadFile(LevelPackFile,FileName, NrOfCols, NrOfRows);									
+	// 		//WorldParts->LoadFromLevelPackFile(LevelPackFile, SelectedLevel, true);
 	// 		total += LevelPackFile->LevelCount;
 	// 	}
 	// printf("total levels:%d\n", total);
-    CInput *Input = new CInput(InputDelay);
+    CInput *Input = CInput_Create(InputDelay);
 	int Teller, Selection = 1;
 	SDL_Event Event;
 	SDL_PollEvent(&Event);
-	char *Tekst = new char[300];
+	char Tekst[300];
 	char FileName[FILENAME_MAX];
 	if(MusicCount > 0)
 		if (! Mix_PlayingMusic())
@@ -48,7 +49,7 @@ void TitleScreen()
 		sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
 		if(!FileExists(FileName))
 			sprintf(FileName,"./levelpacks/%s",LevelPackName);
-		LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);	
+		CLevelPackFile_loadFile(LevelPackFile,FileName, NrOfCols, NrOfRows, true);	
 	}
 	while (GameState == GSTitleScreen)
 	{
@@ -61,13 +62,13 @@ void TitleScreen()
 		}
 		SDL_BlitSurface(IMGTitleScreen,NULL,Buffer,NULL);
 
-        Input->Update();
+        CInput_Update(Input);
 
         if(Input->SpecialsHeld[SPECIAL_QUIT_EV])
             GameState = GSQuit;
 
 					
-					if (Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_LEFT)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_LEFT)]))
+					if (CInput_Ready(Input) && (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_LEFT)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_LEFT)]))
 					{
 						if(Selection==3)
 						 	if (InstalledLevelPacksCount > 0)
@@ -79,15 +80,15 @@ void TitleScreen()
 									sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
 									if(!FileExists(FileName))
 										sprintf(FileName,"./levelpacks/%s",LevelPackName);
-									LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);									
+									CLevelPackFile_loadFile(LevelPackFile,FileName, NrOfCols, NrOfRows, true);									
 									LoadGraphics();
 									if (GlobalSoundEnabled)
 										Mix_PlayChannel(-1,Sounds[SND_MENU],0);
 								}
-                        Input->Delay();
+                        CInput_Delay(Input);
 					}
 
-					if (Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_RIGHT)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_RIGHT)]))
+					if (CInput_Ready(Input) && (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_RIGHT)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_RIGHT)]))
 					{
 						if (Selection==3)
 							if (InstalledLevelPacksCount > 0)
@@ -99,15 +100,15 @@ void TitleScreen()
 									sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
 									if(!FileExists(FileName))
 										sprintf(FileName,"./levelpacks/%s",LevelPackName);
-									LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
+									CLevelPackFile_loadFile(LevelPackFile,FileName, NrOfCols, NrOfRows, true);
 									LoadGraphics();
 									if (GlobalSoundEnabled)
 										Mix_PlayChannel(-1,Sounds[SND_MENU],0);
 								}
-                        Input->Delay();
+                        CInput_Delay(Input);
 					}
 
-					if (Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_UP)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_UP)]))
+					if (CInput_Ready(Input) && (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_UP)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_UP)]))
 					{
 						if (Selection > 1)
 						{
@@ -115,10 +116,10 @@ void TitleScreen()
 							if (GlobalSoundEnabled)
 								Mix_PlayChannel(-1,Sounds[SND_MENU],0);
 						}
-						Input->Delay();
+						CInput_Delay(Input);
 					}
 
-					if (Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_DOWN)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_DOWN)]))
+					if (CInput_Ready(Input) && (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_DOWN)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_DOWN)]))
 					{
 						if (Selection < 6)
 						{
@@ -126,10 +127,10 @@ void TitleScreen()
 							if (GlobalSoundEnabled)
 								Mix_PlayChannel(-1,Sounds[SND_MENU],0);
 						}
-						Input->Delay();
+						CInput_Delay(Input);
 					}
 
-					if (Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]))
+					if (CInput_Ready(Input) && (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_A)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_A)]))
 					{
 						switch(Selection)
 						{
@@ -139,7 +140,7 @@ void TitleScreen()
 									sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
 									if(!FileExists(FileName))
 										sprintf(FileName,"./levelpacks/%s",LevelPackName);
-									LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, false);
+									CLevelPackFile_loadFile(LevelPackFile,FileName, NrOfCols, NrOfRows, false);
 								
 									FindLevels();
 								    if(InstalledLevels > 0)
@@ -158,7 +159,7 @@ void TitleScreen()
 										SDL_BlitSurface(IMGTitleScreen,NULL,Buffer,NULL);
 										sprintf(Tekst,"There are no levels found in levelpack\n%s\n\nPlease create a level for this level pack\nfirst!",LevelPackName);
 										PrintForm(Tekst);
-										Input->Reset();
+										CInput_Reset(Input);
                         			}
 								}
 								break;
@@ -184,7 +185,7 @@ void TitleScreen()
 									Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
 								break;
 						}
-						Input->Delay();
+						CInput_Delay(Input);
 					}
 
 		printTitleInfo(Buffer);
@@ -219,6 +220,5 @@ void TitleScreen()
         SDL_Flip(Screen);
         SDL_framerateDelay(&Fpsman);
 	}
-	delete[] Tekst;
-	delete Input;
+	CInput_Destroy(Input);
 }
