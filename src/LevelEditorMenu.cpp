@@ -221,6 +221,11 @@ void LevelEditorMenu()
 							{
 								remove(Tekst);
 							}
+							sprintf(Tekst,"%s/.sokoban_levelpacks/%s/colors.txt", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+							if(FileExists(Tekst))
+							{
+								remove(Tekst);
+							}
 							sprintf(Tekst,"%s/.sokoban_levelpacks/%s",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 							rmdir(Tekst);
 							SearchForLevelPacks();
