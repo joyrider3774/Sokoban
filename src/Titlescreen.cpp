@@ -71,19 +71,20 @@ void TitleScreen()
 					{
 						if(Selection==3)
 						 	if (InstalledLevelPacksCount > 0)
-								if(SelectedLevelPack > 0)
-								{
-									SelectedLevelPack--;
-									sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
-									sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
-									sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
-									if(!FileExists(FileName))
-										sprintf(FileName,"./levelpacks/%s",LevelPackName);
-									LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);									
-									LoadGraphics();
-									if (GlobalSoundEnabled)
-										Mix_PlayChannel(-1,Sounds[SND_MENU],0);
-								}
+							{
+								SelectedLevelPack--;
+								if(SelectedLevelPack < 0)
+									SelectedLevelPack = InstalledLevelPacksCount - 1;
+								sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);								
+								sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
+								if(!FileExists(FileName))
+									sprintf(FileName,"./levelpacks/%s",LevelPackName);
+								LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);									
+								LoadGraphics();
+								if (GlobalSoundEnabled)
+									Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+								SaveSettings();
+							}
                         Input->Delay();
 					}
 
@@ -91,19 +92,20 @@ void TitleScreen()
 					{
 						if (Selection==3)
 							if (InstalledLevelPacksCount > 0)
-								if(SelectedLevelPack < InstalledLevelPacksCount-1)
-								{
-									SelectedLevelPack++;
-									sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
-									sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
-									sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
-									if(!FileExists(FileName))
-										sprintf(FileName,"./levelpacks/%s",LevelPackName);
-									LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
-									LoadGraphics();
-									if (GlobalSoundEnabled)
-										Mix_PlayChannel(-1,Sounds[SND_MENU],0);
-								}
+							{
+								SelectedLevelPack++;
+								if(SelectedLevelPack > InstalledLevelPacksCount-1)
+									SelectedLevelPack = 0;
+								sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
+								sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
+								if(!FileExists(FileName))
+									sprintf(FileName,"./levelpacks/%s",LevelPackName);
+								LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
+								LoadGraphics();
+								if (GlobalSoundEnabled)
+									Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+								SaveSettings();
+							}
                         Input->Delay();
 					}
 
@@ -167,6 +169,23 @@ void TitleScreen()
 								LevelEditorMode=true;
 								if (GlobalSoundEnabled)
 									Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+								break;
+							case 3:
+								if (InstalledLevelPacksCount > 0)
+								{
+									SelectedLevelPack++;
+									if(SelectedLevelPack > InstalledLevelPacksCount-1)
+										SelectedLevelPack = 0;
+									sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
+									sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
+									if(!FileExists(FileName))
+										sprintf(FileName,"./levelpacks/%s",LevelPackName);
+									LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
+									LoadGraphics();
+									if (GlobalSoundEnabled)
+										Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+									SaveSettings();
+								}		
 								break;
 							case 4:
 								GameState = GSJoystickSetup;
