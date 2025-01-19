@@ -24,8 +24,8 @@ bool CLevelPackFile::loadFile(char* filename, int maxWidth, int maxHeight, bool 
 	bool Result = false;
 	LevelCount = 0;
 	Loaded = false;
-	memset(author, 0, 250);
-	memset(set, 0, 250);
+	memset(author, 0, MAXAUTHORLEN);
+	memset(set, 0, MAXSETLEN);
     struct stat statbuf;
     stat(filename, &statbuf);
     // test for a regular file
