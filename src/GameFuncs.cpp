@@ -738,7 +738,7 @@ void printTitleInfo(SDL_Surface *Surface)
 
 		if(strlen(LevelPackFile->author) > 0)
 		{
-			strcpy(Tekst, "Levels By ");
+			strcpy(Tekst, "Levels by ");
 			strcat(Tekst, LevelPackFile->author);
 			TTF_SizeText(RobotoMedium, Tekst, &w, NULL);
 			WriteText(Surface, RobotoMedium, Tekst, strlen(Tekst), (ORIG_WINDOW_WIDTH - w) / 2, 290, 0, TitleColor);
