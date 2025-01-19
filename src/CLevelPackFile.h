@@ -1,17 +1,28 @@
 #ifndef CLEVELPACKFILE_H
 #define CLEVELPACKFILE_H
 
+#include "Defines.h"
+
 #define MAXLEVELTEXTSIZE 500000
+
 #define MAXLEVELS 2250
-#define MAXITEMCOUNT 50*50
+#define MAXITEMCOUNT (NrOfCols*NrOfRows) + 2
 
-#define LPWall '#'
-#define LPSpot '.'
-#define LPPlayer '@'
-#define LPBox '$'
-#define LPPlayerOnSpot '+'
-#define LPBoxOnSpot '*'
+#define MAXCOMMENTLEN 150
+#define MAXSETLEN 50
+#define MAXAUTHORLEN 75
+#define MAXTITLELEN 50
+#define MAXLEVELFIELDDATALEN 2000
+#define MAXLEVELFIELDLEN 100
+#define MAXLINELEN 2000
 
+#define LPWall 35          //'#' 
+#define LPSpot 46          //'.'
+#define LPPlayer 64        //'@'
+#define LPBox 36           //'$'
+#define LPPlayerOnSpot 43  //'+'
+#define LPBoxOnSpot 42     //'*'
+#define LPFloor 32         //' '
 
 typedef struct LevelPart LevelPart;
 struct LevelPart
@@ -24,12 +35,14 @@ struct LevelPart
 typedef struct LevelMeta LevelMeta;
 struct LevelMeta
 {
-	int width;
-	int height;
+	int minx;
+	int miny;
+	int maxx;
+	int maxy;
 	int parts;
-	char author[100];
-	char comments[1000];
-	char title[100];
+	char author[MAXAUTHORLEN];
+	char comments[MAXCOMMENTLEN];
+	char title[MAXTITLELEN];
 
 };
 
@@ -38,8 +51,8 @@ class CLevelPackFile
 	public:
 		LevelPart Levels[MAXLEVELS][MAXITEMCOUNT];
 		LevelMeta LevelsMeta[MAXLEVELS];
-		char author[250];
-		char set[250];
+		char author[MAXAUTHORLEN];
+		char set[MAXSETLEN];
 		int LevelCount;
 		bool Loaded;
 		CLevelPackFile();

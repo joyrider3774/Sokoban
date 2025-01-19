@@ -201,11 +201,18 @@ bool CWorldParts::LoadFromLevelPackFile(CLevelPackFile* LPFile, int level, bool 
 		DisableSorting=true;
 		Pushes = 0;
 		Moves = 0;
+		int Xi = ((NrOfCols-1) / 2) - ( LPFile->LevelsMeta[level-1].maxx +  LPFile->LevelsMeta[level-1].minx) / 2;
+		int Yi = ((NrOfRows-1) / 2) - ( LPFile->LevelsMeta[level-1].maxy +  LPFile->LevelsMeta[level-1].miny) / 2;
+		if(!doCenterLevel)
+		{
+			Xi = 0;
+			Yi = 0;
+		}		
 		for (int i=0; i< LPFile->LevelsMeta[level-1].parts; i++ )
 		{
 			int Type = LPFile->Levels[level-1][i].id;
-			int X = LPFile->Levels[level-1][i].x;
-			int Y = LPFile->Levels[level-1][i].y;
+			int X = LPFile->Levels[level-1][i].x + Xi;
+			int Y = LPFile->Levels[level-1][i].y + Yi;
 			switch(Type)
 			{
 				case IDPlayer:
@@ -221,16 +228,10 @@ bool CWorldParts::LoadFromLevelPackFile(CLevelPackFile* LPFile, int level, bool 
 				case IDWall:
 					Add(new CWall(X,Y));
 					break;
-				//case IDFloor:
-				//	Add(new CFloor(X,Y));
-				//	break;
-
 			}
 		}
 		DisableSorting=false;
 		Sort();
-		if(doCenterLevel)
-			CenterLevel();
 		return true;
 	}
 	return false;
@@ -277,9 +278,6 @@ void CWorldParts::Load(char *Filename, bool doCenterLevel)
 				case IDWall:
 					Add(new CWall(X,Y));
 					break;
-				//case IDFloor:
-				//	Add(new CFloor(X,Y));
-				//	break;
 
 			}
 		}
