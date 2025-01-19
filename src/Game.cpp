@@ -190,35 +190,41 @@ void Game()
 				}
 				Player->MoveTo(Player->GetPlayFieldX() + 1, Player->GetPlayFieldY(),false);
 			}
-
-			if ( Input->Ready() &&  !(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]) && 
-				(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_LEFT)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_LEFT)]))
+			else
 			{
-				if (Player->CanMoveTo(Player->GetPlayFieldX() - 1, Player->GetPlayFieldY()))
+				if ( Input->Ready() &&  !(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]) && 
+					(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_LEFT)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_LEFT)]))
 				{
-					WorldParts.HistoryAdd();
+					if (Player->CanMoveTo(Player->GetPlayFieldX() - 1, Player->GetPlayFieldY()))
+					{
+						WorldParts.HistoryAdd();
+					}
+					Player->MoveTo(Player->GetPlayFieldX() - 1, Player->GetPlayFieldY(),false);
 				}
-				Player->MoveTo(Player->GetPlayFieldX() - 1, Player->GetPlayFieldY(),false);
-			}
-
-			if ( Input->Ready() && !(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]) &&
-				(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_UP)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_UP)]))
-			{
-				if (Player->CanMoveTo(Player->GetPlayFieldX() , Player->GetPlayFieldY()-1))
+				else
 				{
-					WorldParts.HistoryAdd();
+					if ( Input->Ready() && !(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]) &&
+						(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_UP)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_UP)]))
+					{
+						if (Player->CanMoveTo(Player->GetPlayFieldX() , Player->GetPlayFieldY()-1))
+						{
+							WorldParts.HistoryAdd();
+						}
+						Player->MoveTo(Player->GetPlayFieldX(), Player->GetPlayFieldY() - 1,false);
+					}
+					else
+					{
+						if ( Input->Ready() && !(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]) &&
+							(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_DOWN)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_DOWN)]))
+						{
+							if (Player->CanMoveTo(Player->GetPlayFieldX() , Player->GetPlayFieldY()+1))
+							{
+								WorldParts.HistoryAdd();
+							}
+							Player->MoveTo(Player->GetPlayFieldX(), Player->GetPlayFieldY() +1,false);
+						}
+					}
 				}
-				Player->MoveTo(Player->GetPlayFieldX(), Player->GetPlayFieldY() - 1,false);
-			}
-
-			if ( Input->Ready() && !(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]) &&
-				(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_DOWN)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_DOWN)]))
-			{
-				if (Player->CanMoveTo(Player->GetPlayFieldX() , Player->GetPlayFieldY()+1))
-				{
-					WorldParts.HistoryAdd();
-				}
-				Player->MoveTo(Player->GetPlayFieldX(), Player->GetPlayFieldY() +1,false);
 			}
 		}
 		SDL_BlitSurface(IMGBackground,NULL,Buffer,NULL);
