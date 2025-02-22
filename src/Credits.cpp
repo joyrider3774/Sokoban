@@ -19,9 +19,13 @@ void Credits()
 	SDL_PollEvent(&Event);
 	char *Tekst = new char[500];
 	char *Tekst2 = new char[500];
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/credits.dat", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/credits.dat", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/credits.dat",LevelPackName);
+	{
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/credits.dat", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		if(!FileExists(FileName))
+			sprintf(FileName,"./levelpacks/%s/credits.dat", LevelPackName);
+	}
 	if(InstalledLevelPacksCount > 0)
 	{
 		Fp = fopen(FileName,"rt");
