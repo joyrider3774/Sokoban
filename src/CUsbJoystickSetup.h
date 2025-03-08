@@ -28,11 +28,11 @@ class CUsbJoystickSetup {
        int PNrOfDefinitions;
        SJoystickButtonDefinition PJoystickButtons[MAXDEFINITIONS];
     public:
-        bool AddDefinition(int Button, char* Definition, int value, int defaultValue,SDLKey keyValue, SDLKey defaultKeyValue, char *DisplayValue);
+        bool AddDefinition(int Button,const char* Definition, int value, int defaultValue,SDLKey keyValue, SDLKey defaultKeyValue,const char *DisplayValue);
         int GetButtonValue(int Button);
         int GetKeyValue(int Button);
-        bool SaveCurrentButtonValues(char *Filename);
-        bool LoadCurrentButtonValues(char *Filename);
+        bool SaveCurrentButtonValues(const char *Filename);
+        bool LoadCurrentButtonValues(const char *Filename);
         void SetButtonValue(int Button, int Value);
         void SetKeyValue(int Button, SDLKey Value);
         char *GetKeyNameForDefinition(int Definition);

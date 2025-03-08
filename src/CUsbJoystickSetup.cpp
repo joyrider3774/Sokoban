@@ -20,7 +20,7 @@ CUsbJoystickSetup::~CUsbJoystickSetup()
 {
 }
 
-bool CUsbJoystickSetup::AddDefinition(int Button, char* Definition, int Value, int DefaultValue, SDLKey keyValue, SDLKey defaultKeyValue, char *DisplayValue) 
+bool CUsbJoystickSetup::AddDefinition(int Button,const char* Definition, int Value, int DefaultValue, SDLKey keyValue, SDLKey defaultKeyValue,const char *DisplayValue) 
 {
     if (Button >=0 && Button < NROFBUTTONS)
     {
@@ -123,7 +123,7 @@ void CUsbJoystickSetup::SetKeyValue(int Button, SDLKey Value)
 }
 
 
-bool CUsbJoystickSetup::SaveCurrentButtonValues(char *Filename) 
+bool CUsbJoystickSetup::SaveCurrentButtonValues(const char *Filename) 
 {
     FILE *f;
     int Teller;
@@ -140,7 +140,7 @@ bool CUsbJoystickSetup::SaveCurrentButtonValues(char *Filename)
     return false;
 }
 
-bool CUsbJoystickSetup::LoadCurrentButtonValues(char *Filename) 
+bool CUsbJoystickSetup::LoadCurrentButtonValues(const char *Filename) 
 {
     FILE *f;
     int Teller;

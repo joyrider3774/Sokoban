@@ -116,7 +116,7 @@ void SearchForMusic()
 	MusicCount = Teller;
 }
 
-void DoSearchForLevelPacks(char* Path)
+void DoSearchForLevelPacks(const char* Path)
 {
 	struct dirent *Entry;
 	DIR *Directory;
@@ -213,7 +213,7 @@ void SearchForLevelPacks()
 }
 
 
-bool AskQuestion(char *Msg)
+bool AskQuestion(const char *Msg)
 {
 	bool Result = false;
 	CInput *Input = new CInput(InputDelay);
@@ -265,7 +265,7 @@ bool AskQuestion(char *Msg)
 	return Result;
 }
 
-void PrintForm(char *msg)
+void PrintForm(const char *msg)
 {
     CInput *Input = new CInput(InputDelay);
 	boxRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
@@ -333,7 +333,7 @@ void LoadUnlockData()
 }
 
 
-char *GetString(char *NameIn,char *Msg)
+char *GetString(const char *NameIn,const char *Msg)
 {
 	char *PackName = new char[21];
 	bool End=false,SubmitChanges=false;
@@ -819,7 +819,7 @@ void LoadJoystickSettings()
 }
 
 
-void WriteText(SDL_Surface* Surface,TTF_Font* FontIn,char* Tekst,int NrOfChars,int X,int Y,int YSpacing,SDL_Color ColorIn)
+void WriteText(SDL_Surface* Surface,TTF_Font* FontIn,const char* Tekst,int NrOfChars,int X,int Y,int YSpacing,SDL_Color ColorIn)
 {
 	char List[100][255];
 	int Lines,Teller,Chars;
@@ -859,7 +859,7 @@ void WriteText(SDL_Surface* Surface,TTF_Font* FontIn,char* Tekst,int NrOfChars,i
 	}
 }
 
-bool FileExists(char * FileName)
+bool FileExists(const char * FileName)
 {
 	FILE *Fp;
 	struct stat statbuf;
