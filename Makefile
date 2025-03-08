@@ -8,7 +8,7 @@ OBJS=$(addprefix $(OBJ_DIR)/, $(SRC:.cpp=.o))
 SDL_CONFIG=sdl-config
 CPP = g++
 OPT_LEVEL ?= -O2 
-CFLAGS ?= -g -Wall -Wextra `$(SDL_CONFIG) --cflags` -Wno-write-strings
+CFLAGS ?= -g -Wall -Wextra `$(SDL_CONFIG) --cflags`
 LDFLAGS ?= -g
 LDLIBS ?=  `$(SDL_CONFIG) --libs` -lSDL_image -lSDL_ttf -lSDL_mixer -lSDL -lSDL_gfx -lm
 
