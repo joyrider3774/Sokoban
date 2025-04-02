@@ -1,6 +1,5 @@
 #include <unistd.h>
-#include <SDL.h>
-#include <SDL_gfxPrimitives.h>
+#include <SDL3/SDL.h>
 #include "GameFuncs.h"
 #include "CUsbJoystickSetup.h"
 #include "CInput.h"
@@ -20,7 +19,7 @@ CUsbJoystickSetup::~CUsbJoystickSetup()
 {
 }
 
-bool CUsbJoystickSetup::AddDefinition(int Button,const char* Definition, int Value, int DefaultValue, SDLKey keyValue, SDLKey defaultKeyValue,const char *DisplayValue) 
+bool CUsbJoystickSetup::AddDefinition(int Button,const char* Definition, int Value, int DefaultValue, SDL_Keycode keyValue, SDL_Keycode defaultKeyValue,const char *DisplayValue) 
 {
     if (Button >=0 && Button < NROFBUTTONS)
     {
@@ -46,7 +45,7 @@ int CUsbJoystickSetup::GetButtonValue(int Button)
     return -1;
 }
 
-int CUsbJoystickSetup::GetKeyValue(int Button) 
+SDL_Keycode CUsbJoystickSetup::GetKeyValue(int Button) 
 {
     if (Button >= 0 && Button <NROFBUTTONS)
         return PJoystickButtons[Button].CurrentKeyValue;
@@ -54,7 +53,7 @@ int CUsbJoystickSetup::GetKeyValue(int Button)
 }
 
 
-void CUsbJoystickSetup::DrawCurrentSetup(SDL_Surface *Surface,TTF_Font* FontIn,int X, int Y, int XSpacing,int YSpacing,int Selection,  SDL_Color TextColor,SDL_Color SelectedColor, bool Keyboard) 
+void CUsbJoystickSetup::DrawCurrentSetup(TTF_Font* FontIn,int X, int Y, int XSpacing,int YSpacing,int Selection,  SDL_Color TextColor,SDL_Color SelectedColor, bool Keyboard) 
 {
     char ButtonText[100];
     char SelectedDescText[DESCRIPTIONSIZE+4];
@@ -62,7 +61,7 @@ void CUsbJoystickSetup::DrawCurrentSetup(SDL_Surface *Surface,TTF_Font* FontIn,i
     {
         if (strlen(PJoystickButtons[Teller].ButtonDescription) > 0)
         {
-            WriteText(Surface,FontIn,PJoystickButtons[Teller].ButtonDescription,strlen(PJoystickButtons[Teller].ButtonDescription),X ,Y + (YSpacing*Teller),0,TextColor);
+            WriteText(FontIn,PJoystickButtons[Teller].ButtonDescription,strlen(PJoystickButtons[Teller].ButtonDescription),X ,Y + (YSpacing*Teller),0,TextColor,false);
 
             if(Keyboard)
             {
@@ -83,10 +82,10 @@ void CUsbJoystickSetup::DrawCurrentSetup(SDL_Surface *Surface,TTF_Font* FontIn,i
             if(Selection == Teller)
             {
                 sprintf(SelectedDescText,"%s <<",ButtonText);
-                WriteText(Surface,FontIn,SelectedDescText,strlen(SelectedDescText),X + XSpacing ,Y + (YSpacing*Teller),YSpacing,SelectedColor);
+                WriteText(FontIn,SelectedDescText,strlen(SelectedDescText),X + XSpacing ,Y + (YSpacing*Teller),YSpacing,SelectedColor, false);
             }
             else
-                WriteText(Surface,FontIn,ButtonText,strlen(ButtonText),X + XSpacing ,Y + (YSpacing*Teller),0,TextColor);
+                WriteText(FontIn,ButtonText,strlen(ButtonText),X + XSpacing ,Y + (YSpacing*Teller),0,TextColor, false);
         }
     }
 }
@@ -104,7 +103,7 @@ void CUsbJoystickSetup::SetButtonValue(int Button, int Value)
     }
 }
 
-void CUsbJoystickSetup::SetKeyValue(int Button, SDLKey Value) 
+void CUsbJoystickSetup::SetKeyValue(int Button, SDL_Keycode Value) 
 {
     int Teller;
     char Tmp[100];

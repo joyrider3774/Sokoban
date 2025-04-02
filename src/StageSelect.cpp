@@ -1,9 +1,7 @@
-#include <SDL.h>
-#include <SDL_mixer.h>
-#include <SDL_image.h>
-#include <SDL_ttf.h>
-#include <SDL_gfxPrimitives.h>
-#include <SDL_rotozoom.h>
+#include <SDL3/SDL.h>
+#include <SDL3_mixer/SDL_mixer.h>
+#include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include "StageSelect.h"
 #include "Common.h"
 #include "GameFuncs.h"
@@ -11,7 +9,7 @@
 
 void StageSelect()
 {
-    CInput *Input = new CInput(InputDelay);
+    Input->SetInputDelay(InputDelay);
 	SDL_Event Event;
 	SDL_PollEvent(&Event);
 	int Teller;
@@ -30,10 +28,10 @@ void StageSelect()
 
 	if (SelectedLevel > 0)
 	{
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 		if(!FileExists(FileName))
 		{
-			sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+			sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 			if(!FileExists(FileName))
 				sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 		}
@@ -47,6 +45,8 @@ void StageSelect()
 		WorldParts.RemoveAll();
 	while (GameState == GSStageSelect)
 	{
+        frameticks = SDL_GetPerformanceCounter();
+        SDL_SetRenderTarget(Renderer, Buffer);
 		if (ReloadMusic)
 		{
 			ReloadMusic=false;
@@ -54,16 +54,24 @@ void StageSelect()
 			//Mix_HookMusicFinished(MusicFinished);
 			SetVolume(Volume);
 		}
-		SDL_BlitSurface(IMGBackground,NULL,Buffer,NULL);
+		SDL_RenderTexture(Renderer, IMGBackground,NULL,NULL);
+		SDL_FRect Rect;
 		if (SelectedLevel > 0)
 		{
 			WorldParts.Move();
-			WorldParts.DrawFloor(Buffer, WorldParts.Player);
-			WorldParts.Draw(Buffer);
+			WorldParts.DrawFloor(WorldParts.Player);
+			WorldParts.Draw();
 			if((InstalledLevels > 0))
 			{
-				boxRGBA(Buffer,0,ORIG_WINDOW_HEIGHT- 13*UI_HEIGHT_SCALE,320*UI_WIDTH_SCALE,ORIG_WINDOW_HEIGHT,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxBorderColor.unused);
-				rectangleRGBA(Buffer,0,ORIG_WINDOW_HEIGHT- 13*UI_HEIGHT_SCALE,320*UI_WIDTH_SCALE,ORIG_WINDOW_HEIGHT,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
+				
+				Rect.x = -1.0f;
+				Rect.y = 0.0f;
+				Rect.w = (float)ORIG_WINDOW_WIDTH+1;
+				Rect.h = 13.0f*UI_HEIGHT_SCALE;
+				SDL_SetRenderDrawColor(Renderer, MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.a);
+				SDL_RenderFillRect(Renderer, &Rect);
+				SDL_SetRenderDrawColor(Renderer, MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
+				SDL_RenderRect(Renderer, &Rect);
 				if(WorldParts.isLevelPackFileLevel)
 				{
 					if ((strlen(LevelPackFile->LevelsMeta[SelectedLevel-1].title) > 0) || (strlen(LevelPackFile->LevelsMeta[SelectedLevel-1].author) > 0))
@@ -73,14 +81,20 @@ void StageSelect()
 						else
 							sprintf(Tekst, "%s by %s", LevelPackFile->LevelsMeta[SelectedLevel-1].title, LevelPackFile->author);
 						int w;
-						TTF_SizeText(font, Tekst, &w, NULL);
-						WriteText(Buffer,font,Tekst,strlen(Tekst),(ORIG_WINDOW_WIDTH - w) / 2,ORIG_WINDOW_HEIGHT- 11*UI_HEIGHT_SCALE,0,MenuTextColor);
+						TTF_GetStringSize(font, Tekst, strlen(Tekst), &w, NULL);
+						WriteText(font,Tekst,strlen(Tekst),(ORIG_WINDOW_WIDTH - w) / 2,ORIG_WINDOW_HEIGHT- 11*UI_HEIGHT_SCALE,0,MenuTextColor, false);
 					}					
 				}
 			}
 		}
-		boxRGBA(Buffer,0,0,320*UI_WIDTH_SCALE,13*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
-		rectangleRGBA(Buffer,0,-1,320*UI_WIDTH_SCALE,13*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
+		Rect.x = -1.0f;
+		Rect.y = 0.0f;
+		Rect.w = (float)ORIG_WINDOW_WIDTH+1;
+		Rect.h = 13.0f*UI_HEIGHT_SCALE;
+		SDL_SetRenderDrawColor(Renderer, MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.a);
+		SDL_RenderFillRect(Renderer, &Rect);
+		SDL_SetRenderDrawColor(Renderer, MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
+		SDL_RenderRect(Renderer, &Rect);
 		if(LevelEditorMode)
 		{
 			if (SelectedLevel == 0)
@@ -95,15 +109,22 @@ void StageSelect()
 			else
 				sprintf(Tekst,"Level Pack: %s Level:%d/%d - Level is locked!",LevelPackName,SelectedLevel,InstalledLevels);
 		}
-		WriteText(Buffer,font,Tekst,strlen(Tekst),2*UI_WIDTH_SCALE,2*UI_HEIGHT_SCALE,0,MenuTextColor);
+		WriteText(font,Tekst,strlen(Tekst),2*UI_WIDTH_SCALE,2*UI_HEIGHT_SCALE,0,MenuTextColor,false);
 
         Input->Update();
 
-        if(Input->SpecialsHeld[SPECIAL_QUIT_EV])
+        if(Input->SpecialsHeld(SPECIAL_QUIT_EV))
             GameState = GSQuit;
 
+        if (Input->Ready() && ((Input->KeyboardHeld(SDLK_LALT) || Input->KeyboardHeld(SDLK_RALT)) && Input->KeyboardHeld(SDLK_RETURN)))
+		{
+			fullScreen = !fullScreen;
+			SDL_SetWindowFullscreen(SdlWindow, fullScreen);
+			Input->Delay();
+			continue;
+		}
 
-                    if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_Y)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_Y)]))
+                    if ( Input->Ready() &&  (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_Y)) || Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_Y))))
                     {
                         if(LevelEditorMode)
 						{
@@ -115,7 +136,7 @@ void StageSelect()
 						Input->Delay();
                     }
 
-					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_B)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_B)]))
+					if ( Input->Ready() &&  (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_B))|| Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_B))))
 					{
 						if(LevelEditorMode)
 							GameState= GSLevelEditorMenu;
@@ -127,7 +148,7 @@ void StageSelect()
 						Input->Delay();
 					}
 
-					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_X)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_X)]))
+					if ( Input->Ready() &&  (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_X))|| Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_X))))
 					{
 						if(LevelEditorMode && (SelectedLevel > 0))
 						{
@@ -136,7 +157,7 @@ void StageSelect()
 							sprintf(Tekst,"Are you sure you want to delete this level:\n%s - Level %d\n\nPress (A) to Delete (X) to Cancel",LevelPackName,SelectedLevel);
 							if (AskQuestion(Tekst))
 							{
-								sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+								sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 								//to edit default levels
 								//sprintf(Tekst,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 								if(FileExists(Tekst))
@@ -148,8 +169,8 @@ void StageSelect()
 									{
 										for(Teller=SelectedLevel;Teller<InstalledLevels;Teller++)
 										{
-											sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller+1);
-											sprintf(Tekst1,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName,Teller);                      
+											sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, Teller+1);
+											sprintf(Tekst1,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName,Teller);                      
 											rename(Tekst,Tekst1);
 										}
 									}
@@ -167,10 +188,10 @@ void StageSelect()
 										WorldParts.RemoveAll();
 									else
 									{
-										sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+										sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 										if(!FileExists(FileName))
 										{
-											sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+											sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 											if(!FileExists(FileName))
 												sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 										}
@@ -186,7 +207,7 @@ void StageSelect()
 						Input->Delay();
 					}
 
-					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]))
+					if ( Input->Ready() &&  (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_A))|| Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_A))))
 					{
 						if (GlobalSoundEnabled)
 							Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
@@ -205,10 +226,10 @@ void StageSelect()
 								if	(AskQuestion(Tekst))
 								{
 									SelectedLevel = UnlockedLevels;
-									sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+									sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 									if(!FileExists(FileName))
 									{
-										sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+										sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 										if(!FileExists(FileName))
 											sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 									}
@@ -224,7 +245,7 @@ void StageSelect()
 						Input->Delay();
 					}
 
-					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_L)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_L)]))
+					if ( Input->Ready() &&  (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_L))|| Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_L))))
 					{
 						if(LevelEditorMode)
 						{
@@ -241,10 +262,10 @@ void StageSelect()
 								}
 								else
 								{
-									sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+									sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 									if(!FileExists(FileName))
 									{
-										sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+										sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 										if(!FileExists(FileName))
 											sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 									}
@@ -265,10 +286,10 @@ void StageSelect()
 								SelectedLevel -= 5;	
 								if (SelectedLevel < 1)
 									SelectedLevel = 1;
-								sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+								sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 								if(!FileExists(FileName))
 								{
-									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 									if(!FileExists(FileName))
 										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 								}
@@ -281,7 +302,7 @@ void StageSelect()
                         Input->Delay();
 					}
 
-					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_R)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_R)]))
+					if ( Input->Ready() &&  (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_R))|| Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_R))))
 					{
 						if(SelectedLevel != InstalledLevels)
 						{
@@ -291,10 +312,10 @@ void StageSelect()
 							SelectedLevel +=5;
 							if (SelectedLevel > InstalledLevels)
 								SelectedLevel = InstalledLevels;
-							sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+							sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 							if(!FileExists(FileName))
 							{
-								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 								if(!FileExists(FileName))
 									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 							}
@@ -306,7 +327,7 @@ void StageSelect()
 						Input->Delay();
 					}
 
-					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_LEFT)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_LEFT)]))
+					if ( Input->Ready() &&  (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_LEFT))|| Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_LEFT))))
 					{
 						if(LevelEditorMode)
 						{
@@ -323,10 +344,10 @@ void StageSelect()
 								}
 								else
 								{
-									sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+									sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 									if(!FileExists(FileName))
 									{
-										sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+										sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 										if(!FileExists(FileName))
 											sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 									}
@@ -347,10 +368,10 @@ void StageSelect()
 								SelectedLevel--;
 								if (SelectedLevel < 1)
 									SelectedLevel = 1;
-								sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+								sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 								if(!FileExists(FileName))
 								{
-									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 									if(!FileExists(FileName))
 										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 								}
@@ -363,7 +384,7 @@ void StageSelect()
                         Input->Delay();
 					}
 
-					if ( Input->Ready() &&  (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_RIGHT)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_RIGHT)]))
+					if ( Input->Ready() &&  (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_RIGHT))|| Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_RIGHT))))
 					{
 						if(SelectedLevel != InstalledLevels)
 						{
@@ -372,10 +393,10 @@ void StageSelect()
 								Mix_PlayChannel(-1,Sounds[SND_MENU],0);
 							if (SelectedLevel > InstalledLevels)
 								SelectedLevel = InstalledLevels;
-							sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+							sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 							if(!FileExists(FileName))
 							{
-								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 								if(!FileExists(FileName))
 									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
 							}
@@ -387,21 +408,61 @@ void StageSelect()
                         Input->Delay();
 					}
 
-		SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
-        if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
+		if(showfps)
+        {
+            char fpsText[100];
+            sprintf(fpsText, "FPS: %.2f\n", avgfps);
+            SDL_FRect Rect;
+			Rect.x = 0.0f;
+			Rect.y = 0.0f;
+			Rect.w = 100.0f;
+			Rect.h = (float)TTF_GetFontHeight(font);
+            SDL_SetRenderDrawColor(Renderer, 255,255,255,255);
+            SDL_RenderFillRect(Renderer, &Rect);
+            SDL_Color col = {0,0,0,255};
+            WriteText(font, fpsText, strlen(fpsText), 0, 0, 0, col, false);
+        }
+        SDL_SetRenderTarget(Renderer, NULL);
+        SDL_SetRenderDrawColor(Renderer, 0,0,0,255);
+        SDL_RenderClear(Renderer);
+        SDL_SetRenderLogicalPresentation(Renderer, ORIG_WINDOW_WIDTH, ORIG_WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);        
+        SDL_RenderTexture(Renderer, Buffer, NULL, NULL);
+        SDL_RenderPresent(Renderer);
+        Uint64 frameEndTicks = SDL_GetPerformanceCounter();
+        Uint64 FramePerf = frameEndTicks - frameticks;
+        frameTime = (double)FramePerf / (double)SDL_GetPerformanceFrequency() * 1000.0f;
+        double delay = 1000.0f / FPS - frameTime;
+        if (!nodelay && (delay > 0.0f))
+            SDL_Delay((Uint32)(delay)); 
+		if (showfps)
 		{
-			SDL_Surface *ScreenBufferZoom = zoomSurface(Buffer,(double)WINDOW_WIDTH / ORIG_WINDOW_WIDTH,(double)WINDOW_HEIGHT / ORIG_WINDOW_HEIGHT,0);
-			SDL_BlitSurface(ScreenBufferZoom,NULL,Screen,NULL);
-			SDL_FreeSurface(ScreenBufferZoom);
+			if(skipCounter > 0)
+			{
+				skipCounter--;
+				lastfpstime = SDL_GetTicks();
+			}
+			else
+			{
+				framecount++;
+				if(SDL_GetTicks() - lastfpstime >= 1000)
+				{
+					for (int i = FPS_SAMPLES-1; i > 0; i--)
+						fpsSamples[i] = fpsSamples[i-1];
+					fpsSamples[0] = framecount;
+					fpsAvgCount++;
+					if(fpsAvgCount > FPS_SAMPLES)
+						fpsAvgCount = FPS_SAMPLES;
+					int fpsSum = 0;
+					for (int i = 0; i < fpsAvgCount; i++)
+						fpsSum += fpsSamples[i];
+					avgfps = (double)fpsSum / (double)fpsAvgCount;
+					framecount = 0;
+					lastfpstime = SDL_GetTicks();
+				}
+			}
 		}
-		else
-		{
-			SDL_BlitSurface(Buffer, NULL, Screen, NULL);
-		}
-        SDL_Flip(Screen);
-        SDL_framerateDelay(&Fpsman);
+
 
 	}
-	delete Input;
 	delete[] FileName;
 }

@@ -94,9 +94,9 @@ void CSelector::DecSelection()
 	Part->Selected = true;
 }
 
-void CSelector::Draw(SDL_Surface *Surface)
+void CSelector::Draw()
 {
-	Part->Draw(Surface);
+	Part->Draw();
 }
 
 int CSelector::GetSelection()

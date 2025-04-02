@@ -24,7 +24,7 @@ class CWorldParts
 		void Move();
 		void HistoryAdd();
 		void HistoryGoBack();
-		void Draw(SDL_Surface *Surface);
+		void Draw();
 		void Remove(int PlayFieldXin,int PlayFieldYin);
 		void Remove(int PlayFieldXin,int PlayFieldYin,int Type);
 		void RemoveAll();
@@ -32,7 +32,7 @@ class CWorldParts
 		void Load(char *Filename, bool doCenterLevel);
 		bool LoadFromLevelPackFile(CLevelPackFile* LPFile, int level, bool doCenterLevel);
 		bool ItemExists(int PlayFieldXin,int PlayFieldYin, int Type);
-		void DrawFloor(SDL_Surface* Surface, CWorldPart* Player);
+		void DrawFloor(CWorldPart* Player);
 		~CWorldParts();
 };
 

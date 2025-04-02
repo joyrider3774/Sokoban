@@ -1,9 +1,7 @@
 #include <unistd.h>
-#include <SDL.h>
-#include <SDL_mixer.h>
-#include <SDL_image.h>
-#include <SDL_gfxPrimitives.h>
-#include <SDL_rotozoom.h>
+#include <SDL3/SDL.h>
+#include <SDL3_mixer/SDL_mixer.h>
+#include <SDL3_image/SDL_image.h>
 #include <sys/stat.h>
 #include "LevelEditorMenu.h"
 #include "Common.h"
@@ -13,7 +11,7 @@
 
 void LevelEditorMenu()
 {
-    CInput *Input = new CInput(InputDelay);
+    Input->SetInputDelay(InputDelay);
 	FILE *ColorsFile,*Fp;
 	int Teller, Selection = 1;
 	SDL_Event Event;
@@ -32,6 +30,8 @@ void LevelEditorMenu()
 			}
 	while (GameState == GSLevelEditorMenu)
 	{
+	    frameticks = SDL_GetPerformanceCounter();
+        SDL_SetRenderTarget(Renderer, Buffer);
 		if (ReloadMusic)
 		{
 			ReloadMusic=false;
@@ -39,14 +39,14 @@ void LevelEditorMenu()
 			//Mix_HookMusicFinished(MusicFinished);
 			SetVolume(Volume);
 		}
-		SDL_BlitSurface(IMGTitleScreen,NULL,Buffer,NULL);
-
+		SDL_RenderTexture(Renderer,IMGTitleScreen,NULL,NULL);
+		printTitleInfo();
         Input->Update();
 
-        if(Input->SpecialsHeld[SPECIAL_QUIT_EV])
+        if(Input->SpecialsHeld(SPECIAL_QUIT_EV))
             GameState = GSQuit;
 
-		if (Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_B)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_B)]))
+		if (Input->Ready() && (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_B)) || Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_B))))
 		{
 			if (GlobalSoundEnabled)
 				Mix_PlayChannel(-1,Sounds[SND_BACK],0);
@@ -54,7 +54,7 @@ void LevelEditorMenu()
 			Input->Delay();
 		}
 
-		if (Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_LEFT)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_LEFT)]))
+		if (Input->Ready() && (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_LEFT))|| Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_LEFT))))
 		{
 			if(Selection==4)
 				if (InstalledLevelPacksCount > 0)
@@ -63,7 +63,7 @@ void LevelEditorMenu()
 					if(SelectedLevelPack < 0)
 						SelectedLevelPack = InstalledLevelPacksCount - 1;
 					sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
-					sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
+					sprintf(FileName, "%s/.sokoban_levelpacks/%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
 					if(!FileExists(FileName))
 						sprintf(FileName,"./levelpacks/%s",LevelPackName);
 					LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
@@ -75,7 +75,7 @@ void LevelEditorMenu()
 			Input->Delay();
 		}
 
-		if (Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_RIGHT)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_RIGHT)]))
+		if (Input->Ready() && (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_RIGHT))|| Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_RIGHT))))
 		{
 			if (Selection==4)
 				if (InstalledLevelPacksCount > 0)
@@ -84,7 +84,7 @@ void LevelEditorMenu()
 					if(SelectedLevelPack > InstalledLevelPacksCount-1)
 						SelectedLevelPack = 0;
 					sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
-					sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
+					sprintf(FileName, "%s/.sokoban_levelpacks/%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
 					if(!FileExists(FileName))
 						sprintf(FileName,"./levelpacks/%s",LevelPackName);
 					LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
@@ -96,7 +96,7 @@ void LevelEditorMenu()
 			Input->Delay();
 		}
 
-		if (Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_UP)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_UP)]))
+		if (Input->Ready() && (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_UP))|| Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_UP))))
 		{
 			if (Selection > 1)
 			{
@@ -107,7 +107,7 @@ void LevelEditorMenu()
 			Input->Delay();
 		}
 
-		if (Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_DOWN)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_DOWN)]))
+		if (Input->Ready() && (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_DOWN))|| Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_DOWN))))
 		{
 			if (Selection < 5)
 			{
@@ -118,7 +118,7 @@ void LevelEditorMenu()
 			Input->Delay();
 		}
 
-		if ((GameState == GSLevelEditorMenu) && Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)]))
+		if ((GameState == GSLevelEditorMenu) && Input->Ready() && (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_A))|| Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_A))))
 		{
 			switch(Selection)
 			{
@@ -129,33 +129,34 @@ void LevelEditorMenu()
 					if (strlen(PackName) > 0)
 					{
 						Input->Reset();
-						SDL_BlitSurface(IMGTitleScreen,NULL,Buffer,NULL);
+						SDL_RenderTexture(Renderer, IMGTitleScreen,NULL,NULL);
+						printTitleInfo();
 						CreatorName = GetString("","Enter the Levelpack Creator name:");
 						if(strlen(CreatorName)>0)
 						{
 							Input->Reset();
 							sprintf(LevelPackName,"%s",PackName);
-							sprintf(Tekst,"%s", getenv("HOME") == NULL ? ".": getenv("HOME"));
+							sprintf(Tekst,"%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"));
 #ifdef WIN32
 							mkdir(Tekst);
 #else
 							mkdir(Tekst,S_IRWXO|S_IRWXU|S_IRWXG);
 #endif
 
-							sprintf(Tekst,"%s/.sokoban_levelpacks", getenv("HOME") == NULL ? ".": getenv("HOME"));
+							sprintf(Tekst,"%s/.sokoban_levelpacks", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"));
 #ifdef WIN32
 							mkdir(Tekst);
 #else
 							mkdir(Tekst,S_IRWXO|S_IRWXU|S_IRWXG);
 #endif
 
-							sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+							sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 #ifdef WIN32
 							mkdir(Tekst);
 #else
 							mkdir(Tekst,S_IRWXO|S_IRWXU|S_IRWXG);
 #endif
-							sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/colors.txt", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+							sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/colors.txt", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 							ColorsFile = fopen(FileName,"wt");
 							if (ColorsFile)
 							{
@@ -164,7 +165,7 @@ void LevelEditorMenu()
 								fprintf(ColorsFile,"[MenuBoxBorderColor]\nR=52\nG=102\nB=148\nA=255\n");
 								fclose(ColorsFile);
 							}
-							sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/credits.dat", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+							sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/credits.dat", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 							Fp = fopen(FileName,"wt");
 							if (Fp)
 							{
@@ -188,7 +189,7 @@ void LevelEditorMenu()
 				case 2:
 					if (InstalledLevelPacksCount >0)
 					{
-						sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
+						sprintf(FileName, "%s/.sokoban_levelpacks/%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
 						if(!FileExists(FileName))
 							sprintf(FileName,"./levelpacks/%s",LevelPackName);
 						LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, false);						
@@ -210,23 +211,23 @@ void LevelEditorMenu()
 							FindLevels();
 							for(Teller=1;Teller<=InstalledLevels;Teller++)
 							{
-								sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev/level%d.lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName,Teller);
+								sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev/level%d.lev",SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName,Teller);
 								if(FileExists(Tekst))
 								{
 									remove(Tekst);
 								}
 							}
-							sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev/credits.dat", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+							sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev/credits.dat", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 							if(FileExists(Tekst))
 							{
 								remove(Tekst);
 							}
-							sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev/colors.txt", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+							sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev/colors.txt", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 							if(FileExists(Tekst))
 							{
 								remove(Tekst);
 							}
-							sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev",getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+							sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev",SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 							rmdir(Tekst);
 							SearchForLevelPacks();
 							LoadGraphics();
@@ -242,7 +243,7 @@ void LevelEditorMenu()
 						if(SelectedLevelPack > InstalledLevelPacksCount-1)
 							SelectedLevelPack = 0;
 						sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
-						sprintf(FileName, "%s/.sokoban_levelpacks/%s", getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
+						sprintf(FileName, "%s/.sokoban_levelpacks/%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
 						if(!FileExists(FileName))
 							sprintf(FileName,"./levelpacks/%s",LevelPackName);
 						LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
@@ -261,13 +262,27 @@ void LevelEditorMenu()
 			Input->Delay();
 		}
 		
-		printTitleInfo(Buffer);
+		
+        SDL_SetRenderTarget(Renderer, Buffer);
+        SDL_FRect Rect1;
+        Rect1.x = 50.0f*UI_WIDTH_SCALE;
+        Rect1.y = 80.0f*UI_HEIGHT_SCALE;
+        Rect1.w = 220.0f*UI_WIDTH_SCALE;
+        Rect1.h = 85.0f*UI_HEIGHT_SCALE;
+        SDL_SetRenderDrawColor(Renderer, MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.a);
+        SDL_RenderFillRect(Renderer, &Rect1);
+        SDL_SetRenderDrawColor(Renderer, MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
+        SDL_RenderRect(Renderer, &Rect1);
+        SDL_FRect Rect2;
+        Rect2.x = 52.0f*UI_WIDTH_SCALE;
+        Rect2.y = 82.0f*UI_HEIGHT_SCALE;
+        Rect2.w = 216.0f*UI_WIDTH_SCALE;
+        Rect2.h = 81.0f*UI_HEIGHT_SCALE;
+        SDL_SetRenderDrawColor(Renderer, MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
+        SDL_RenderRect(Renderer, &Rect2);
 
-		boxRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
-		rectangleRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-		rectangleRGBA(Buffer,51*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,269*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
 		sprintf(Tekst,"Create New Levelpack\nLoad Selected LevelPack\nDelete Selected Levelpack\n<%s>\nMain Menu",LevelPackName);
-		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),80*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
+		WriteText(BigFont,Tekst,strlen(Tekst),80*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor,false);
 		if (Selection > 1)
 		{
 			strcpy(Tekst,"\n");
@@ -277,22 +292,62 @@ void LevelEditorMenu()
 		}
 		else
 			strcpy(Tekst,">>");
-		WriteText(Buffer,BigFont,Tekst,strlen(Tekst),55*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
-		SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
-        if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
-		{
-			SDL_Surface *ScreenBufferZoom = zoomSurface(Buffer,(double)WINDOW_WIDTH / ORIG_WINDOW_WIDTH,(double)WINDOW_HEIGHT / ORIG_WINDOW_HEIGHT,0);
-			SDL_BlitSurface(ScreenBufferZoom,NULL,Screen,NULL);
-			SDL_FreeSurface(ScreenBufferZoom);
-		}
-		else
-		{
-			SDL_BlitSurface(Buffer, NULL, Screen, NULL);
-		}
-        SDL_Flip(Screen);
-        SDL_framerateDelay(&Fpsman);
+		WriteText(BigFont,Tekst,strlen(Tekst),55*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor,false);
+		if(showfps)
+        {
+            char fpsText[100];
+            sprintf(fpsText, "FPS: %.2f\n", avgfps);
+            SDL_FRect Rect;
+            Rect.x = 0.0f;
+            Rect.y = 0.0f;
+            Rect.w = 100.0f;
+            Rect.h = (float)TTF_GetFontHeight(font);
+            SDL_SetRenderDrawColor(Renderer, 255,255,255,255);
+            SDL_RenderFillRect(Renderer, &Rect);
+            SDL_Color col = {0,0,0,255};
+            WriteText(font, fpsText, strlen(fpsText), 0, 0, 0, col, false);
+        }
+        SDL_SetRenderTarget(Renderer, NULL);
+        SDL_SetRenderDrawColor(Renderer, 0,0,0,255);
+        SDL_RenderClear(Renderer);
+        SDL_SetRenderLogicalPresentation(Renderer, ORIG_WINDOW_WIDTH, ORIG_WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);        
+        SDL_RenderTexture(Renderer, Buffer, NULL, NULL);
+        SDL_RenderPresent(Renderer);
+        Uint64 frameEndTicks = SDL_GetPerformanceCounter();
+        Uint64 FramePerf = frameEndTicks - frameticks;
+        frameTime = (double)FramePerf / (double)SDL_GetPerformanceFrequency() * 1000.0f;
+        double delay = 1000.0f / FPS - frameTime;
+        if (!nodelay && (delay > 0.0f))
+            SDL_Delay((Uint32)(delay)); 
+        if (showfps)
+        {
+            if(skipCounter > 0)
+            {
+                skipCounter--;
+                lastfpstime = SDL_GetTicks();
+            }
+            else
+            {
+                framecount++;
+                if(SDL_GetTicks() - lastfpstime >= 1000)
+                {
+                    for (int i = FPS_SAMPLES-1; i > 0; i--)
+                        fpsSamples[i] = fpsSamples[i-1];
+                    fpsSamples[0] = framecount;
+                    fpsAvgCount++;
+                    if(fpsAvgCount > FPS_SAMPLES)
+                        fpsAvgCount = FPS_SAMPLES;
+                    int fpsSum = 0;
+                    for (int i = 0; i < fpsAvgCount; i++)
+                        fpsSum += fpsSamples[i];
+                    avgfps = (double)fpsSum / (double)fpsAvgCount;
+                    framecount = 0;
+                    lastfpstime = SDL_GetTicks();
+                }
+            }
+        }
+
 	}
-	delete Input;
 	delete[] Tekst;
 }
 

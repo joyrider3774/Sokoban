@@ -1,4 +1,4 @@
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 #include "CWorldParts.h"
 #include "CWorldPart.h"
@@ -57,7 +57,7 @@ void CWorldParts::Remove(int PlayFieldXin,int PlayFieldYin,int Type)
 
 
 // Recursive Floodfill function
-void FloodFill(CWorldParts *aWorldParts, SDL_Surface* Surface, bool **visited, int X, int Y)
+void FloodFill(CWorldParts *aWorldParts, bool **visited, int X, int Y)
 {
     // Check bounds and whether the tile has been visited
     if (X < 0 || X >= NrOfCols || Y < 0 || Y >= NrOfRows || visited[Y][X])
@@ -73,41 +73,41 @@ void FloodFill(CWorldParts *aWorldParts, SDL_Surface* Surface, bool **visited, i
     // Mark the tile as visited
     visited[Y][X] = true;
 
-	SDL_Rect Dest;
+	SDL_FRect Dest;
 
-	Dest.x = (X * TileWidth) + 8; // + 8 because 640/24 is not possible
-	Dest.y = (Y * TileWidth);
-	Dest.w = TileWidth;
-	Dest.h = TileHeight;
+	Dest.x = (float)((X * TileWidth) + 8); // + 8 because 640/24 is not possible
+	Dest.y = (float)(Y * TileWidth);
+	Dest.w = (float)TileWidth;
+	Dest.h = (float)TileHeight;
     // Draw the floor tile
-    SDL_BlitSurface(IMGFloor, NULL, Surface, &Dest );
+    SDL_RenderTexture(Renderer, IMGFloor, NULL, &Dest );
 
     // Recur for neighboring tiles
-    FloodFill(aWorldParts, Surface, visited, X + 1, Y);
-    FloodFill(aWorldParts, Surface, visited, X - 1, Y);
-    FloodFill(aWorldParts, Surface, visited, X, Y + 1);
-    FloodFill(aWorldParts, Surface, visited, X, Y - 1);
+    FloodFill(aWorldParts, visited, X + 1, Y);
+    FloodFill(aWorldParts, visited, X - 1, Y);
+    FloodFill(aWorldParts, visited, X, Y + 1);
+    FloodFill(aWorldParts, visited, X, Y - 1);
 }
 
-void  CWorldParts::DrawFloor(SDL_Surface* Surface, CWorldPart* Player)
+void  CWorldParts::DrawFloor(CWorldPart* Player)
 {
 	if(!Player)
 		return;
     // Allocate memory for the visited array using malloc
-    bool **visited = (bool**)malloc(NrOfRows * sizeof(bool*));
+    bool **visited = (bool**)SDL_malloc(NrOfRows * sizeof(bool*));
     for (int i = 0; i < NrOfRows; ++i)
     {
-        visited[i] = (bool*)malloc(NrOfCols * sizeof(bool));
+        visited[i] = (bool*)SDL_malloc(NrOfCols * sizeof(bool));
         for (int j = 0; j < NrOfCols; ++j)
             visited[i][j] = false; // Initialize the array to false
     }
 
-	FloodFill(this, Surface, visited, Player->GetPlayFieldX(), Player->GetPlayFieldY());
+	FloodFill(this, visited, Player->GetPlayFieldX(), Player->GetPlayFieldY());
 
     // Free the allocated memory for the visited array
     for (int i = 0; i < NrOfRows; ++i)
-        free(visited[i]);
-    free(visited);
+        SDL_free(visited[i]);
+    SDL_free(visited);
 }
 
 
@@ -326,11 +326,11 @@ void CWorldParts::Move()
 		Items[Teller]->Move();
 }
 
-void CWorldParts::Draw(SDL_Surface *Surface)
+void CWorldParts::Draw()
 {
 	int Teller;
 	for (Teller=0;Teller<ItemCount;Teller++)
-		Items[Teller]->Draw(Surface);
+		Items[Teller]->Draw();
 }
 
 CWorldParts::~CWorldParts()

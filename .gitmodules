@@ -1,0 +1,12 @@
+[submodule "Vendored/SDL3"]
+	path = Vendored/SDL3
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "Vendored/SDL_mixer"]
+	path = Vendored/SDL_mixer
+	url = https://github.com/libsdl-org/SDL_mixer.git
+[submodule "Vendored/SDL_ttf"]
+	path = Vendored/SDL_ttf
+	url = https://github.com/libsdl-org/SDL_ttf.git
+[submodule "Vendored/SDL_image"]
+	path = Vendored/SDL_image
+	url = https://github.com/libsdl-org/SDL_image.git

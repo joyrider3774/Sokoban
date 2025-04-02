@@ -1,9 +1,11 @@
 #ifndef GAMEFUNCS_H
 #define GAMEFUNCS_H
 
-#include <SDL.h>
-#include <SDL_ttf.h>
+#include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
+char* assetPath(const char* assetSubPath);
+void logMessage(SDL_PRINTF_FORMAT_STRING const char *fmt, ...);
 void SetVolume(const int VolumeIn);
 void IncVolume();
 void DecVolume();
@@ -24,9 +26,8 @@ void LoadSounds();
 void UnloadMusic();
 void UnLoadGraphics();
 void LoadJoystickSettings();
-void printTitleInfo(SDL_Surface *Surface);	
-void WriteText(SDL_Surface* Surface,TTF_Font* FontIn,const char* Tekst,int NrOfChars,int X,int Y,int YSpacing,SDL_Color ColorIn);
-SDL_Surface* ScaleSurface(SDL_Surface* Surface,int ScaleFactor);
+void printTitleInfo();	
+void WriteText(TTF_Font* FontIn,const char* Tekst,int NrOfChars,int X,int Y,int YSpacing,SDL_Color ColorIn,bool Centered);
 bool FileExists(const char * FileName);
 char chr(int ascii);
 int ord(char chr);

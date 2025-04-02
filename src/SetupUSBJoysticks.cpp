@@ -1,8 +1,6 @@
-#include <SDL.h>
-#include <SDL_mixer.h>
-#include <SDL_image.h>
-#include <SDL_gfxPrimitives.h>
-#include <SDL_rotozoom.h>
+#include <SDL3/SDL.h>
+#include <SDL3_mixer/SDL_mixer.h>
+#include <SDL3_image/SDL_image.h>
 #include "SetupUSBJoysticks.h"
 #include "Common.h"
 #include "GameFuncs.h"
@@ -14,14 +12,13 @@ void SetupUsbJoystickButtons()
     SDL_Surface *Tmp,*Tmp1;
 	int Teller, Selection = 0;
 	char *Tekst = new char[300];
-	Tmp1 = SDL_CreateRGBSurface(SDL_SWSURFACE,ORIG_WINDOW_WIDTH,ORIG_WINDOW_HEIGHT,SCREEN_BPP,Screen->format->Rmask,Screen->format->Gmask,Screen->format->Bmask,Screen->format->Amask);
-	Tmp = SDL_DisplayFormat(Tmp1);
-	SDL_FreeSurface(Tmp1);
 	bool done = false;
 	bool keyboard = true;
-	CInput *Input = new CInput(10);
+	Input->SetInputDelay(10);
 	while (GameState == GSJoystickSetup)
 	{
+        frameticks = SDL_GetPerformanceCounter();
+        SDL_SetRenderTarget(Renderer, Buffer);
         if(MusicCount > 0)
 		{
             if(GlobalSoundEnabled)
@@ -36,20 +33,28 @@ void SetupUsbJoystickButtons()
 		}
 		Input->Update();
 
-		if(Input->SpecialsHeld[SPECIAL_QUIT_EV])
+		if(Input->SpecialsHeld(SPECIAL_QUIT_EV))
             GameState = GSQuit;
 
-		if(Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_B)]||  Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_B)])
+        if (Input->Ready() && ((Input->KeyboardHeld(SDLK_LALT) || Input->KeyboardHeld(SDLK_RALT)) && Input->KeyboardHeld(SDLK_RETURN)))
+        {
+            fullScreen = !fullScreen;
+            SDL_SetWindowFullscreen(SdlWindow, fullScreen);
+            Input->Delay();
+            continue;
+        }
+
+		if(Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_B))||  Input->JoystickHeld(0, JoystickSetup->GetButtonValue(BUT_B)))
 		{
 			char FileName[FILENAME_MAX];
-			sprintf(FileName,"%s/.sokoban_joystick.def", getenv("HOME") == NULL ? ".": getenv("HOME"));
+			sprintf(FileName,"%s/.sokoban_joystick.def", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"));
 			JoystickSetup->SaveCurrentButtonValues(FileName);
 			if (GlobalSoundEnabled)
 				Mix_PlayChannel(-1,Sounds[SND_BACK],0);
             GameState = GSTitleScreen;
 		}
 
-        if(Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_UP)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_UP)]))
+        if(Input->Ready() && (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_UP)) || Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_UP))))
         {
             Selection--;
             if( Selection < 0)
@@ -59,8 +64,8 @@ void SetupUsbJoystickButtons()
             Input->Delay();
         }
 
-		if(Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_LEFT)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_LEFT)] ||
-			Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_RIGHT)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_RIGHT)]))
+		if(Input->Ready() && (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_LEFT)) || Input->JoystickHeld(0, JoystickSetup->GetButtonValue(BUT_LEFT)) ||
+			Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_RIGHT)) || Input->JoystickHeld(0, JoystickSetup->GetButtonValue(BUT_RIGHT))))
 		{
 			if (GlobalSoundEnabled)
             	Mix_PlayChannel(-1,Sounds[SND_MENU],0);
@@ -68,11 +73,11 @@ void SetupUsbJoystickButtons()
 			Input->Delay();
 		}
 
-        if ((Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_R)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_R)]) && 
-	        (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_L)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_L)]))
+        if ((Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_R)) || Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_R))) && 
+	        (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_L)) || Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_L))))
             JoystickSetup->ResetToDefaults();
 
-        if(Input->Ready() && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_DOWN)]|| Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_DOWN)]))
+        if(Input->Ready() && (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_DOWN))|| Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_DOWN))))
         {
             Selection++;
             if( Selection >=12)
@@ -82,123 +87,236 @@ void SetupUsbJoystickButtons()
             Input->Delay();
         }
 
-        SDL_BlitSurface(IMGTitleScreen,NULL,Tmp,NULL);
+        SDL_RenderTexture(Renderer, IMGTitleScreen,NULL, NULL);
 
-		printTitleInfo(Tmp);
+		printTitleInfo();
 
-        boxRGBA(Tmp,45*UI_WIDTH_SCALE,50*UI_HEIGHT_SCALE,295*UI_WIDTH_SCALE,173*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
-		rectangleRGBA(Tmp,45*UI_WIDTH_SCALE,50*UI_HEIGHT_SCALE,295*UI_WIDTH_SCALE,173*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-		rectangleRGBA(Tmp,46*UI_WIDTH_SCALE,51*UI_HEIGHT_SCALE,294*UI_WIDTH_SCALE,172*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-        if(keyboard)
+        SDL_FRect Rect1;
+        Rect1.x = 45.0f*UI_WIDTH_SCALE;
+        Rect1.y = 50.0f*UI_HEIGHT_SCALE;
+        Rect1.w = 250.0f*UI_WIDTH_SCALE;
+        Rect1.h = 123.0f*UI_HEIGHT_SCALE;
+        SDL_SetRenderDrawColor(Renderer, MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.a);
+        SDL_RenderFillRect(Renderer, &Rect1);
+        SDL_SetRenderDrawColor(Renderer, MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
+        SDL_RenderRect(Renderer, &Rect1);
+        SDL_FRect Rect2;
+        Rect2.x = 47.0f*UI_WIDTH_SCALE;
+        Rect2.y = 52.0f*UI_HEIGHT_SCALE;
+        Rect2.w = 246.0f*UI_WIDTH_SCALE;
+        Rect2.h = 119.0f*UI_HEIGHT_SCALE;
+        SDL_SetRenderDrawColor(Renderer, MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
+		SDL_RenderRect(Renderer, &Rect2);
+        
+		if(keyboard)
 		{
-			WriteText(Tmp,font, "Keyboard <<", 11, 115*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor);
-			WriteText(Tmp,font, "Joypad", 6, 170*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuTextColor);
+			WriteText(font, "Keyboard <<", 11, 115*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor, false);
+			WriteText(font, "Joypad", 6, 170*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuTextColor, false);
 		}
 		else
 		{
-			WriteText(Tmp,font, "Keyboard", 8, 115*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuTextColor);
-			WriteText(Tmp,font, "Joypad <<", 9, 170*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor);
+			WriteText(font, "Keyboard", 8, 115*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuTextColor, false);
+			WriteText(font, "Joypad <<", 9, 170*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor, false);
 		}
 
-        JoystickSetup->DrawCurrentSetup(Tmp,font,55*UI_WIDTH_SCALE,61*UI_HEIGHT_SCALE,155*UI_WIDTH_SCALE,9*UI_HEIGHT_SCALE,Selection,MenuTextColor,MenuBoxBorderColor,keyboard);
-        SDL_BlitSurface(Tmp,NULL,Buffer,NULL);
-        SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
-        if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
-		{
-			SDL_Surface *ScreenBufferZoom = zoomSurface(Buffer,(double)WINDOW_WIDTH / ORIG_WINDOW_WIDTH,(double)WINDOW_HEIGHT / ORIG_WINDOW_HEIGHT,0);
-			SDL_BlitSurface(ScreenBufferZoom,NULL,Screen,NULL);
-			SDL_FreeSurface(ScreenBufferZoom);
-		}
-		else
-		{
-			SDL_BlitSurface(Buffer, NULL, Screen, NULL);
-		}
-        SDL_Flip(Screen);
-
-        if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)] ||  Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]))
+        JoystickSetup->DrawCurrentSetup(font,55*UI_WIDTH_SCALE,61*UI_HEIGHT_SCALE,155*UI_WIDTH_SCALE,9*UI_HEIGHT_SCALE,Selection,MenuTextColor,MenuBoxBorderColor,keyboard);
+        if(showfps)
         {
-               if (GlobalSoundEnabled)
-                    Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
-                Input->Reset();
-                while (!done)
+            char fpsText[100];
+            sprintf(fpsText, "FPS: %.2f\n", avgfps);
+            SDL_FRect Rect;
+            Rect.x = 0.0f;
+            Rect.y = 0.0f;
+            Rect.w = 100.0f;
+            Rect.h = (float)TTF_GetFontHeight(font);
+            SDL_SetRenderDrawColor(Renderer, 255,255,255,255);
+            SDL_RenderFillRect(Renderer, &Rect);
+            SDL_Color col = {0,0,0,255};
+            WriteText(font, fpsText, strlen(fpsText), 0, 0, 0, col, false);
+        }
+		SDL_SetRenderTarget(Renderer, NULL);
+        SDL_SetRenderDrawColor(Renderer, 0,0,0,255);
+        SDL_RenderClear(Renderer);
+        SDL_SetRenderLogicalPresentation(Renderer, ORIG_WINDOW_WIDTH, ORIG_WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);        
+        SDL_RenderTexture(Renderer, Buffer, NULL, NULL);
+        SDL_RenderPresent(Renderer);
+        Uint64 frameEndTicks = SDL_GetPerformanceCounter();
+        Uint64 FramePerf = frameEndTicks - frameticks;
+        frameTime = (double)FramePerf / (double)SDL_GetPerformanceFrequency() * 1000.0f;
+        double delay = 1000.0f / FPS - frameTime;
+        if (!nodelay && (delay > 0.0f))
+            SDL_Delay((Uint32)(delay)); 
+        if (showfps)
+        {
+            if(skipCounter > 0)
+            {
+                skipCounter--;
+                lastfpstime = SDL_GetTicks();
+            }
+            else
+            {
+                framecount++;
+                if(SDL_GetTicks() - lastfpstime >= 1000)
                 {
-                    Input->Update();
-                    SDL_BlitSurface(IMGTitleScreen,NULL,Tmp,NULL);
-                    printTitleInfo(Tmp);
+                    for (int i = FPS_SAMPLES-1; i > 0; i--)
+                        fpsSamples[i] = fpsSamples[i-1];
+                    fpsSamples[0] = framecount;
+                    fpsAvgCount++;
+                    if(fpsAvgCount > FPS_SAMPLES)
+                        fpsAvgCount = FPS_SAMPLES;
+                    int fpsSum = 0;
+                    for (int i = 0; i < fpsAvgCount; i++)
+                        fpsSum += fpsSamples[i];
+                    avgfps = (double)fpsSum / (double)fpsAvgCount;
+                    framecount = 0;
+                    lastfpstime = SDL_GetTicks();
+                }
+            }
+        }        
+        
 
-					boxRGBA(Tmp,45*UI_WIDTH_SCALE,50*UI_HEIGHT_SCALE,295*UI_WIDTH_SCALE,173*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
-					rectangleRGBA(Tmp,45*UI_WIDTH_SCALE,50*UI_HEIGHT_SCALE,295*UI_WIDTH_SCALE,173*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-					rectangleRGBA(Tmp,46*UI_WIDTH_SCALE,51*UI_HEIGHT_SCALE,294*UI_WIDTH_SCALE,172*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-					if(keyboard)
-					{
-						WriteText(Tmp,font, "Keyboard <<", 11, 115*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor);
-						WriteText(Tmp,font, "Joypad", 6, 170*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuTextColor);
-					}
-					else
-					{
-						WriteText(Tmp,font, "Keyboard", 8, 115*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuTextColor);
-						WriteText(Tmp,font, "Joypad <<", 9, 170*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor);
-					}
+        if(Input->Ready() && (Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_A)) ||  Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_A))))
+        {
+            if (GlobalSoundEnabled)
+                Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+            Input->Reset();
+            while (!done)
+            {
+                Input->Update();
+                frameticks = SDL_GetPerformanceCounter();
+                SDL_SetRenderTarget(Renderer, Buffer);
+                SDL_RenderTexture(Renderer, IMGTitleScreen,NULL, NULL);
+                printTitleInfo();
+                SDL_FRect Rect1;
+                Rect1.x = 45.0f*UI_WIDTH_SCALE;
+                Rect1.y = 50.0f*UI_HEIGHT_SCALE;
+                Rect1.w = 250.0f*UI_WIDTH_SCALE;
+                Rect1.h = 123.0f*UI_HEIGHT_SCALE;
+                SDL_SetRenderDrawColor(Renderer, MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.a);
+                SDL_RenderFillRect(Renderer, &Rect1);
+                SDL_SetRenderDrawColor(Renderer, MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
+                SDL_RenderRect(Renderer, &Rect1);
+                SDL_FRect Rect2;
+                Rect2.x = 47.0f*UI_WIDTH_SCALE;
+                Rect2.y = 52.0f*UI_HEIGHT_SCALE;
+                Rect2.w = 246.0f*UI_WIDTH_SCALE;
+                Rect2.h = 119.0f*UI_HEIGHT_SCALE;
+                SDL_SetRenderDrawColor(Renderer, MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
+                SDL_RenderRect(Renderer, &Rect2);
+                if(keyboard)
+                {
+                    WriteText(font, "Keyboard <<", 11, 115*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor, false);
+                    WriteText(font, "Joypad", 6, 170*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuTextColor, false);
+                }
+                else
+                {
+                    WriteText(font, "Keyboard", 8, 115*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuTextColor, false);
+                    WriteText(font, "Joypad <<", 9, 170*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor, false);
+                }
 
-					JoystickSetup->DrawCurrentSetup(Tmp,font,55*UI_WIDTH_SCALE,61*UI_HEIGHT_SCALE,155*UI_WIDTH_SCALE,9*UI_HEIGHT_SCALE,Selection,MenuTextColor,MenuBoxBorderColor,keyboard);
-					SDL_BlitSurface(Tmp,NULL,Buffer,NULL);
-                    SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
-                    if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
-					{
-						SDL_Surface *ScreenBufferZoom = zoomSurface(Buffer,(double)WINDOW_WIDTH / ORIG_WINDOW_WIDTH,(double)WINDOW_HEIGHT / ORIG_WINDOW_HEIGHT,0);
-						SDL_BlitSurface(ScreenBufferZoom,NULL,Screen,NULL);
-						SDL_FreeSurface(ScreenBufferZoom);
-					}
-					else
-					{
-						SDL_BlitSurface(Buffer, NULL, Screen, NULL);
-					}
-                    SDL_Flip(Screen);
-					if(keyboard)
-                      for (Teller = 0;Teller<SDLK_LAST;Teller++)
-                        if(Input->KeyboardHeld[Teller])
-                        {
-							if (GlobalSoundEnabled)
-                				Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
-                            done = true;
-                            JoystickSetup->SetKeyValue(Selection,(SDLKey)Teller);
-                            break;
-                        }
-
-                    if(!keyboard)  
-					  for (Teller = 0;Teller<MAXJOYSTICKBUTTONS;Teller++)
-                        if(Input->JoystickHeld[0][Teller])
-                        {
-							if (GlobalSoundEnabled)
-                				Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
-                            done = true;
-                            JoystickSetup->SetButtonValue(Selection,Teller);
-                            break;
-                        }
-
-                    if(Input->SpecialsHeld[SPECIAL_QUIT_EV])
+                JoystickSetup->DrawCurrentSetup(font,55*UI_WIDTH_SCALE,61*UI_HEIGHT_SCALE,155*UI_WIDTH_SCALE,9*UI_HEIGHT_SCALE,Selection,MenuTextColor,MenuBoxBorderColor,keyboard);
+                if(showfps)
+                {
+                    char fpsText[100];
+                    sprintf(fpsText, "FPS: %.2f\n", avgfps);
+                    SDL_FRect Rect;
+                    Rect.x = 0.0f;
+                    Rect.y = 0.0f;
+                    Rect.w = 100.0f;
+                    Rect.h = (float)TTF_GetFontHeight(font);
+                    SDL_SetRenderDrawColor(Renderer, 255,255,255,255);
+                    SDL_RenderFillRect(Renderer, &Rect);
+                    SDL_Color col = {0,0,0,255};
+                    WriteText(font, fpsText, strlen(fpsText), 0, 0, 0, col, false);
+                }
+                SDL_SetRenderTarget(Renderer, NULL);
+                SDL_SetRenderDrawColor(Renderer, 0,0,0,255);
+                SDL_RenderClear(Renderer);
+                SDL_SetRenderLogicalPresentation(Renderer, ORIG_WINDOW_WIDTH, ORIG_WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);        
+                SDL_RenderTexture(Renderer, Buffer, NULL, NULL);
+                SDL_RenderPresent(Renderer);
+                Uint64 frameEndTicks = SDL_GetPerformanceCounter();
+                Uint64 FramePerf = frameEndTicks - frameticks;
+                frameTime = (double)FramePerf / (double)SDL_GetPerformanceFrequency() * 1000.0f;
+                double delay = 1000.0f / FPS - frameTime;
+                if (!nodelay && (delay > 0.0f))
+                    SDL_Delay((Uint32)(delay)); 
+                if (showfps)
+                {
+                    if(skipCounter > 0)
                     {
-                        GameState = GSQuit;
+                        skipCounter--;
+                        lastfpstime = SDL_GetTicks();
+                    }
+                    else
+                    {
+                        framecount++;
+                        if(SDL_GetTicks() - lastfpstime >= 1000)
+                        {
+                            for (int i = FPS_SAMPLES-1; i > 0; i--)
+                                fpsSamples[i] = fpsSamples[i-1];
+                            fpsSamples[0] = framecount;
+                            fpsAvgCount++;
+                            if(fpsAvgCount > FPS_SAMPLES)
+                                fpsAvgCount = FPS_SAMPLES;
+                            int fpsSum = 0;
+                            for (int i = 0; i < fpsAvgCount; i++)
+                                fpsSum += fpsSamples[i];
+                            avgfps = (double)fpsSum / (double)fpsAvgCount;
+                            framecount = 0;
+                            lastfpstime = SDL_GetTicks();
+                        }
+                    }
+                }
+                if(keyboard)
+                    for (Teller = 0;Teller<SDL_SCANCODE_COUNT;Teller++)
+                        if(Input->KeyboardHeld(SDL_SCANCODE_TO_KEYCODE(Teller)))
+                        {
+                            if (GlobalSoundEnabled)
+                                Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+                            done = true;
+                            JoystickSetup->SetKeyValue(Selection,SDL_SCANCODE_TO_KEYCODE(Teller));
+                            break;
+                        }
+
+                if(!keyboard)  
+                    for (Teller = 0;Teller<MAXJOYSTICKBUTTONS;Teller++)
+                    if(Input->JoystickHeld(0,Teller))
+                    {
+                        if (GlobalSoundEnabled)
+                            Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
                         done = true;
+                        JoystickSetup->SetButtonValue(Selection,Teller);
+                        break;
                     }
 
-                    if((!done) && (Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_B)] || Input->SpecialsHeld[SPECIAL_QUIT_EV] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_B)]))
-					{
-						if (GlobalSoundEnabled)
-                			Mix_PlayChannel(-1,Sounds[SND_BACK],0);
-                        done= true;
-					}
-                    SDL_framerateDelay(&Fpsman);
+                if(Input->SpecialsHeld(SPECIAL_QUIT_EV))
+                {
+                    GameState = GSQuit;
+                    done = true;
                 }
-                Input->Reset();
-                Input->Delay();
-                done= false;
 
-        }
-        SDL_framerateDelay(&Fpsman);
+                if((!done) && (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_B)) || Input->SpecialsHeld(SPECIAL_QUIT_EV) || Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_B))))
+                {
+                    if (GlobalSoundEnabled)
+                        Mix_PlayChannel(-1,Sounds[SND_BACK],0);
+                    done= true;
+                }
+                
+                if (Input->Ready() && ((Input->KeyboardHeld(SDLK_LALT) || Input->KeyboardHeld(SDLK_RALT)) && Input->KeyboardHeld(SDLK_RETURN)))
+                {
+                    fullScreen = !fullScreen;
+                    SDL_SetWindowFullscreen(SdlWindow, fullScreen);
+                    Input->Delay();
+                    continue;
+                }
+            }
+            Input->Reset();
+            Input->Delay();
+            done= false;
+    }
+
 
 	}
 	delete[] Tekst;
-	delete Input;
-	SDL_FreeSurface(Tmp);
 }

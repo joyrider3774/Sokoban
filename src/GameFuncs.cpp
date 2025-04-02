@@ -1,13 +1,32 @@
-#include <SDL.h>
-#include <SDL_mixer.h>
-#include <SDL_image.h>
-#include <SDL_gfxPrimitives.h>
-#include <SDL_rotozoom.h>
+#include <SDL3/SDL.h>
+#include <SDL3_mixer/SDL_mixer.h>
+#include <SDL3_image/SDL_image.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include "GameFuncs.h"
 #include "Common.h"
 #include "CInput.h"
+
+char* assetPath(const char* assetSubPath)
+{
+	char* Result = (char*) SDL_malloc(FILENAME_MAX);
+
+	snprintf(Result, FILENAME_MAX, "%s/%s", basePath, assetSubPath);
+	
+	return Result;
+}
+
+void logMessage(SDL_PRINTF_FORMAT_STRING const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+#if defined _WIN32 || defined __CYGWIN__
+    vprintf(fmt, ap);
+#else
+    SDL_LogMessageV(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, fmt, ap);
+#endif    
+    va_end(ap);   
+}
 
 void SetVolume(const int VolumeIn)
 {
@@ -46,11 +65,11 @@ void LoadSettings()
 {
 	FILE *Fp;
 	char Filename[FILENAME_MAX];
-	sprintf(Filename, "%s/.sokoban_settings.dat", getenv("HOME") == NULL ? ".": getenv("HOME"));
+	sprintf(Filename, "%s/.sokoban_settings.dat", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"));
 	Fp = fopen(Filename,"rt");
 	if (Fp)
 	{
-		char* tmpName = (char*)malloc(sizeof(char) * 100);
+		char* tmpName = (char*)SDL_malloc(sizeof(char) * 100);
 		fscanf(Fp,"SelectedLevelPack=%100[^\n]\n",tmpName);
 		for (int i = 0; i < InstalledLevelPacksCount; i++)
 			if(strcasecmp(tmpName, InstalledLevelPacks[i]) == 0)
@@ -60,7 +79,7 @@ void LoadSettings()
 				break;
 			}
 		fclose(Fp);
-		free(tmpName);
+		SDL_free(tmpName);
 	}
 
 }
@@ -69,7 +88,7 @@ void SaveSettings()
 {
 	FILE *Fp;
 	char Filename[FILENAME_MAX];
-	sprintf(Filename, "%s/.sokoban_settings.dat", getenv("HOME") == NULL ? ".": getenv("HOME"));
+	sprintf(Filename, "%s/.sokoban_settings.dat", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"));
 	Fp = fopen(Filename,"wt");
 	if (Fp)
 	{
@@ -199,7 +218,7 @@ void SearchForLevelPacks()
 	InstalledLevelPacksCount = 0;
 	DoSearchForLevelPacks("./levelpacks");
 	char Path[FILENAME_MAX];
-	sprintf(Path, "%s/.sokoban_levelpacks", getenv("HOME") == NULL ? ".": getenv("HOME"));
+	sprintf(Path, "%s/.sokoban_levelpacks", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"));
 	DoSearchForLevelPacks(Path);
 	SelectedLevelPack=0;
 	if (InstalledLevelPacksCount > 0)
@@ -216,76 +235,145 @@ void SearchForLevelPacks()
 bool AskQuestion(const char *Msg)
 {
 	bool Result = false;
-	CInput *Input = new CInput(InputDelay);
-	boxRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
-	rectangleRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-	rectangleRGBA(Buffer,51*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,269*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-	WriteText(Buffer,font,Msg,strlen(Msg),55*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
-	SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
-    if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
+	SDL_Texture * PrevTarget = SDL_GetRenderTarget(Renderer);
+	Input->Reset();
+	Input->SetInputDelay(InputDelay);
+	SDL_FRect Rect1;
+	Rect1.x = 60.0f*UI_WIDTH_SCALE;
+	Rect1.y = 80.0f*UI_HEIGHT_SCALE;
+	Rect1.w = 200.0f*UI_WIDTH_SCALE;
+	Rect1.h = 85.0f*UI_HEIGHT_SCALE;
+	SDL_SetRenderDrawColor(Renderer, MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.a);
+	SDL_RenderFillRect(Renderer, &Rect1);
+	SDL_SetRenderDrawColor(Renderer, MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
+	SDL_RenderRect(Renderer, &Rect1);
+	SDL_FRect Rect2;
+	Rect2.x = 62.0f*UI_WIDTH_SCALE;
+	Rect2.y = 82.0f*UI_HEIGHT_SCALE;
+	Rect2.w = 196.0f*UI_WIDTH_SCALE;
+	Rect2.h = 81.0f*UI_HEIGHT_SCALE;
+	SDL_SetRenderDrawColor(Renderer, MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
+	SDL_RenderRect(Renderer, &Rect2);
+	WriteText(font,Msg,strlen(Msg),65*UI_WIDTH_SCALE,83*UI_HEIGHT_SCALE,2,MenuTextColor,false);
+	SDL_SetRenderTarget(Renderer, NULL);
+	SDL_SetRenderDrawColor(Renderer, 0,0,0,255);
+	SDL_RenderClear(Renderer);
+	SDL_SetRenderLogicalPresentation(Renderer, ORIG_WINDOW_WIDTH, ORIG_WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);        
+	SDL_RenderTexture(Renderer, Buffer, NULL, NULL);
+	SDL_RenderPresent(Renderer);
+	while (!( Input->SpecialsHeld(SPECIAL_QUIT_EV) || Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_A)) || Input->JoystickHeld(0, JoystickSetup->GetButtonValue(BUT_X)) || Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_X)) || Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_A))))
 	{
-		SDL_Surface *ScreenBufferZoom = zoomSurface(Buffer,(double)WINDOW_WIDTH / ORIG_WINDOW_WIDTH,(double)WINDOW_HEIGHT / ORIG_WINDOW_HEIGHT,0);
-		SDL_BlitSurface(ScreenBufferZoom,NULL,Screen,NULL);
-		SDL_FreeSurface(ScreenBufferZoom);
-	}
-	else
-	{
-		SDL_BlitSurface(Buffer, NULL, Screen, NULL);
-	}
-    SDL_Flip(Screen);
-	{
-		while (!( Input->SpecialsHeld[SPECIAL_QUIT_EV] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_X)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_X)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]))
+		frameticks = SDL_GetPerformanceCounter();
+		Input->Update();
+		if(GlobalSoundEnabled)
+		if(!Mix_PlayingMusic())
 		{
-		    Input->Update();
-			if(GlobalSoundEnabled)
-			if(!Mix_PlayingMusic())
-			{
-				Mix_PlayMusic(Music[SelectedMusic],0);
-				SetVolume(Volume);
-			}
-			SDL_framerateDelay(&Fpsman);
+			Mix_PlayMusic(Music[SelectedMusic],0);
+			SetVolume(Volume);
 		}
-		if (Input->SpecialsHeld[SPECIAL_QUIT_EV])
-            GameState = GSQuit;
-		if (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)])
+		if(showfps)
 		{
-			if (GlobalSoundEnabled)
-				Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
-			Result = true;
+
+			char fpsText[100];
+			sprintf(fpsText, "FPS: %.2f\n", avgfps);
+			SDL_FRect Rect;
+			Rect.x = 0.0f;
+			Rect.y = 0.0f;
+			Rect.w = 100.0f;
+			Rect.h = (float)TTF_GetFontHeight(font);
+			SDL_SetRenderDrawColor(Renderer, 255,255,255,255);
+			SDL_RenderFillRect(Renderer, &Rect);
+			SDL_Color col = {0,0,0,255};
+			WriteText(font, fpsText, strlen(fpsText), 0, 0, 0, col, false);
+		}
+		SDL_SetRenderTarget(Renderer, NULL);
+		SDL_SetRenderDrawColor(Renderer, 0,0,0,255);
+		SDL_RenderClear(Renderer);
+		SDL_SetRenderLogicalPresentation(Renderer, ORIG_WINDOW_WIDTH, ORIG_WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);        
+		SDL_RenderTexture(Renderer, Buffer, NULL, NULL);
+		SDL_RenderPresent(Renderer);
+		Uint64 frameEndTicks = SDL_GetPerformanceCounter();
+		Uint64 FramePerf = frameEndTicks - frameticks;
+		frameTime = (double)FramePerf / (double)SDL_GetPerformanceFrequency() * 1000.0f;
+		double delay = 1000.0f / FPS - frameTime;
+		if (!nodelay && (delay > 0.0f))
+		SDL_Delay((Uint32)(delay)); 
+		if(skipCounter > 0)
+		{
+			skipCounter--;
+			lastfpstime = SDL_GetTicks();
 		}
 		else
 		{
-			if (GlobalSoundEnabled)
-				Mix_PlayChannel(-1,Sounds[SND_BACK],0);
-			Result = false;
+			framecount++;
+			if(SDL_GetTicks() - lastfpstime >= 1000)
+			{
+				for (int i = FPS_SAMPLES-1; i > 0; i--)
+					fpsSamples[i] = fpsSamples[i-1];
+				fpsSamples[0] = framecount;
+				fpsAvgCount++;
+				if(fpsAvgCount > FPS_SAMPLES)
+					fpsAvgCount = FPS_SAMPLES;
+				int fpsSum = 0;
+				for (int i = 0; i < fpsAvgCount; i++)
+					fpsSum += fpsSamples[i];
+				avgfps = (double)fpsSum / (double)fpsAvgCount;
+				framecount = 0;
+				lastfpstime = SDL_GetTicks();
+			}
 		}
-
 	}
-	delete Input;
+	if (Input->SpecialsHeld(SPECIAL_QUIT_EV))
+		GameState = GSQuit;
+	if (Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_A)) || Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_A)))
+	{
+		if (GlobalSoundEnabled)
+			Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+		Result = true;
+	}
+	else
+	{
+		if (GlobalSoundEnabled)
+			Mix_PlayChannel(-1,Sounds[SND_BACK],0);
+		Result = false;
+	}
+
+	Input->Reset();
+	SDL_SetRenderTarget(Renderer, PrevTarget);
 	return Result;
 }
 
 void PrintForm(const char *msg)
 {
-    CInput *Input = new CInput(InputDelay);
-	boxRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
-	rectangleRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-	rectangleRGBA(Buffer,51*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,269*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-	WriteText(Buffer,font,msg,strlen(msg),55*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
-	SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
-    if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
-	{
-		SDL_Surface *ScreenBufferZoom = zoomSurface(Buffer,(double)WINDOW_WIDTH / ORIG_WINDOW_WIDTH,(double)WINDOW_HEIGHT / ORIG_WINDOW_HEIGHT,0);
-		SDL_BlitSurface(ScreenBufferZoom,NULL,Screen,NULL);
-		SDL_FreeSurface(ScreenBufferZoom);
-	}
-	else
-	{
-		SDL_BlitSurface(Buffer, NULL, Screen, NULL);
-	}
-    SDL_Flip(Screen);
-    while (!( Input->SpecialsHeld[SPECIAL_QUIT_EV] || Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]))
+	SDL_Texture * PrevTarget = SDL_GetRenderTarget(Renderer);
+	Input->Reset();
+    Input->SetInputDelay(InputDelay);
+	SDL_FRect Rect1;
+	Rect1.x = 60.0f*UI_WIDTH_SCALE;
+	Rect1.y = 80.0f*UI_HEIGHT_SCALE;
+	Rect1.w = 200.0f*UI_WIDTH_SCALE;
+	Rect1.h = 85.0f*UI_HEIGHT_SCALE;
+	SDL_SetRenderDrawColor(Renderer, MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.a);
+	SDL_RenderFillRect(Renderer, &Rect1);
+	SDL_SetRenderDrawColor(Renderer, MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
+	SDL_RenderRect(Renderer, &Rect1);
+	SDL_FRect Rect2;
+	Rect2.x = 62.0f*UI_WIDTH_SCALE;
+	Rect2.y = 82.0f*UI_HEIGHT_SCALE;
+	Rect2.w = 196.0f*UI_WIDTH_SCALE;
+	Rect2.h = 81.0f*UI_HEIGHT_SCALE;
+	SDL_SetRenderDrawColor(Renderer, MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
+	SDL_RenderRect(Renderer, &Rect2);
+	WriteText(font,msg,strlen(msg),65*UI_WIDTH_SCALE,83*UI_HEIGHT_SCALE,2,MenuTextColor,false);
+	SDL_SetRenderTarget(Renderer, NULL);
+	SDL_SetRenderDrawColor(Renderer, 0,0,0,255);
+	SDL_RenderClear(Renderer);
+	SDL_SetRenderLogicalPresentation(Renderer, ORIG_WINDOW_WIDTH, ORIG_WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);        
+	SDL_RenderTexture(Renderer, Buffer, NULL, NULL);
+	SDL_RenderPresent(Renderer);
+    while (!( Input->SpecialsHeld(SPECIAL_QUIT_EV) || Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_A)) || Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_A))))
     {
+		frameticks = SDL_GetPerformanceCounter();
         Input->Update();
         if(GlobalSoundEnabled)
         if(!Mix_PlayingMusic())
@@ -294,20 +382,73 @@ void PrintForm(const char *msg)
             //Mix_HookMusicFinished(MusicFinished);
             SetVolume(Volume);
         }
-        SDL_framerateDelay(&Fpsman);
+        if(showfps)
+        {
+            char fpsText[100];
+            sprintf(fpsText, "FPS: %.2f\n", avgfps);
+            SDL_FRect Rect;
+			Rect.x = 0.0f;
+			Rect.y = 0.0f;
+			Rect.w = 100.0f;
+			Rect.h = (float)TTF_GetFontHeight(font);
+            SDL_SetRenderDrawColor(Renderer, 255,255,255,255);
+            SDL_RenderFillRect(Renderer, &Rect);
+            SDL_Color col = {0,0,0,255};
+            WriteText(font, fpsText, strlen(fpsText), 0, 0, 0, col, false);
+        }
+        SDL_SetRenderTarget(Renderer, NULL);
+        SDL_SetRenderDrawColor(Renderer, 0,0,0,255);
+        SDL_RenderClear(Renderer);
+        SDL_SetRenderLogicalPresentation(Renderer, ORIG_WINDOW_WIDTH, ORIG_WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);        
+        SDL_RenderTexture(Renderer, Buffer, NULL, NULL);
+        SDL_RenderPresent(Renderer);
+        Uint64 frameEndTicks = SDL_GetPerformanceCounter();
+        Uint64 FramePerf = frameEndTicks - frameticks;
+        frameTime = (double)FramePerf / (double)SDL_GetPerformanceFrequency() * 1000.0f;
+        double delay = 1000.0f / FPS - frameTime;
+        if (!nodelay && (delay > 0.0f))
+            SDL_Delay((Uint32)(delay)); 
+		if (showfps)
+		{
+			if(skipCounter > 0)
+			{
+				skipCounter--;
+				lastfpstime = SDL_GetTicks();
+			}
+			else
+			{
+				framecount++;
+				if(SDL_GetTicks() - lastfpstime >= 1000)
+				{
+					for (int i = FPS_SAMPLES-1; i > 0; i--)
+						fpsSamples[i] = fpsSamples[i-1];
+					fpsSamples[0] = framecount;
+					fpsAvgCount++;
+					if(fpsAvgCount > FPS_SAMPLES)
+						fpsAvgCount = FPS_SAMPLES;
+					int fpsSum = 0;
+					for (int i = 0; i < fpsAvgCount; i++)
+						fpsSum += fpsSamples[i];
+					avgfps = (double)fpsSum / (double)fpsAvgCount;
+					framecount = 0;
+					lastfpstime = SDL_GetTicks();
+				}
+			}
+		}
     }
-	if(Input->SpecialsHeld[SPECIAL_QUIT_EV])
+	if(Input->SpecialsHeld(SPECIAL_QUIT_EV))
 	    GameState = GSQuit;
 	if (GlobalSoundEnabled)
 		Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
-	delete Input;
+	Input->Reset();
+	SDL_SetRenderTarget(Renderer, PrevTarget);
 }
 
 void SaveUnlockData()
 {
 	FILE *Fp;
 	char Filename[FILENAME_MAX];
-	sprintf(Filename,"%s/%s.dat",getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
+	sprintf(Filename,"%s/%s.dat",SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
 	Fp = fopen(Filename,"wb");
 	if (Fp)
 	{
@@ -321,7 +462,7 @@ void LoadUnlockData()
 	FILE *Fp;
  	UnlockedLevels = 1;
 	char Filename[FILENAME_MAX];
-	sprintf(Filename,"%s/%s.dat",getenv("HOME") == NULL ? ".": getenv("HOME"),LevelPackName);
+	sprintf(Filename,"%s/%s.dat",SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
 	Fp = fopen(Filename,"rb");
 	if (Fp)
 	{
@@ -335,34 +476,38 @@ void LoadUnlockData()
 
 char *GetString(const char *NameIn,const char *Msg)
 {
+	Input->Reset();
 	char *PackName = new char[21];
 	bool End=false,SubmitChanges=false;
 	int Teller,MaxSelection=0, Selection = 0,asci=97;
-	CInput *Input = new CInput(InputDelay);
+	Input->SetInputDelay(InputDelay);
 	sprintf(PackName,"%s",NameIn);
 	MaxSelection = strlen(NameIn);
 	PackName[Selection+1]='\0';
 	if (MaxSelection == 0)
 		PackName[MaxSelection]=chr(asci);
 	char Tekst[100];
+	SDL_Texture * PrevTarget = SDL_GetRenderTarget(Renderer);
 	while (!End)
 	{
+		frameticks = SDL_GetPerformanceCounter();
+		SDL_SetRenderTarget(Renderer, Buffer);
 	    if(GlobalSoundEnabled)
-		if(!Mix_PlayingMusic())
-        {
-            Mix_PlayMusic(Music[SelectedMusic],0);
-            SetVolume(Volume);
-        }
+			if(!Mix_PlayingMusic())
+			{
+				Mix_PlayMusic(Music[SelectedMusic],0);
+				SetVolume(Volume);
+			}
         Input->Update();
 
-        if(Input->SpecialsHeld[SPECIAL_QUIT_EV])
+        if(Input->SpecialsHeld(SPECIAL_QUIT_EV))
 		{
 			End = true;
             SubmitChanges=false;
             GameState = GSQuit;
 		}
 
-        if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_LEFT)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_LEFT)]))
+        if(Input->Ready() && (Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_LEFT)) || Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_LEFT))))
         {
             if (Selection > 0)
             {	Selection--;
@@ -371,7 +516,7 @@ char *GetString(const char *NameIn,const char *Msg)
             Input->Delay();
         }
 
-        if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_RIGHT)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_RIGHT)]))
+        if(Input->Ready() && (Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_RIGHT)) || Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_RIGHT))))
         {
             if (Selection < 19)
             {
@@ -387,7 +532,7 @@ char *GetString(const char *NameIn,const char *Msg)
             Input->Delay();
         }
 
-        if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_UP)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_UP)]))
+        if(Input->Ready() && (Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_UP)) || Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_UP))))
         {
             asci++;
             if (asci==123)
@@ -406,7 +551,7 @@ char *GetString(const char *NameIn,const char *Msg)
             Input->Delay();
         }
 
-        if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_DOWN)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_DOWN)]))
+        if(Input->Ready() && (Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_DOWN)) || Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_DOWN))))
         {
             asci--;
             if(asci==96)
@@ -425,7 +570,7 @@ char *GetString(const char *NameIn,const char *Msg)
             Input->Delay();
         }
 
-        if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)] ||Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]))
+        if(Input->Ready() && (Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_A)) ||Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_A))))
         {
             if (GlobalSoundEnabled)
                 Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
@@ -433,7 +578,7 @@ char *GetString(const char *NameIn,const char *Msg)
             SubmitChanges=true;
         }
 
-        if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_X)] || Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_X)] ))
+        if(Input->Ready() && (Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_X)) || Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_X)) ))
         {
 			if (GlobalSoundEnabled)
                 Mix_PlayChannel(-1,Sounds[SND_BACK],0);
@@ -442,13 +587,24 @@ char *GetString(const char *NameIn,const char *Msg)
         }
 
 
-		SDL_BlitSurface(IMGTitleScreen,NULL,Buffer,NULL);
-		boxRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.unused);
-		rectangleRGBA(Buffer,50*UI_WIDTH_SCALE,80*UI_HEIGHT_SCALE,270*UI_WIDTH_SCALE,160*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-		rectangleRGBA(Buffer,51*UI_WIDTH_SCALE,81.5*UI_HEIGHT_SCALE,269*UI_WIDTH_SCALE,159*UI_HEIGHT_SCALE,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.unused);
-		WriteText(Buffer,font,Msg,strlen(Msg),55*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
+		SDL_RenderTexture(Renderer, IMGTitleScreen,NULL,NULL);
+		printTitleInfo();
+		SDL_SetRenderDrawColor(Renderer, MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.a);
+		SDL_FRect Rect;
+		Rect.x = 50.0f*UI_WIDTH_SCALE;
+		Rect.y = 80.0f*UI_HEIGHT_SCALE;
+		Rect.w = 220.0f*UI_WIDTH_SCALE;
+		Rect.h = 85.0f*UI_HEIGHT_SCALE;
+		SDL_RenderFillRect(Renderer, &Rect);
+		SDL_SetRenderDrawColor(Renderer, MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
+		SDL_RenderRect(Renderer, &Rect);
+		Rect.x = 52.0f*UI_WIDTH_SCALE;
+		Rect.y = 82.0f*UI_HEIGHT_SCALE;
+		Rect.w = 215.0f*UI_WIDTH_SCALE;
+		Rect.h = 81.0f*UI_HEIGHT_SCALE;
+		WriteText(font,Msg,strlen(Msg),55*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor,false);
 	
-		WriteText(Buffer,MonoFont,PackName,strlen(PackName),75*UI_WIDTH_SCALE,110*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
+		WriteText(MonoFont,PackName,strlen(PackName),75*UI_WIDTH_SCALE,110*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor,false);
 		if (Selection > 0)
 		{
 			strcpy(Tekst," ");
@@ -458,22 +614,59 @@ char *GetString(const char *NameIn,const char *Msg)
 		}
 		else
 			strcpy(Tekst,"_");
-		WriteText(Buffer,MonoFont,Tekst,strlen(Tekst),75*UI_WIDTH_SCALE,112*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
+		WriteText(MonoFont,Tekst,strlen(Tekst),75*UI_WIDTH_SCALE,112*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor, false);
 		sprintf(Tekst,"Use Up, Down, Left, Right, %s=Ok %s=Cancel",JoystickSetup->GetKeyNameForDefinition(BUT_A),JoystickSetup->GetKeyNameForDefinition(BUT_X) );
-		WriteText(Buffer,font,Tekst,strlen(Tekst),65*UI_WIDTH_SCALE,135*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
-        SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
-        if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
+		WriteText(font,Tekst,strlen(Tekst),65*UI_WIDTH_SCALE,135*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor,false);
+        if(showfps)
 		{
-			SDL_Surface *ScreenBufferZoom = zoomSurface(Buffer,(double)WINDOW_WIDTH / ORIG_WINDOW_WIDTH,(double)WINDOW_HEIGHT / ORIG_WINDOW_HEIGHT,0);
-			SDL_BlitSurface(ScreenBufferZoom,NULL,Screen,NULL);
-			SDL_FreeSurface(ScreenBufferZoom);
+			char fpsText[100];
+			sprintf(fpsText, "FPS: %.2f\n", avgfps);
+			SDL_FRect Rect;
+			Rect.x = 0.0f;
+			Rect.y = 0.0f;
+			Rect.w = 100.0f;
+			Rect.h = (float)TTF_GetFontHeight(font);
+			SDL_SetRenderDrawColor(Renderer, 255,255,255,255);
+			SDL_RenderFillRect(Renderer, &Rect);
+			SDL_Color col = {0,0,0,255};
+			WriteText(font, fpsText, strlen(fpsText), 0, 0, 0, col, false);
+		}		
+		SDL_SetRenderTarget(Renderer, NULL);
+		SDL_SetRenderDrawColor(Renderer, 0,0,0,255);
+		SDL_RenderClear(Renderer);
+		SDL_SetRenderLogicalPresentation(Renderer, ORIG_WINDOW_WIDTH, ORIG_WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);        
+		SDL_RenderTexture(Renderer, Buffer, NULL, NULL);
+		SDL_RenderPresent(Renderer);
+		Uint64 frameEndTicks = SDL_GetPerformanceCounter();
+		Uint64 FramePerf = frameEndTicks - frameticks;
+		frameTime = (double)FramePerf / (double)SDL_GetPerformanceFrequency() * 1000.0f;
+		double delay = 1000.0f / FPS - frameTime;
+		if (!nodelay && (delay > 0.0f))
+		SDL_Delay((Uint32)(delay)); 
+		if(skipCounter > 0)
+		{
+			skipCounter--;
+			lastfpstime = SDL_GetTicks();
 		}
 		else
 		{
-			SDL_BlitSurface(Buffer, NULL, Screen, NULL);
+			framecount++;
+			if(SDL_GetTicks() - lastfpstime >= 1000)
+			{
+				for (int i = FPS_SAMPLES-1; i > 0; i--)
+					fpsSamples[i] = fpsSamples[i-1];
+				fpsSamples[0] = framecount;
+				fpsAvgCount++;
+				if(fpsAvgCount > FPS_SAMPLES)
+					fpsAvgCount = FPS_SAMPLES;
+				int fpsSum = 0;
+				for (int i = 0; i < fpsAvgCount; i++)
+					fpsSum += fpsSamples[i];
+				avgfps = (double)fpsSum / (double)fpsAvgCount;
+				framecount = 0;
+				lastfpstime = SDL_GetTicks();
+			}
 		}
-        SDL_Flip(Screen);
-        SDL_framerateDelay(&Fpsman);
 	}
 	PackName[MaxSelection+1] = '\0';
 	while ((PackName[0] == ' ') && (MaxSelection>-1))
@@ -490,7 +683,8 @@ char *GetString(const char *NameIn,const char *Msg)
 		}
 	if (!SubmitChanges)
 		sprintf(PackName,"%s","\0");
-    delete Input;
+	Input->Reset();
+	SDL_SetRenderTarget(Renderer, PrevTarget);
 	return PackName;
 }
 
@@ -501,22 +695,22 @@ void FindLevels()
 	char *FileName = new char[FILENAME_MAX];
 	char *FileName2 = new char[FILENAME_MAX];
 	char *FileName3 = new char[FILENAME_MAX];
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, Teller);
 	sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackName,Teller);
-	sprintf(FileName3,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
+	sprintf(FileName3,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, Teller);
 	while (FileExists(FileName) || FileExists(FileName2) || FileExists(FileName3))
 	{
 		Teller+=30;
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, Teller);
 		sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackName,Teller);
-		sprintf(FileName3,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
+		sprintf(FileName3,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, Teller);
 	}
 	while (!FileExists(FileName) && !FileExists(FileName2) && !FileExists(FileName3) && (Teller > InstalledLevelsFile) )
 	{
 		Teller--;
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, Teller);
 		sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackName,Teller);
-		sprintf(FileName3,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
+		sprintf(FileName3,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, Teller);
 	}
 	InstalledLevels=Teller;
 	delete[] FileName;
@@ -531,28 +725,28 @@ void LoadGraphics()
 	int R,G,B,A;
 	char FileName[FILENAME_MAX];
 	if(IMGBackground)
-		SDL_FreeSurface(IMGBackground);
+		SDL_DestroyTexture(IMGBackground);
 	if(IMGFloor)
-		SDL_FreeSurface(IMGFloor);
+		SDL_DestroyTexture(IMGFloor);
 	if(IMGPlayer)
-		SDL_FreeSurface(IMGPlayer);
+		SDL_DestroyTexture(IMGPlayer);
 	if(IMGBox)
-		SDL_FreeSurface(IMGBox);
+		SDL_DestroyTexture(IMGBox);
 	if(IMGSpot)
-		SDL_FreeSurface(IMGSpot);
+		SDL_DestroyTexture(IMGSpot);
 	if(IMGEmpty)
-		SDL_FreeSurface(IMGEmpty);
+		SDL_DestroyTexture(IMGEmpty);
 	if(IMGWall)
-		SDL_FreeSurface(IMGWall);
+		SDL_DestroyTexture(IMGWall);
 	if(IMGTitleScreen)
-		SDL_FreeSurface(IMGTitleScreen);
+		SDL_DestroyTexture(IMGTitleScreen);
 
 
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/floor.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/floor.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
 	{
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/floor.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/floor.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
 			sprintf(FileName,"./levelpacks/%s/floor.png",LevelPackName);
 	}
@@ -560,14 +754,13 @@ void LoadGraphics()
 		Tmp = IMG_Load(FileName);
 	else
 		Tmp = IMG_Load("./graphics/floor.png");
-	SDL_SetColorKey(Tmp,SDL_SRCCOLORKEY |SDL_RLEACCEL,SDL_MapRGB(Tmp->format,255,0,255));
-	IMGFloor = SDL_DisplayFormat(Tmp);
-	SDL_FreeSurface(Tmp);
+	IMGFloor = SDL_CreateTextureFromSurface(Renderer, Tmp);
+	
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/wall.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/wall.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
 	{
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/wall.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/wall.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
 			sprintf(FileName,"./levelpacks/%s/wall.png",LevelPackName);
 	}
@@ -575,14 +768,13 @@ void LoadGraphics()
 		Tmp = IMG_Load(FileName);
 	else
 		Tmp = IMG_Load("./graphics/wall.png");
-	SDL_SetColorKey(Tmp,SDL_SRCCOLORKEY |SDL_RLEACCEL,SDL_MapRGB(Tmp->format,255,0,255));
-	IMGWall = SDL_DisplayFormat(Tmp);
-	SDL_FreeSurface(Tmp);
+	IMGWall =  SDL_CreateTextureFromSurface(Renderer, Tmp);
+	SDL_DestroySurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/box.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/box.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
 	{
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/box.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/box.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
 			sprintf(FileName,"./levelpacks/%s/box.png",LevelPackName);
 	}
@@ -590,14 +782,13 @@ void LoadGraphics()
 		Tmp = IMG_Load(FileName);
 	else
 		Tmp = IMG_Load("./graphics/box.png");
-	SDL_SetColorKey(Tmp,SDL_SRCCOLORKEY |SDL_RLEACCEL,SDL_MapRGB(Tmp->format,255,0,255));
-	IMGBox = SDL_DisplayFormat(Tmp);
-	SDL_FreeSurface(Tmp);
+	IMGBox =  SDL_CreateTextureFromSurface(Renderer, Tmp);
+	SDL_DestroySurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/spot.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/spot.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
 	{
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/spot.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/spot.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
 			sprintf(FileName,"./levelpacks/%s/spot.png",LevelPackName);
 	}
@@ -605,14 +796,13 @@ void LoadGraphics()
 		Tmp = IMG_Load(FileName);
 	else
 		Tmp = IMG_Load("./graphics/spot.png");
-	SDL_SetColorKey(Tmp,SDL_SRCCOLORKEY |SDL_RLEACCEL,SDL_MapRGB(Tmp->format,255,0,255));
-	IMGSpot = SDL_DisplayFormat(Tmp);
-	SDL_FreeSurface(Tmp);
+	IMGSpot = SDL_CreateTextureFromSurface(Renderer, Tmp);
+	SDL_DestroySurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/player.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/player.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
 	{
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/player.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/player.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
 			sprintf(FileName,"./levelpacks/%s/player.png",LevelPackName);
 	}
@@ -620,14 +810,13 @@ void LoadGraphics()
 		Tmp = IMG_Load(FileName);
 	else
 		Tmp = IMG_Load("./graphics/player.png");
-	SDL_SetColorKey(Tmp,SDL_SRCCOLORKEY |SDL_RLEACCEL,SDL_MapRGB(Tmp->format,255,0,255));
-	IMGPlayer = SDL_DisplayFormat(Tmp);
-	SDL_FreeSurface(Tmp);
+	IMGPlayer = SDL_CreateTextureFromSurface(Renderer, Tmp);
+	SDL_DestroySurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/empty.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/empty.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
 	{
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/empty.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/empty.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
 			sprintf(FileName,"./levelpacks/%s/empty.png",LevelPackName);
 	}
@@ -635,14 +824,13 @@ void LoadGraphics()
 		Tmp = IMG_Load(FileName);
 	else
 		Tmp = IMG_Load("./graphics/empty.png");
-	SDL_SetColorKey(Tmp,SDL_SRCCOLORKEY |SDL_RLEACCEL,SDL_MapRGB(Tmp->format,255,0,255));
-	IMGEmpty = SDL_DisplayFormat(Tmp);
-	SDL_FreeSurface(Tmp);
+	IMGEmpty = SDL_CreateTextureFromSurface(Renderer, Tmp);
+	SDL_DestroySurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/background.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/background.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
 	{
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/background.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/background.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
 			sprintf(FileName,"./levelpacks/%s/background.png",LevelPackName);
 	}
@@ -650,14 +838,14 @@ void LoadGraphics()
 		Tmp = IMG_Load(FileName);
 	else
 		Tmp = IMG_Load("./graphics/background.png");
-	IMGBackground = SDL_DisplayFormat(Tmp);
-	SDL_FreeSurface(Tmp);
+	IMGBackground = SDL_CreateTextureFromSurface(Renderer, Tmp);
+	SDL_DestroySurface(Tmp);
 
 	isCustomnTitleScreen = true;
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/titlescreen.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/titlescreen.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
 	{
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/titlescreen.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/titlescreen.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
 			sprintf(FileName,"./levelpacks/%s/titlescreen.png",LevelPackName);
 	}
@@ -668,13 +856,13 @@ void LoadGraphics()
 		isCustomnTitleScreen = false;
 		Tmp = IMG_Load("./graphics/titlescreen.png");
 	}
-	IMGTitleScreen = SDL_DisplayFormat(Tmp);
-	SDL_FreeSurface(Tmp);
+	IMGTitleScreen = SDL_CreateTextureFromSurface(Renderer, Tmp);
+	SDL_DestroySurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/colors.txt", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/colors.txt", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
 	{
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/colors.txt", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/colors.txt", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
 			sprintf(FileName,"./levelpacks/%s/colors.txt",LevelPackName);
 	}
@@ -689,12 +877,12 @@ void LoadGraphics()
 		MenuBoxColor.r = R;
 		MenuBoxColor.g = G;
 		MenuBoxColor.b = B;
-		MenuBoxColor.unused = A;
+		MenuBoxColor.a = A;
 		fscanf(ColorsFile,"[MenuBoxBorderColor]\nR=%d\nG=%d\nB=%d\nA=%d\n",&R,&G,&B,&A);
 		MenuBoxBorderColor.r = R;
 		MenuBoxBorderColor.g = G;
 		MenuBoxBorderColor.b = B;
-		MenuBoxBorderColor.unused = A;
+		MenuBoxBorderColor.a = A;
 		fclose(ColorsFile);
 	}
 	else
@@ -705,32 +893,32 @@ void LoadGraphics()
 		MenuBoxColor.r = 197;
 		MenuBoxColor.g = 215;
 		MenuBoxColor.b = 235;
-		MenuBoxColor.unused = 255;
+		MenuBoxColor.a = 255;
 		MenuBoxBorderColor.r = 52;
 		MenuBoxBorderColor.g = 102;
 		MenuBoxBorderColor.b = 148;
-		MenuBoxBorderColor.unused = 255;
+		MenuBoxBorderColor.a = 255;
 	}
 }
 
 void UnLoadGraphics()
 {
 	if(IMGBackground)
-		SDL_FreeSurface(IMGBackground);
+		SDL_DestroyTexture(IMGBackground);
 	if(IMGFloor)
-		SDL_FreeSurface(IMGFloor);
+		SDL_DestroyTexture(IMGFloor);
 	if(IMGPlayer)
-		SDL_FreeSurface(IMGPlayer);
+		SDL_DestroyTexture(IMGPlayer);
 	if(IMGBox)
-		SDL_FreeSurface(IMGBox);
+		SDL_DestroyTexture(IMGBox);
 	if(IMGSpot)
-		SDL_FreeSurface(IMGSpot);
+		SDL_DestroyTexture(IMGSpot);
 	if(IMGEmpty)
-		SDL_FreeSurface(IMGEmpty);
+		SDL_DestroyTexture(IMGEmpty);
 	if(IMGWall)
-		SDL_FreeSurface(IMGWall);
+		SDL_DestroyTexture(IMGWall);
 	if(IMGTitleScreen)
-		SDL_FreeSurface(IMGTitleScreen);
+		SDL_DestroyTexture(IMGTitleScreen);
 }
 
 void UnloadMusic()
@@ -768,23 +956,23 @@ void UnloadSounds()
 			Mix_FreeChunk(Sounds[Teller]);
 }
 
-void printTitleInfo(SDL_Surface *Surface)
+void printTitleInfo()
 {
 	char Tekst[250];
 	int w;
 	if(LevelPackFile->Loaded)
 	{
 		strcpy(Tekst, "Sokoban");
-		TTF_SizeText(RobotoBig, Tekst, &w, NULL);
+		TTF_GetStringSize(RobotoBig, Tekst, strlen(Tekst), &w, NULL);
 		SDL_Color TitleColor = {174,198,234,255};
-		WriteText(Surface, RobotoBig, Tekst, strlen(Tekst), (ORIG_WINDOW_WIDTH - w) / 2, 10, 0, TitleColor);
+		WriteText(RobotoBig, Tekst, strlen(Tekst), (ORIG_WINDOW_WIDTH - w) / 2, 10, 0, TitleColor, false);
 
 		if(strlen(LevelPackFile->author) > 0)
 		{
 			strcpy(Tekst, "Levels by ");
 			strcat(Tekst, LevelPackFile->author);
-			TTF_SizeText(RobotoMedium, Tekst, &w, NULL);
-			WriteText(Surface, RobotoMedium, Tekst, strlen(Tekst), (ORIG_WINDOW_WIDTH - w) / 2, 290, 0, TitleColor);
+			TTF_GetStringSize(RobotoMedium, Tekst, strlen(Tekst), &w, NULL);
+			WriteText(RobotoMedium, Tekst, strlen(Tekst), (ORIG_WINDOW_WIDTH - w) / 2, 290, 0, TitleColor, false);
 		}
 	}
 	else
@@ -792,9 +980,9 @@ void printTitleInfo(SDL_Surface *Surface)
 		if(!isCustomnTitleScreen)
 		{
 			strcpy(Tekst, "Sokoban");
-			TTF_SizeText(RobotoBig, Tekst, &w, NULL);
+			TTF_GetStringSize(RobotoBig, Tekst, strlen(Tekst), &w, NULL);
 			SDL_Color TitleColor = {174,198,234,255};
-			WriteText(Surface, RobotoBig, Tekst, strlen(Tekst), (ORIG_WINDOW_WIDTH - w) / 2, 10, 0, TitleColor);
+			WriteText(RobotoBig, Tekst, strlen(Tekst), (ORIG_WINDOW_WIDTH - w) / 2, 10, 0, TitleColor, false);
 		}
 	}
 }
@@ -809,22 +997,23 @@ void LoadJoystickSettings()
     JoystickSetup->AddDefinition(BUT_DOWN,"Down",JOYSTICK_DOWN,JOYSTICK_DOWN,SDLK_DOWN,SDLK_DOWN,"DOWN");
     JoystickSetup->AddDefinition(BUT_UP,"Up",JOYSTICK_UP,JOYSTICK_UP,SDLK_UP,SDLK_UP,"UP");
     JoystickSetup->AddDefinition(BUT_A,"Select / Place part",0,0,SDLK_SPACE,SDLK_SPACE,"A");
-    JoystickSetup->AddDefinition(BUT_X,"Center level",2,2,SDLK_x,SDLK_x,"X");
-    JoystickSetup->AddDefinition(BUT_Y,"New Level / Erase all parts",3,3,SDLK_y,SDLK_y,"Y");
-    JoystickSetup->AddDefinition(BUT_SELECT,"Hide position / Statistics",6,6,SDLK_b,SDLK_b,"SELECT");
+    JoystickSetup->AddDefinition(BUT_X,"Center level",2,2,SDLK_X,SDLK_X,"X");
+    JoystickSetup->AddDefinition(BUT_Y,"New Level / Erase all parts",3,3,SDLK_Y,SDLK_Y,"Y");
+    JoystickSetup->AddDefinition(BUT_SELECT,"Hide position / Statistics",6,6,SDLK_B,SDLK_B,"SELECT");
     JoystickSetup->AddDefinition(BUT_START,"Restart / Test level",7,7,SDLK_RETURN,SDLK_RETURN,"START");
 	char FileName[FILENAME_MAX];
-	sprintf(FileName,"%s/.sokoban_joystick.def", getenv("HOME") == NULL ? ".": getenv("HOME"));
+	sprintf(FileName,"%s/.sokoban_joystick.def", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"));
 	JoystickSetup->LoadCurrentButtonValues(FileName);
 }
 
 
-void WriteText(SDL_Surface* Surface,TTF_Font* FontIn,const char* Tekst,int NrOfChars,int X,int Y,int YSpacing,SDL_Color ColorIn)
+void WriteText(TTF_Font* FontIn,const char* Tekst,int NrOfChars,int X,int Y,int YSpacing,SDL_Color ColorIn,bool Centered)
 {
 	char List[100][255];
 	int Lines,Teller,Chars;
-	SDL_Rect DstRect;
+	SDL_FRect DstRect;
 	SDL_Surface* TmpSurface1;
+	SDL_Texture *TmpTexture;
 	Lines = 0;
 	Chars = 0;
 	for (Teller=0;Teller<NrOfChars;Teller++)
@@ -848,13 +1037,22 @@ void WriteText(SDL_Surface* Surface,TTF_Font* FontIn,const char* Tekst,int NrOfC
 	{
 		if(strlen(List[Teller]) > 0)
 		{
-			TmpSurface1 = TTF_RenderUTF8_Blended(FontIn,List[Teller],ColorIn);
-			DstRect.x = X;
-			DstRect.y = Y + (Teller) * TTF_FontLineSkip(FontIn) + (Teller*YSpacing);
+			TmpSurface1 = TTF_RenderText_Blended(FontIn,List[Teller],strlen(List[Teller]) * sizeof(char), ColorIn);
+			if(Centered)
+			{
+				int w;
+				SDL_GetCurrentRenderOutputSize(Renderer, &w, NULL);
+                DstRect.x = (w /2) - (TmpSurface1->w / 2);
+			}
+			else
+                DstRect.x = X;
+			DstRect.y = Y + (Teller) * TTF_GetFontLineSkip(FontIn) + (Teller*YSpacing);
 			DstRect.w = TmpSurface1->w;
 			DstRect.h = TmpSurface1->h;
-			SDL_BlitSurface(TmpSurface1,NULL,Surface,&DstRect);
-			SDL_FreeSurface(TmpSurface1);
+			TmpTexture = SDL_CreateTextureFromSurface(Renderer, TmpSurface1);
+			SDL_RenderTexture(Renderer, TmpTexture,NULL,&DstRect);
+			SDL_DestroyTexture(TmpTexture);
+			SDL_DestroySurface(TmpSurface1);
 		}
 	}
 }

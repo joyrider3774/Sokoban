@@ -1,5 +1,5 @@
-#include <SDL_gfxPrimitives.h>
-#include <SDL.h>
+#include <SDL3/SDL.h>
+#include <SDL3_mixer/SDL_mixer.h>
 #include "CWorldParts.h"
 #include "CWorldPart.h"
 #include "CHistory.h"
@@ -167,13 +167,13 @@ void CWorldPart::Move()
 	}
 }
 
-void CWorldPart::Draw(SDL_Surface* Surface)
+void CWorldPart::Draw()
 {
 
 	if (Image)
 	{
 		Event_BeforeDraw();
-		SDL_Rect SrcRect,DstRect;
+		SDL_FRect SrcRect,DstRect;
 		SrcRect.x = AnimPhase * TileWidth;
 		SrcRect.y = 0;
 		SrcRect.w = TileWidth;
@@ -182,12 +182,21 @@ void CWorldPart::Draw(SDL_Surface* Surface)
 		DstRect.y = Y;
 		DstRect.w = TileWidth;
 		DstRect.h = TileHeight;
-		SDL_BlitSurface(Image,&SrcRect,Surface,&DstRect);
+		SDL_RenderTexture(Renderer, Image,&SrcRect,&DstRect);
 	}
 	if (Selected)
 	{
-		boxRGBA(Surface,X+8,Y,X+8+TileWidth-1,Y+TileHeight-1,0,0,200,125);
-		rectangleRGBA(Surface,X+8,Y,X+8+TileWidth-1,Y+TileHeight-1,0,0,255,125);
+		SDL_SetRenderDrawBlendMode(Renderer, SDL_BLENDMODE_BLEND);
+		SDL_SetRenderDrawColor(Renderer,0,0,200,125);
+		SDL_FRect Rect;
+		Rect.x = (float)(X+8);
+		Rect.y = (float)(Y);
+		Rect.w = (float)TileWidth;
+		Rect.h = (float)TileHeight;
+		SDL_RenderFillRect(Renderer, &Rect);
+		SDL_SetRenderDrawColor(Renderer,0,0,255,125);
+		SDL_RenderRect(Renderer, &Rect);
+		SDL_SetRenderDrawBlendMode(Renderer, SDL_BLENDMODE_NONE);
 	}
 
 }
