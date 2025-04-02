@@ -5,6 +5,7 @@ EXE=sokoban
 SRC=$(wildcard *.cpp $(foreach fd, $(SRC_DIR), $(fd)/*.cpp)) 
 OBJS=$(addprefix $(OBJ_DIR)/, $(SRC:.cpp=.o))
 
+DEFINES = 
 SDL_CONFIG=sdl-config
 CPP = g++
 OPT_LEVEL ?= -O2 
@@ -29,11 +30,11 @@ endif
 all: $(EXE)
 
 $(EXE): $(OBJS)
-	$(CPP) $(LDFLAGS) $(TARGET_ARCH) $(OBJS) -o $@ $(LDLIBS)
+	$(CPP) $(LDFLAGS) $(DEFINES) $(TARGET_ARCH) $(OBJS) -o $@ $(LDLIBS)
 
 $(OBJ_DIR)/%.o: %.cpp
 	mkdir -p $(@D)
-	$(CPP) $(CFLAGS) -c -o $@ $<
+	$(CPP) $(CFLAGS) $(DEFINES) -c -o $@ $<
 
 $(OBJ_DIR):
 	mkdir -p $@

@@ -850,6 +850,20 @@ void printTitleInfo(SDL_Surface *Surface)
 
 void LoadJoystickSettings()
 {
+#ifdef MIYOO
+	JoystickSetup->AddDefinition(BUT_B,"Go back / Quit",1,1,SDLK_LCTRL,SDLK_LCTRL,"B");
+    JoystickSetup->AddDefinition(BUT_R,"Next Music / Inc Level +5",5,5,SDLK_t,SDLK_t,"R");
+    JoystickSetup->AddDefinition(BUT_L,"Prev Music / Dec Level -5",4,4,SDLK_e,SDLK_e,"L");
+    JoystickSetup->AddDefinition(BUT_LEFT,"Left",JOYSTICK_LEFT,JOYSTICK_LEFT,SDLK_LEFT,SDLK_LEFT,"LEFT");
+    JoystickSetup->AddDefinition(BUT_RIGHT,"Right",JOYSTICK_RIGHT,JOYSTICK_RIGHT,SDLK_RIGHT,SDLK_RIGHT,"RIGHT");
+    JoystickSetup->AddDefinition(BUT_DOWN,"Down",JOYSTICK_DOWN,JOYSTICK_DOWN,SDLK_DOWN,SDLK_DOWN,"DOWN");
+    JoystickSetup->AddDefinition(BUT_UP,"Up",JOYSTICK_UP,JOYSTICK_UP,SDLK_UP,SDLK_UP,"UP");
+    JoystickSetup->AddDefinition(BUT_A,"Select / Place part",0,0,SDLK_SPACE,SDLK_SPACE,"A");
+    JoystickSetup->AddDefinition(BUT_X,"Center level",2,2,SDLK_LSHIFT,SDLK_LSHIFT,"X");
+    JoystickSetup->AddDefinition(BUT_Y,"New Level / Erase all parts",3,3,SDLK_LALT,SDLK_LALT,"Y");
+    JoystickSetup->AddDefinition(BUT_SELECT,"Hide position / Statistics",6,6,SDLK_RCTRL,SDLK_RCTRL,"SELECT");
+    JoystickSetup->AddDefinition(BUT_START,"Restart / Test level",7,7,SDLK_RETURN,SDLK_RETURN,"START");
+#else	
     JoystickSetup->AddDefinition(BUT_B,"Go back / Quit",1,1,SDLK_ESCAPE,SDLK_ESCAPE,"B");
     JoystickSetup->AddDefinition(BUT_R,"Next Music / Inc Level +5",5,5,SDLK_PAGEUP,SDLK_PAGEUP,"R");
     JoystickSetup->AddDefinition(BUT_L,"Prev Music / Dec Level -5",4,4,SDLK_PAGEDOWN,SDLK_PAGEDOWN,"L");
@@ -862,6 +876,7 @@ void LoadJoystickSettings()
     JoystickSetup->AddDefinition(BUT_Y,"New Level / Erase all parts",3,3,SDLK_y,SDLK_y,"Y");
     JoystickSetup->AddDefinition(BUT_SELECT,"Hide position / Statistics",6,6,SDLK_b,SDLK_b,"SELECT");
     JoystickSetup->AddDefinition(BUT_START,"Restart / Test level",7,7,SDLK_RETURN,SDLK_RETURN,"START");
+#endif
 	char FileName[FILENAME_MAX];
 	sprintf(FileName,"%s/.sokoban_joystick.def", getenv("HOME") == NULL ? ".": getenv("HOME"));
 	JoystickSetup->LoadCurrentButtonValues(FileName);
