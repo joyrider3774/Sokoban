@@ -121,6 +121,7 @@ void SetupUsbJoystickButtons()
 		{
 			SDL_BlitSurface(Buffer, NULL, Screen, NULL);
 		}
+		HandleFPS();
         SDL_Flip(Screen);
 
         if(Input->Ready() && (Input->JoystickHeld[0][JoystickSetup->GetButtonValue(BUT_A)] ||  Input->KeyboardHeld[JoystickSetup->GetKeyValue(BUT_A)]))
@@ -169,6 +170,7 @@ void SetupUsbJoystickButtons()
 					{
 						SDL_BlitSurface(Buffer, NULL, Screen, NULL);
 					}
+					HandleFPS();
                     SDL_Flip(Screen);
 					if(keyboard)
                       for (Teller = 0;Teller<SDLK_LAST;Teller++)
@@ -204,14 +206,16 @@ void SetupUsbJoystickButtons()
                 			Mix_PlayChannel(-1,Sounds[SND_BACK],0);
                         done= true;
 					}
-                    SDL_framerateDelay(&Fpsman);
+                    if(!noDelay)
+        	SDL_framerateDelay(&Fpsman);
                 }
                 Input->Reset();
                 Input->Delay();
                 done= false;
 
         }
-        SDL_framerateDelay(&Fpsman);
+        if(!noDelay)
+        	SDL_framerateDelay(&Fpsman);
 
 	}
 	delete[] Tekst;

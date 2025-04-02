@@ -29,3 +29,8 @@ bool isCustomnTitleScreen;
 FPSmanager Fpsman;
 int WINDOW_WIDTH = 640;
 int WINDOW_HEIGHT = 360;
+Uint32 LastFps = 0;
+Uint32 FrameCount = 0;
+Uint32 FrameTicks = 0;
+bool ShowFps = false;
+bool noDelay = false;

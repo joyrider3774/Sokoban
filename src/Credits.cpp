@@ -91,8 +91,10 @@ void Credits()
 		{
 			SDL_BlitSurface(Buffer, NULL, Screen, NULL);
 		}
-        SDL_Flip(Screen);
-        SDL_framerateDelay(&Fpsman);
+		HandleFPS();
+      	SDL_Flip(Screen);
+		if(!noDelay)
+        	SDL_framerateDelay(&Fpsman);
 	}
 	delete[] Tekst;
 	delete[] Tekst2;

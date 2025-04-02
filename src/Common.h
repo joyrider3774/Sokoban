@@ -32,5 +32,9 @@ extern bool isCustomnTitleScreen;
 extern FPSmanager Fpsman;
 extern int WINDOW_WIDTH;
 extern int WINDOW_HEIGHT;
-
+extern Uint32 LastFps;
+extern Uint32 FrameCount;
+extern Uint32 FrameTicks;
+extern bool ShowFps;
+extern bool noDelay;
 #endif

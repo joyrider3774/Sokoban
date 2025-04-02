@@ -255,6 +255,7 @@ void Game()
 		{
 			SDL_BlitSurface(Buffer, NULL, Screen, NULL);
 		}
+		HandleFPS();
         SDL_Flip(Screen);
 		if (!Player->IsMoving && (WorldParts.Moves >0) && StageDone())
 		{
@@ -318,7 +319,8 @@ void Game()
 				}
 			}
 		}
-		SDL_framerateDelay(&Fpsman);
+		if(!noDelay)
+        	SDL_framerateDelay(&Fpsman);
 	}
 	delete Input;
 	if (GlobalSoundEnabled)

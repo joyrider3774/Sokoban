@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
+void HandleFPS();
 void SetVolume(const int VolumeIn);
 void IncVolume();
 void DecVolume();
