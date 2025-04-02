@@ -66,10 +66,16 @@ int main(int argc, char **argv)
 		printf("SDL Succesfully initialized\n");
 		Uint32 flags = SDL_SWSURFACE;
 		if(fullscreen)
+		{
+			WINDOW_WIDTH = 0;
+			WINDOW_HEIGHT = 0;
 			flags |= SDL_FULLSCREEN;
+		}
         Screen = SDL_SetVideoMode( WINDOW_WIDTH, WINDOW_HEIGHT,0, flags);
 		if(Screen)
 		{
+			WINDOW_WIDTH = Screen->w;
+			WINDOW_HEIGHT = Screen->h;
 			Icon = IMG_Load("./graphics/sokoban.png");
         	SDL_WM_SetIcon(Icon,NULL);
 			SDL_WM_SetCaption( "Sokoban GP2X - Created By Willems Davy", NULL );

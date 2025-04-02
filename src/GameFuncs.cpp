@@ -223,11 +223,19 @@ bool AskQuestion(const char *Msg)
 	WriteText(Buffer,font,Msg,strlen(Msg),55*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
 	SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
     if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
-	{
-		SDL_Surface *ScreenBufferZoom = zoomSurface(Buffer,(double)WINDOW_WIDTH / ORIG_WINDOW_WIDTH,(double)WINDOW_HEIGHT / ORIG_WINDOW_HEIGHT,0);
-		SDL_BlitSurface(ScreenBufferZoom,NULL,Screen,NULL);
-		SDL_FreeSurface(ScreenBufferZoom);
-	}
+		{
+			double wscale = (double)WINDOW_WIDTH / ORIG_WINDOW_WIDTH;
+			if(ORIG_WINDOW_HEIGHT * wscale > WINDOW_HEIGHT)
+				wscale = (double)WINDOW_HEIGHT / ORIG_WINDOW_HEIGHT;
+			SDL_Rect dst;
+			dst.x = (WINDOW_WIDTH - (ORIG_WINDOW_WIDTH * wscale)) / 2;
+			dst.y =(WINDOW_HEIGHT - (ORIG_WINDOW_HEIGHT * wscale)) / 2,
+			dst.w = ORIG_WINDOW_WIDTH * wscale;
+			dst.h = ORIG_WINDOW_HEIGHT * wscale;
+			SDL_Surface *ScreenBufferZoom = zoomSurface(Buffer,wscale,wscale,0);
+			SDL_BlitSurface(ScreenBufferZoom,NULL,Screen,&dst);
+			SDL_FreeSurface(ScreenBufferZoom);
+		}
 	else
 	{
 		SDL_BlitSurface(Buffer, NULL, Screen, NULL);
@@ -274,11 +282,19 @@ void PrintForm(const char *msg)
 	WriteText(Buffer,font,msg,strlen(msg),55*UI_WIDTH_SCALE,85*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor);
 	SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
     if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
-	{
-		SDL_Surface *ScreenBufferZoom = zoomSurface(Buffer,(double)WINDOW_WIDTH / ORIG_WINDOW_WIDTH,(double)WINDOW_HEIGHT / ORIG_WINDOW_HEIGHT,0);
-		SDL_BlitSurface(ScreenBufferZoom,NULL,Screen,NULL);
-		SDL_FreeSurface(ScreenBufferZoom);
-	}
+		{
+			double wscale = (double)WINDOW_WIDTH / ORIG_WINDOW_WIDTH;
+			if(ORIG_WINDOW_HEIGHT * wscale > WINDOW_HEIGHT)
+				wscale = (double)WINDOW_HEIGHT / ORIG_WINDOW_HEIGHT;
+			SDL_Rect dst;
+			dst.x = (WINDOW_WIDTH - (ORIG_WINDOW_WIDTH * wscale)) / 2;
+			dst.y =(WINDOW_HEIGHT - (ORIG_WINDOW_HEIGHT * wscale)) / 2,
+			dst.w = ORIG_WINDOW_WIDTH * wscale;
+			dst.h = ORIG_WINDOW_HEIGHT * wscale;
+			SDL_Surface *ScreenBufferZoom = zoomSurface(Buffer,wscale,wscale,0);
+			SDL_BlitSurface(ScreenBufferZoom,NULL,Screen,&dst);
+			SDL_FreeSurface(ScreenBufferZoom);
+		}
 	else
 	{
 		SDL_BlitSurface(Buffer, NULL, Screen, NULL);
@@ -464,8 +480,16 @@ char *GetString(const char *NameIn,const char *Msg)
         SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
         if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))
 		{
-			SDL_Surface *ScreenBufferZoom = zoomSurface(Buffer,(double)WINDOW_WIDTH / ORIG_WINDOW_WIDTH,(double)WINDOW_HEIGHT / ORIG_WINDOW_HEIGHT,0);
-			SDL_BlitSurface(ScreenBufferZoom,NULL,Screen,NULL);
+			double wscale = (double)WINDOW_WIDTH / ORIG_WINDOW_WIDTH;
+			if(ORIG_WINDOW_HEIGHT * wscale > WINDOW_HEIGHT)
+				wscale = (double)WINDOW_HEIGHT / ORIG_WINDOW_HEIGHT;
+			SDL_Rect dst;
+			dst.x = (WINDOW_WIDTH - (ORIG_WINDOW_WIDTH * wscale)) / 2;
+			dst.y =(WINDOW_HEIGHT - (ORIG_WINDOW_HEIGHT * wscale)) / 2,
+			dst.w = ORIG_WINDOW_WIDTH * wscale;
+			dst.h = ORIG_WINDOW_HEIGHT * wscale;
+			SDL_Surface *ScreenBufferZoom = zoomSurface(Buffer,wscale,wscale,0);
+			SDL_BlitSurface(ScreenBufferZoom,NULL,Screen,&dst);
 			SDL_FreeSurface(ScreenBufferZoom);
 		}
 		else
@@ -560,7 +584,6 @@ void LoadGraphics()
 		Tmp = IMG_Load(FileName);
 	else
 		Tmp = IMG_Load("./graphics/floor.png");
-	SDL_SetColorKey(Tmp,SDL_SRCCOLORKEY |SDL_RLEACCEL,SDL_MapRGB(Tmp->format,255,0,255));
 	IMGFloor = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
@@ -575,7 +598,6 @@ void LoadGraphics()
 		Tmp = IMG_Load(FileName);
 	else
 		Tmp = IMG_Load("./graphics/wall.png");
-	SDL_SetColorKey(Tmp,SDL_SRCCOLORKEY |SDL_RLEACCEL,SDL_MapRGB(Tmp->format,255,0,255));
 	IMGWall = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
@@ -590,8 +612,7 @@ void LoadGraphics()
 		Tmp = IMG_Load(FileName);
 	else
 		Tmp = IMG_Load("./graphics/box.png");
-	SDL_SetColorKey(Tmp,SDL_SRCCOLORKEY |SDL_RLEACCEL,SDL_MapRGB(Tmp->format,255,0,255));
-	IMGBox = SDL_DisplayFormat(Tmp);
+	IMGBox = SDL_DisplayFormatAlpha(Tmp);
 	SDL_FreeSurface(Tmp);
 
 	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/spot.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
@@ -605,7 +626,6 @@ void LoadGraphics()
 		Tmp = IMG_Load(FileName);
 	else
 		Tmp = IMG_Load("./graphics/spot.png");
-	SDL_SetColorKey(Tmp,SDL_SRCCOLORKEY |SDL_RLEACCEL,SDL_MapRGB(Tmp->format,255,0,255));
 	IMGSpot = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
@@ -620,8 +640,7 @@ void LoadGraphics()
 		Tmp = IMG_Load(FileName);
 	else
 		Tmp = IMG_Load("./graphics/player.png");
-	SDL_SetColorKey(Tmp,SDL_SRCCOLORKEY |SDL_RLEACCEL,SDL_MapRGB(Tmp->format,255,0,255));
-	IMGPlayer = SDL_DisplayFormat(Tmp);
+	IMGPlayer = SDL_DisplayFormatAlpha(Tmp);
 	SDL_FreeSurface(Tmp);
 
 	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/empty.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
@@ -635,8 +654,7 @@ void LoadGraphics()
 		Tmp = IMG_Load(FileName);
 	else
 		Tmp = IMG_Load("./graphics/empty.png");
-	SDL_SetColorKey(Tmp,SDL_SRCCOLORKEY |SDL_RLEACCEL,SDL_MapRGB(Tmp->format,255,0,255));
-	IMGEmpty = SDL_DisplayFormat(Tmp);
+	IMGEmpty = SDL_DisplayFormatAlpha(Tmp);
 	SDL_FreeSurface(Tmp);
 
 	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/background.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
