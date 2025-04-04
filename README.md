@@ -89,6 +89,8 @@ There are only a select few of these preinstalled but you can however get extra 
 | PAGEUP | At the level Selector increase selected level with 5, During game play select next music. In the level editor select next part. |
 | RETURN | Test level when being in the level editor, go back to level editor after testing, Restart the current level |
 
+## SDL1 version
+An SDL1 Version is avaible in the [SDL1_Version](https://github.com/joyrider3774/Sokoban/tree/SDL1_Version) branch.
 
 ## Credits
 Game is an adaptation from the gp2x version i (willems davy, aka joyrider3774) initially made many years ago
