@@ -15,7 +15,7 @@ void LevelEditorMenu()
 	FILE *ColorsFile,*Fp;
 	int Teller, Selection = 1;
 	SDL_Event Event;
-	char *PackName,*CreatorName;
+	char *PackName,*CreatorName,*TmpPath;
 	char FileName[FILENAME_MAX];
 	SDL_PollEvent(&Event);
 	char *Tekst = new char[300];
@@ -65,7 +65,11 @@ void LevelEditorMenu()
 					sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
 					sprintf(FileName, "%s/.sokoban_levelpacks/%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
 					if(!FileExists(FileName))
-						sprintf(FileName,"./levelpacks/%s",LevelPackName);
+					{
+						TmpPath = assetPath("levelpacks");
+						sprintf(FileName,"%s/%s",TmpPath,LevelPackName);
+						SDL_free(TmpPath);
+					}
 					LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
 					LoadGraphics();
 					if (GlobalSoundEnabled)
@@ -86,7 +90,11 @@ void LevelEditorMenu()
 					sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
 					sprintf(FileName, "%s/.sokoban_levelpacks/%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
 					if(!FileExists(FileName))
-						sprintf(FileName,"./levelpacks/%s",LevelPackName);
+					{
+						TmpPath = assetPath("levelpacks");
+						sprintf(FileName,"%s/%s",TmpPath,LevelPackName);
+						SDL_free(TmpPath);
+					}
 					LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
 					LoadGraphics();
 					if (GlobalSoundEnabled)
@@ -191,7 +199,11 @@ void LevelEditorMenu()
 					{
 						sprintf(FileName, "%s/.sokoban_levelpacks/%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
 						if(!FileExists(FileName))
-							sprintf(FileName,"./levelpacks/%s",LevelPackName);
+						{
+							TmpPath = assetPath("levelpacks");
+							sprintf(FileName,"%s/%s",TmpPath,LevelPackName);
+							SDL_free(TmpPath);
+						}
 						LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, false);						
 						FindLevels();
 						SelectedLevel=0;
@@ -245,7 +257,11 @@ void LevelEditorMenu()
 						sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
 						sprintf(FileName, "%s/.sokoban_levelpacks/%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
 						if(!FileExists(FileName))
-							sprintf(FileName,"./levelpacks/%s",LevelPackName);
+						{
+							TmpPath = assetPath("levelpacks");
+							sprintf(FileName,"%s/%s",TmpPath,LevelPackName);
+							SDL_free(TmpPath);
+						}
 						LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
 						LoadGraphics();
 						if (GlobalSoundEnabled)

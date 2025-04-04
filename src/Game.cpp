@@ -158,7 +158,11 @@ void Game()
 				{
 					sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 					if(!FileExists(FileName))
-						sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+					{
+						char *TmpPath = assetPath("levelpacks");
+						sprintf(FileName,"%s/%s/level%d.lev",TmpPath,LevelPackName,SelectedLevel);
+						SDL_free(TmpPath);
+					}
 				}
 				if(FileExists(FileName))
 					WorldParts.Load(FileName, true);

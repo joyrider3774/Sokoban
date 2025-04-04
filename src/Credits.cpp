@@ -22,7 +22,11 @@ void Credits()
 	{
 		sprintf(FileName,"%s/.sokoban_levelpacks/%s/credits.dat", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
-			sprintf(FileName,"./levelpacks/%s/credits.dat", LevelPackName);
+        {
+            char *TmpPath = assetPath("levelpacks");
+            sprintf(FileName,"%s/%s/credits.dat",TmpPath,LevelPackName);
+            SDL_free(TmpPath);
+        }
 	}
 	if(InstalledLevelPacksCount > 0)
 	{
@@ -31,13 +35,13 @@ void Credits()
 		{
 			fscanf(Fp,"[Credits]\nCreator='%[^']'\n",LevelPackCreator);
 			fclose(Fp);
-			sprintf(Tekst,"Sokoban GP2X was created by\nWillems Davy - Willems Soft 2006-2024.\nHttps://joyrider3774.itch.io\n\nLevelpack %s was created\nby %s.",LevelPackName,LevelPackCreator);
+			sprintf(Tekst,"Sokoban GP2X was created by\nWillems Davy - Willems Soft 2006-2025.\nHttps://joyrider3774.itch.io\n\nLevelpack %s was created\nby %s.",LevelPackName,LevelPackCreator);
 		}
 		else
-			sprintf(Tekst,"Sokoban GP2X was created by\nWillems Davy - Willems Soft 2006-2024.\nHttps://joyrider3774.itch.io\n\nLevelpack %s was created\nby %s.",LevelPackName, LevelPackFile->author);
+			sprintf(Tekst,"Sokoban GP2X was created by\nWillems Davy - Willems Soft 2006-2025.\nHttps://joyrider3774.itch.io\n\nLevelpack %s was created\nby %s.",LevelPackName, LevelPackFile->author);
 	}
 	else
-		sprintf(Tekst,"Sokoban GP2X was created by\nWillems Davy - Willems Soft 2006-2024\nHttps://joyrider3774.itch.io");
+		sprintf(Tekst,"Sokoban GP2X was created by\nWillems Davy - Willems Soft 2006-2025\nHttps://joyrider3774.itch.io");
 	while (GameState == GSCredits)
 	{
         frameticks = SDL_GetPerformanceCounter();

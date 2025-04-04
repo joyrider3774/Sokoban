@@ -105,16 +105,22 @@ void SearchForMusic()
 	struct stat Stats;
 	int Teller;
 	char FileName[FILENAME_MAX];
+	char *Tmp;
 	if (GlobalSoundEnabled)
-		Music[0] = Mix_LoadMUS("./music/title.ogg");
+	{
+		Tmp = assetPath("music/title.ogg");
+		Music[0] = Mix_LoadMUS(Tmp);
+		SDL_free(Tmp);
+	}
 	Teller=1;
-	Directory = opendir("./music");
+	char* musPath = assetPath("music");
+	Directory = opendir(musPath);
 	if (Directory)
 	{
 		Entry=readdir(Directory);
 		while(Entry)
 		{
-			sprintf(FileName,"./music/%s",Entry->d_name);
+			sprintf(FileName,"%s/%s",musPath,Entry->d_name);
 			stat(FileName,&Stats);
 			if(!S_ISDIR(Stats.st_mode))
 			{
@@ -133,6 +139,7 @@ void SearchForMusic()
 		closedir(Directory);
 	}
 	MusicCount = Teller;
+	SDL_free(musPath);
 }
 
 void DoSearchForLevelPacks(const char* Path)
@@ -216,7 +223,9 @@ void DoSearchForLevelPacks(const char* Path)
 void SearchForLevelPacks()
 {
 	InstalledLevelPacksCount = 0;
-	DoSearchForLevelPacks("./levelpacks");
+	char* TmpPath = assetPath("levelpacks");
+	DoSearchForLevelPacks(TmpPath);
+	SDL_free(TmpPath);
 	char Path[FILENAME_MAX];
 	sprintf(Path, "%s/.sokoban_levelpacks", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"));
 	DoSearchForLevelPacks(Path);
@@ -696,23 +705,25 @@ void FindLevels()
 	char *FileName2 = new char[FILENAME_MAX];
 	char *FileName3 = new char[FILENAME_MAX];
 	sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, Teller);
-	sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackName,Teller);
+	char* TmpPath = assetPath("levelpacks");
+	sprintf(FileName2,"%s/%s/level%d.lev",TmpPath, LevelPackName,Teller);
 	sprintf(FileName3,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, Teller);
 	while (FileExists(FileName) || FileExists(FileName2) || FileExists(FileName3))
 	{
 		Teller+=30;
 		sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, Teller);
-		sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackName,Teller);
+		sprintf(FileName2,"%s/%s/level%d.lev",TmpPath, LevelPackName,Teller);
 		sprintf(FileName3,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, Teller);
 	}
 	while (!FileExists(FileName) && !FileExists(FileName2) && !FileExists(FileName3) && (Teller > InstalledLevelsFile) )
 	{
 		Teller--;
 		sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, Teller);
-		sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackName,Teller);
+		sprintf(FileName2,"%s/%s/level%d.lev",TmpPath, LevelPackName,Teller);
 		sprintf(FileName3,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, Teller);
 	}
 	InstalledLevels=Teller;
+	SDL_free(TmpPath);	
 	delete[] FileName;
 	delete[] FileName2;
 	delete[] FileName3;
@@ -724,6 +735,7 @@ void LoadGraphics()
 	SDL_Surface *Tmp;
 	int R,G,B,A;
 	char FileName[FILENAME_MAX];
+	char* TmpPath;
 	if(IMGBackground)
 		SDL_DestroyTexture(IMGBackground);
 	if(IMGFloor)
@@ -748,12 +760,20 @@ void LoadGraphics()
 	{
 		sprintf(FileName,"%s/.sokoban_levelpacks/%s/floor.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
-			sprintf(FileName,"./levelpacks/%s/floor.png",LevelPackName);
+		{
+			TmpPath = assetPath("levelpacks");
+			sprintf(FileName,"%s/%s/floor.png",TmpPath, LevelPackName);
+			SDL_free(TmpPath);
+		}
 	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
-		Tmp = IMG_Load("./graphics/floor.png");
+	{
+		TmpPath = assetPath("graphics/floor.png");
+		Tmp = IMG_Load(TmpPath);
+		SDL_free(TmpPath);
+	}
 	IMGFloor = SDL_CreateTextureFromSurface(Renderer, Tmp);
 	
 
@@ -762,12 +782,20 @@ void LoadGraphics()
 	{
 		sprintf(FileName,"%s/.sokoban_levelpacks/%s/wall.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
-			sprintf(FileName,"./levelpacks/%s/wall.png",LevelPackName);
+		{
+			TmpPath = assetPath("levelpacks");
+			sprintf(FileName,"%s/%s/wall.png",TmpPath, LevelPackName);
+			SDL_free(TmpPath);
+		}
 	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
-		Tmp = IMG_Load("./graphics/wall.png");
+	{
+		TmpPath = assetPath("graphics/wall.png");
+		Tmp = IMG_Load(TmpPath);
+		SDL_free(TmpPath);
+	}
 	IMGWall =  SDL_CreateTextureFromSurface(Renderer, Tmp);
 	SDL_DestroySurface(Tmp);
 
@@ -776,12 +804,20 @@ void LoadGraphics()
 	{
 		sprintf(FileName,"%s/.sokoban_levelpacks/%s/box.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
-			sprintf(FileName,"./levelpacks/%s/box.png",LevelPackName);
+		{
+			TmpPath = assetPath("levelpacks");
+			sprintf(FileName,"%s/%s/box.png",TmpPath, LevelPackName);
+			SDL_free(TmpPath);
+		}
 	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
-		Tmp = IMG_Load("./graphics/box.png");
+	{
+		TmpPath = assetPath("graphics/box.png");
+		Tmp = IMG_Load(TmpPath);
+		SDL_free(TmpPath);
+	}
 	IMGBox =  SDL_CreateTextureFromSurface(Renderer, Tmp);
 	SDL_DestroySurface(Tmp);
 
@@ -790,12 +826,20 @@ void LoadGraphics()
 	{
 		sprintf(FileName,"%s/.sokoban_levelpacks/%s/spot.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
-			sprintf(FileName,"./levelpacks/%s/spot.png",LevelPackName);
+		{
+			TmpPath = assetPath("levelpacks");
+			sprintf(FileName,"%s/%s/spot.png",TmpPath, LevelPackName);
+			SDL_free(TmpPath);
+		}
 	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
-		Tmp = IMG_Load("./graphics/spot.png");
+	{
+		TmpPath = assetPath("graphics/spot.png");
+		Tmp = IMG_Load(TmpPath);
+		SDL_free(TmpPath);
+	}
 	IMGSpot = SDL_CreateTextureFromSurface(Renderer, Tmp);
 	SDL_DestroySurface(Tmp);
 
@@ -804,12 +848,20 @@ void LoadGraphics()
 	{
 		sprintf(FileName,"%s/.sokoban_levelpacks/%s/player.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
-			sprintf(FileName,"./levelpacks/%s/player.png",LevelPackName);
+		{
+			TmpPath = assetPath("levelpacks");
+			sprintf(FileName,"%s/%s/player.png",TmpPath, LevelPackName);
+			SDL_free(TmpPath);
+		}
 	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
-		Tmp = IMG_Load("./graphics/player.png");
+	{
+		TmpPath = assetPath("graphics/player.png");
+		Tmp = IMG_Load(TmpPath);
+		SDL_free(TmpPath);
+	}
 	IMGPlayer = SDL_CreateTextureFromSurface(Renderer, Tmp);
 	SDL_DestroySurface(Tmp);
 
@@ -818,12 +870,20 @@ void LoadGraphics()
 	{
 		sprintf(FileName,"%s/.sokoban_levelpacks/%s/empty.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
-			sprintf(FileName,"./levelpacks/%s/empty.png",LevelPackName);
+		{
+			TmpPath = assetPath("levelpacks");
+			sprintf(FileName,"%s/%s/empty.png",TmpPath, LevelPackName);
+			SDL_free(TmpPath);
+		}
 	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
-		Tmp = IMG_Load("./graphics/empty.png");
+	{
+		TmpPath = assetPath("graphics/empty.png");
+		Tmp = IMG_Load(TmpPath);
+		SDL_free(TmpPath);
+	}
 	IMGEmpty = SDL_CreateTextureFromSurface(Renderer, Tmp);
 	SDL_DestroySurface(Tmp);
 
@@ -832,12 +892,20 @@ void LoadGraphics()
 	{
 		sprintf(FileName,"%s/.sokoban_levelpacks/%s/background.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
-			sprintf(FileName,"./levelpacks/%s/background.png",LevelPackName);
+		{
+			TmpPath = assetPath("levelpacks");
+			sprintf(FileName,"%s/%s/background.png",TmpPath, LevelPackName);
+			SDL_free(TmpPath);
+		}
 	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
-		Tmp = IMG_Load("./graphics/background.png");
+	{
+		TmpPath = assetPath("graphics/background.png");
+		Tmp = IMG_Load(TmpPath);
+		SDL_free(TmpPath);
+	}
 	IMGBackground = SDL_CreateTextureFromSurface(Renderer, Tmp);
 	SDL_DestroySurface(Tmp);
 
@@ -847,14 +915,20 @@ void LoadGraphics()
 	{
 		sprintf(FileName,"%s/.sokoban_levelpacks/%s/titlescreen.png", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
-			sprintf(FileName,"./levelpacks/%s/titlescreen.png",LevelPackName);
+		{
+			TmpPath = assetPath("levelpacks");
+			sprintf(FileName,"%s/%s/titlescreen.png",TmpPath, LevelPackName);
+			SDL_free(TmpPath);
+		}
 	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
 	{
 		isCustomnTitleScreen = false;
-		Tmp = IMG_Load("./graphics/titlescreen.png");
+		TmpPath = assetPath("graphics/titlescreen.png");
+		Tmp = IMG_Load(TmpPath);
+		SDL_free(TmpPath);
 	}
 	IMGTitleScreen = SDL_CreateTextureFromSurface(Renderer, Tmp);
 	SDL_DestroySurface(Tmp);
@@ -864,7 +938,11 @@ void LoadGraphics()
 	{
 		sprintf(FileName,"%s/.sokoban_levelpacks/%s/colors.txt", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 		if(!FileExists(FileName))
-			sprintf(FileName,"./levelpacks/%s/colors.txt",LevelPackName);
+		{
+			char *TmpPath = assetPath("levelpacks");
+			sprintf(FileName,"%s/%s/colors.txt",TmpPath, LevelPackName);
+			SDL_free(TmpPath);
+		}
 	}
 	ColorsFile = fopen(FileName,"rt");
 	if (ColorsFile)
@@ -937,12 +1015,29 @@ void LoadSounds()
 {
 	if (GlobalSoundEnabled)
 	{
-		Sounds[SND_MENU] = Mix_LoadWAV("./sound/menu.wav");
-		Sounds[SND_SELECT] = Mix_LoadWAV("./sound/select.wav");
-		Sounds[SND_ERROR] = Mix_LoadWAV("./sound/error.wav");
-		Sounds[SND_STAGEEND] = Mix_LoadWAV("./sound/stageend.wav");
-		Sounds[SND_BACK] = Mix_LoadWAV("./sound/back.wav");
-		Sounds[SND_MOVE] = Mix_LoadWAV("./sound/move.wav");
+		char *Tmp = assetPath("sound/menu.wav");
+		Sounds[SND_MENU] = Mix_LoadWAV(Tmp);
+		SDL_free(Tmp);
+
+		Tmp = assetPath("sound/select.wav");
+		Sounds[SND_SELECT] = Mix_LoadWAV(Tmp);
+		SDL_free(Tmp);
+
+		Tmp = assetPath("sound/error.wav");
+		Sounds[SND_ERROR] = Mix_LoadWAV(Tmp);
+		SDL_free(Tmp);
+
+		Tmp = assetPath("sound/stageend.wav");
+		Sounds[SND_STAGEEND] = Mix_LoadWAV(Tmp);
+		SDL_free(Tmp);
+
+		Tmp = assetPath("sound/move.wav");
+		Sounds[SND_MOVE] = Mix_LoadWAV(Tmp);
+		SDL_free(Tmp);
+
+		Tmp = assetPath("sound/menuback.wav");
+		Sounds[SND_BACK] = Mix_LoadWAV(Tmp);
+		SDL_free(Tmp);
 	}
 }
 

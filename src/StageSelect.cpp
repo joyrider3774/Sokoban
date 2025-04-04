@@ -14,6 +14,7 @@ void StageSelect()
 	SDL_PollEvent(&Event);
 	int Teller;
 	char *FileName = new char[FILENAME_MAX];
+	char *TmpPath;
 	char Tekst[300];
 	char Tekst1[300];
 	SelectedMusic = 0;
@@ -33,7 +34,11 @@ void StageSelect()
 		{
 			sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 			if(!FileExists(FileName))
-				sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+			{
+				TmpPath = assetPath("levelpacks");
+				sprintf(FileName,"%s/%s/level%d.lev",TmpPath,LevelPackName,SelectedLevel);
+				SDL_free(TmpPath);
+			}
 		}
 		if(FileExists(FileName))
 			WorldParts.Load(FileName, true);
@@ -163,7 +168,9 @@ void StageSelect()
 								if(FileExists(Tekst))
 								{
 									remove(Tekst);
-									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+									TmpPath = assetPath("levelpacks");
+									sprintf(FileName,"%s/%s/level%d.lev",TmpPath,LevelPackName,SelectedLevel);
+									SDL_free(TmpPath);
 									//only swap levels if we did not edit a level that also exists as a default level
 									if(!FileExists(FileName) && (SelectedLevel > LevelPackFile->LevelCount))
 									{
@@ -193,7 +200,11 @@ void StageSelect()
 										{
 											sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 											if(!FileExists(FileName))
-												sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+											{
+												TmpPath = assetPath("levelpacks");
+												sprintf(FileName,"%s/%s/level%d.lev",TmpPath,LevelPackName,SelectedLevel);
+												SDL_free(TmpPath);
+											}
 										}
 										if(FileExists(FileName))
 											WorldParts.Load(FileName, true);
@@ -231,7 +242,11 @@ void StageSelect()
 									{
 										sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 										if(!FileExists(FileName))
-											sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+										{
+											TmpPath = assetPath("levelpacks");
+											sprintf(FileName,"%s/%s/level%d.lev",TmpPath,LevelPackName,SelectedLevel);
+											SDL_free(TmpPath);
+										}
 									}
 									if(FileExists(FileName))
 										WorldParts.Load(FileName, true);
@@ -267,7 +282,11 @@ void StageSelect()
 									{
 										sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 										if(!FileExists(FileName))
-											sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+										{
+											TmpPath = assetPath("levelpacks");
+											sprintf(FileName,"%s/%s/level%d.lev",TmpPath,LevelPackName,SelectedLevel);
+											SDL_free(TmpPath);
+										}
 									}
 									if(FileExists(FileName))
 										WorldParts.Load(FileName, true);
@@ -291,7 +310,11 @@ void StageSelect()
 								{
 									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 									if(!FileExists(FileName))
-										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+									{
+										TmpPath = assetPath("levelpacks");
+										sprintf(FileName,"%s/%s/level%d.lev",TmpPath,LevelPackName,SelectedLevel);
+										SDL_free(TmpPath);
+									}
 								}
 								if(FileExists(FileName))
 									WorldParts.Load(FileName, true);
@@ -317,7 +340,11 @@ void StageSelect()
 							{
 								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 								if(!FileExists(FileName))
-									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+								{
+									TmpPath = assetPath("levelpacks");
+									sprintf(FileName,"%s/%s/level%d.lev",TmpPath,LevelPackName,SelectedLevel);
+									SDL_free(TmpPath);
+								}
 							}
 							if(FileExists(FileName))
 								WorldParts.Load(FileName, true);
@@ -349,7 +376,11 @@ void StageSelect()
 									{
 										sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 										if(!FileExists(FileName))
-											sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+										{
+											TmpPath = assetPath("levelpacks");
+											sprintf(FileName,"%s/%s/level%d.lev",TmpPath,LevelPackName,SelectedLevel);
+											SDL_free(TmpPath);
+										}
 									}
 									if(FileExists(FileName))
 										WorldParts.Load(FileName, true);
@@ -373,7 +404,11 @@ void StageSelect()
 								{
 									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 									if(!FileExists(FileName))
-										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+									{
+										TmpPath = assetPath("levelpacks");
+										sprintf(FileName,"%s/%s/level%d.lev",TmpPath,LevelPackName,SelectedLevel);
+										SDL_free(TmpPath);
+									}
 								}
 								if(FileExists(FileName))
 									WorldParts.Load(FileName, true);
@@ -398,7 +433,11 @@ void StageSelect()
 							{
 								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);
 								if(!FileExists(FileName))
-									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+								{
+									TmpPath = assetPath("levelpacks");
+									sprintf(FileName,"%s/%s/level%d.lev",TmpPath,LevelPackName,SelectedLevel);
+									SDL_free(TmpPath);
+								}
 							}
 							if(FileExists(FileName))
 								WorldParts.Load(FileName, true);

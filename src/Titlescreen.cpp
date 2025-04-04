@@ -29,6 +29,7 @@ void TitleScreen()
 	int Teller, Selection = 1;
 	SDL_Event Event;
 	SDL_PollEvent(&Event);
+	char *TmpPath;
 	char *Tekst = new char[300];
 	char FileName[FILENAME_MAX];
 	if(MusicCount > 0)
@@ -45,7 +46,11 @@ void TitleScreen()
 	{		
 		sprintf(FileName, "%s/.sokoban_levelpacks/%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
 		if(!FileExists(FileName))
-			sprintf(FileName,"./levelpacks/%s",LevelPackName);
+		{
+			TmpPath = assetPath("levelpacks");
+			sprintf(FileName,"%s/%s",TmpPath,LevelPackName);
+			SDL_free(TmpPath);
+		}
 		LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);	
 	}
 	while (GameState == GSTitleScreen)
@@ -86,7 +91,11 @@ void TitleScreen()
 					sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);								
 					sprintf(FileName, "%s/.sokoban_levelpacks/%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
 					if(!FileExists(FileName))
-						sprintf(FileName,"./levelpacks/%s",LevelPackName);
+					{
+						TmpPath = assetPath("levelpacks");
+						sprintf(FileName,"%s/%s",TmpPath,LevelPackName);
+						SDL_free(TmpPath);
+					}
 					LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);									
 					LoadGraphics();
 					if (GlobalSoundEnabled)
@@ -107,7 +116,11 @@ void TitleScreen()
 					sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
 					sprintf(FileName, "%s/.sokoban_levelpacks/%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
 					if(!FileExists(FileName))
-						sprintf(FileName,"./levelpacks/%s",LevelPackName);
+					{
+						TmpPath = assetPath("levelpacks");
+						sprintf(FileName,"%s/%s",TmpPath,LevelPackName);
+						SDL_free(TmpPath);
+					}
 					LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
 					LoadGraphics();
 					if (GlobalSoundEnabled)
@@ -148,7 +161,11 @@ void TitleScreen()
 					{
 						sprintf(FileName, "%s/.sokoban_levelpacks/%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
 						if(!FileExists(FileName))
-							sprintf(FileName,"./levelpacks/%s",LevelPackName);
+						{
+							TmpPath = assetPath("levelpacks");
+							sprintf(FileName,"%s/%s",TmpPath,LevelPackName);
+							SDL_free(TmpPath);
+						}
 						LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, false);
 					
 						FindLevels();
@@ -187,7 +204,11 @@ void TitleScreen()
 						sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
 						sprintf(FileName, "%s/.sokoban_levelpacks/%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
 						if(!FileExists(FileName))
-							sprintf(FileName,"./levelpacks/%s",LevelPackName);
+						{
+							TmpPath = assetPath("levelpacks");
+							sprintf(FileName,"%s/%s",TmpPath,LevelPackName);
+							SDL_free(TmpPath);
+						}
 						LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
 						LoadGraphics();
 						if (GlobalSoundEnabled)
