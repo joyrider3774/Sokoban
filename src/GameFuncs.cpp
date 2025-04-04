@@ -106,7 +106,7 @@ void SearchForMusic()
 	int Teller;
 	char FileName[FILENAME_MAX];
 	if (GlobalSoundEnabled)
-		Music[0] = Mix_LoadMUS("./music/title.wav");
+		Music[0] = Mix_LoadMUS("./music/title.ogg");
 	Teller=1;
 	Directory = opendir("./music");
 	if (Directory)
@@ -118,7 +118,7 @@ void SearchForMusic()
 			stat(FileName,&Stats);
 			if(!S_ISDIR(Stats.st_mode))
 			{
-				if(strncmp(".", Entry->d_name, 1) && (strcmp("title.wav",Entry->d_name) != 0) && (Teller< MaxMusicFiles))
+				if(strncmp(".", Entry->d_name, 1) && (strcmp("title.ogg",Entry->d_name) != 0) && (Teller< MaxMusicFiles))
 				{
 					if (GlobalSoundEnabled)
 					{
