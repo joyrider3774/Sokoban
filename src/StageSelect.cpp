@@ -70,7 +70,7 @@ void StageSelect()
 			{
 				
 				Rect.x = -1.0f;
-				Rect.y = 0.0f;
+				Rect.y = ORIG_WINDOW_HEIGHT- 13*UI_HEIGHT_SCALE;
 				Rect.w = (float)ORIG_WINDOW_WIDTH+1;
 				Rect.h = 13.0f*UI_HEIGHT_SCALE;
 				SDL_SetRenderDrawColor(Renderer, MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.a);
