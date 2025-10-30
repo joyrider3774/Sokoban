@@ -79,8 +79,11 @@ void Game()
 
         if (Input->Ready() && ((Input->KeyboardHeld(SDLK_LALT) || Input->KeyboardHeld(SDLK_RALT)) && Input->KeyboardHeld(SDLK_RETURN)))
         {
+           if(!fullScreen)
+				SDL_GetWindowSize(SdlWindow, &WINDOW_WIDTH, &WINDOW_HEIGHT);
             fullScreen = !fullScreen;
             SDL_SetWindowFullscreen(SdlWindow, fullScreen);
+            SaveSettings();
             Input->Delay();
             continue;
         }

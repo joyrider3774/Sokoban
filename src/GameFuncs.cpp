@@ -61,7 +61,7 @@ void MusicFinished()
 	ReloadMusic=true;
 }
 
-void LoadSettings()
+void LoadSettings(bool PackNameOnly)
 {
 	FILE *Fp;
 	char Filename[FILENAME_MAX];
@@ -69,8 +69,11 @@ void LoadSettings()
 	Fp = fopen(Filename,"rt");
 	if (Fp)
 	{
-		char* tmpName = (char*)SDL_malloc(sizeof(char) * 100);
-		fscanf(Fp,"SelectedLevelPack=%100[^\n]\n",tmpName);
+		char* tmpName = (char*)SDL_malloc(sizeof(char) * 100);		
+		if (PackNameOnly)
+			fscanf(Fp,"SelectedLevelPack=%100[^\n]\n", tmpName);
+		else
+			fscanf(Fp,"SelectedLevelPack=%100[^\n]\nFullScreen=%i\nWindowWidth=%i\nWindowHeight=%i\nShowFPS=%i\n",tmpName, &fullScreen, &WINDOW_WIDTH, &WINDOW_HEIGHT, &showfps);
 		for (int i = 0; i < InstalledLevelPacksCount; i++)
 			if(strcasecmp(tmpName, InstalledLevelPacks[i]) == 0)
 			{
@@ -92,7 +95,9 @@ void SaveSettings()
 	Fp = fopen(Filename,"wt");
 	if (Fp)
 	{
-		fprintf(Fp,"SelectedLevelPack=%s\n",LevelPackName);
+		if(!fullScreen)
+			SDL_GetWindowSize(SdlWindow, &WINDOW_WIDTH, &WINDOW_HEIGHT);
+		fprintf(Fp,"SelectedLevelPack=%s\nFullScreen=%i\nWindowWidth=%i\nWindowHeight=%i\nShowFPS=%i\n",LevelPackName, fullScreen, WINDOW_WIDTH, WINDOW_HEIGHT, showfps);
 		fclose(Fp);
 	}
 }

@@ -10,7 +10,7 @@ void SetVolume(const int VolumeIn);
 void IncVolume();
 void DecVolume();
 void MusicFinished();
-void LoadSettings();
+void LoadSettings(bool PackNameOnly);
 void SaveSettings();
 void SearchForMusic();
 void SearchForLevelPacks();

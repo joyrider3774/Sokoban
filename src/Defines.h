@@ -45,6 +45,7 @@
 #define GSLevelEditor 8 
 #define GSLevelEditorMenu 9 
 #define GSJoystickSetup 10
+#define GSOptions 11
 
 #define NROFBUTTONS 12
 

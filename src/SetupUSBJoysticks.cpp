@@ -38,8 +38,11 @@ void SetupUsbJoystickButtons()
 
         if (Input->Ready() && ((Input->KeyboardHeld(SDLK_LALT) || Input->KeyboardHeld(SDLK_RALT)) && Input->KeyboardHeld(SDLK_RETURN)))
         {
+            if(!fullScreen)
+				SDL_GetWindowSize(SdlWindow, &WINDOW_WIDTH, &WINDOW_HEIGHT);
             fullScreen = !fullScreen;
             SDL_SetWindowFullscreen(SdlWindow, fullScreen);
+            SaveSettings();
             Input->Delay();
             continue;
         }
@@ -93,7 +96,7 @@ void SetupUsbJoystickButtons()
 
         SDL_FRect Rect1;
         Rect1.x = 45.0f*UI_WIDTH_SCALE;
-        Rect1.y = 50.0f*UI_HEIGHT_SCALE;
+        Rect1.y = 63.0f*UI_HEIGHT_SCALE;
         Rect1.w = 250.0f*UI_WIDTH_SCALE;
         Rect1.h = 123.0f*UI_HEIGHT_SCALE;
         SDL_SetRenderDrawColor(Renderer, MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.a);
@@ -102,7 +105,7 @@ void SetupUsbJoystickButtons()
         SDL_RenderRect(Renderer, &Rect1);
         SDL_FRect Rect2;
         Rect2.x = 47.0f*UI_WIDTH_SCALE;
-        Rect2.y = 52.0f*UI_HEIGHT_SCALE;
+        Rect2.y = 65.0f*UI_HEIGHT_SCALE;
         Rect2.w = 246.0f*UI_WIDTH_SCALE;
         Rect2.h = 119.0f*UI_HEIGHT_SCALE;
         SDL_SetRenderDrawColor(Renderer, MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
@@ -110,16 +113,16 @@ void SetupUsbJoystickButtons()
         
 		if(keyboard)
 		{
-			WriteText(font, "Keyboard <<", 11, 115*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor, false);
-			WriteText(font, "Joypad", 6, 170*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuTextColor, false);
+			WriteText(font, "Keyboard <<", 11, 115*UI_WIDTH_SCALE, 66*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor, false);
+			WriteText(font, "Joypad", 6, 170*UI_WIDTH_SCALE, 66*UI_HEIGHT_SCALE, 2, MenuTextColor, false);
 		}
 		else
 		{
-			WriteText(font, "Keyboard", 8, 115*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuTextColor, false);
-			WriteText(font, "Joypad <<", 9, 170*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor, false);
+			WriteText(font, "Keyboard", 8, 115*UI_WIDTH_SCALE, 66*UI_HEIGHT_SCALE, 2, MenuTextColor, false);
+			WriteText(font, "Joypad <<", 9, 170*UI_WIDTH_SCALE, 66*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor, false);
 		}
 
-        JoystickSetup->DrawCurrentSetup(font,55*UI_WIDTH_SCALE,61*UI_HEIGHT_SCALE,155*UI_WIDTH_SCALE,9*UI_HEIGHT_SCALE,Selection,MenuTextColor,MenuBoxBorderColor,keyboard);
+        JoystickSetup->DrawCurrentSetup(font,55*UI_WIDTH_SCALE,74*UI_HEIGHT_SCALE,155*UI_WIDTH_SCALE,9*UI_HEIGHT_SCALE,Selection,MenuTextColor,MenuBoxBorderColor,keyboard);
         if(showfps)
         {
             char fpsText[100];
@@ -189,7 +192,7 @@ void SetupUsbJoystickButtons()
                 printTitleInfo();
                 SDL_FRect Rect1;
                 Rect1.x = 45.0f*UI_WIDTH_SCALE;
-                Rect1.y = 50.0f*UI_HEIGHT_SCALE;
+                Rect1.y = 63.0f*UI_HEIGHT_SCALE;
                 Rect1.w = 250.0f*UI_WIDTH_SCALE;
                 Rect1.h = 123.0f*UI_HEIGHT_SCALE;
                 SDL_SetRenderDrawColor(Renderer, MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.a);
@@ -198,23 +201,23 @@ void SetupUsbJoystickButtons()
                 SDL_RenderRect(Renderer, &Rect1);
                 SDL_FRect Rect2;
                 Rect2.x = 47.0f*UI_WIDTH_SCALE;
-                Rect2.y = 52.0f*UI_HEIGHT_SCALE;
+                Rect2.y = 65.0f*UI_HEIGHT_SCALE;
                 Rect2.w = 246.0f*UI_WIDTH_SCALE;
                 Rect2.h = 119.0f*UI_HEIGHT_SCALE;
                 SDL_SetRenderDrawColor(Renderer, MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
                 SDL_RenderRect(Renderer, &Rect2);
                 if(keyboard)
                 {
-                    WriteText(font, "Keyboard <<", 11, 115*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor, false);
-                    WriteText(font, "Joypad", 6, 170*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuTextColor, false);
+                    WriteText(font, "Keyboard <<", 11, 115*UI_WIDTH_SCALE, 66*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor, false);
+                    WriteText(font, "Joypad", 6, 170*UI_WIDTH_SCALE, 66*UI_HEIGHT_SCALE, 2, MenuTextColor, false);
                 }
                 else
                 {
-                    WriteText(font, "Keyboard", 8, 115*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuTextColor, false);
-                    WriteText(font, "Joypad <<", 9, 170*UI_WIDTH_SCALE, 53*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor, false);
+                    WriteText(font, "Keyboard", 8, 115*UI_WIDTH_SCALE, 66*UI_HEIGHT_SCALE, 2, MenuTextColor, false);
+                    WriteText(font, "Joypad <<", 9, 170*UI_WIDTH_SCALE, 66*UI_HEIGHT_SCALE, 2, MenuBoxBorderColor, false);
                 }
 
-                JoystickSetup->DrawCurrentSetup(font,55*UI_WIDTH_SCALE,61*UI_HEIGHT_SCALE,155*UI_WIDTH_SCALE,9*UI_HEIGHT_SCALE,Selection,MenuTextColor,MenuBoxBorderColor,keyboard);
+                JoystickSetup->DrawCurrentSetup(font,55*UI_WIDTH_SCALE,74*UI_HEIGHT_SCALE,155*UI_WIDTH_SCALE,9*UI_HEIGHT_SCALE,Selection,MenuTextColor,MenuBoxBorderColor,keyboard);
                 if(showfps)
                 {
                     char fpsText[100];
@@ -305,8 +308,11 @@ void SetupUsbJoystickButtons()
                 
                 if (Input->Ready() && ((Input->KeyboardHeld(SDLK_LALT) || Input->KeyboardHeld(SDLK_RALT)) && Input->KeyboardHeld(SDLK_RETURN)))
                 {
+                    if(!fullScreen)
+                        SDL_GetWindowSize(SdlWindow, &WINDOW_WIDTH, &WINDOW_HEIGHT);
                     fullScreen = !fullScreen;
                     SDL_SetWindowFullscreen(SdlWindow, fullScreen);
+                    SaveSettings();
                     Input->Delay();
                     continue;
                 }

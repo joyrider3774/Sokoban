@@ -61,8 +61,11 @@ void Credits()
             GameState = GSQuit;
         if (Input->Ready() && ((Input->KeyboardHeld(SDLK_LALT) || Input->KeyboardHeld(SDLK_RALT)) && Input->KeyboardHeld(SDLK_RETURN)))
         {
+           if(!fullScreen)
+				SDL_GetWindowSize(SdlWindow, &WINDOW_WIDTH, &WINDOW_HEIGHT);
             fullScreen = !fullScreen;
             SDL_SetWindowFullscreen(SdlWindow, fullScreen);
+            SaveSettings();
             Input->Delay();
             continue;
         }
@@ -83,9 +86,10 @@ void Credits()
         Rect1.y = 80.0f*UI_HEIGHT_SCALE;
         Rect1.w = 220.0f*UI_WIDTH_SCALE;
         Rect1.h = 85.0f*UI_HEIGHT_SCALE;
-		SDL_RenderFillRect(Renderer, &Rect1);
-        SDL_SetRenderDrawColor(Renderer, MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.a);
-		SDL_RenderRect(Renderer, &Rect1);
+		SDL_SetRenderDrawColor(Renderer, MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.a);
+   		SDL_RenderFillRect(Renderer, &Rect1);
+        SDL_SetRenderDrawColor(Renderer,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
+   		SDL_RenderRect(Renderer, &Rect1);      
         SDL_FRect Rect2;
         Rect2.x = 52.0f*UI_WIDTH_SCALE;
         Rect2.y = 82.0f*UI_HEIGHT_SCALE;

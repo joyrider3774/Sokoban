@@ -73,8 +73,11 @@ void TitleScreen()
 			
 		if (Input->Ready() && ((Input->KeyboardHeld(SDLK_LALT) || Input->KeyboardHeld(SDLK_RALT)) && Input->KeyboardHeld(SDLK_RETURN)))
         {
+            if(!fullScreen)
+				SDL_GetWindowSize(SdlWindow, &WINDOW_WIDTH, &WINDOW_HEIGHT);
             fullScreen = !fullScreen;
             SDL_SetWindowFullscreen(SdlWindow, fullScreen);
+            SaveSettings();
             Input->Delay();
             continue;
         }
@@ -143,7 +146,7 @@ void TitleScreen()
 
 		if (Input->Ready() && (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_DOWN))|| Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_DOWN))))
 		{
-			if (Selection < 6)
+			if (Selection < 7)
 			{
 				Selection++;
 				if (GlobalSoundEnabled)
@@ -217,16 +220,21 @@ void TitleScreen()
 					}		
 					break;
 				case 4:
-					GameState = GSJoystickSetup;
+					GameState = GSOptions;
 					if (GlobalSoundEnabled)
 						Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
 					break;
 				case 5:
-					GameState=GSCredits;
+					GameState = GSJoystickSetup;
 					if (GlobalSoundEnabled)
 						Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
 					break;
 				case 6:
+					GameState=GSCredits;
+					if (GlobalSoundEnabled)
+						Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+					break;
+				case 7:
 					GameState = GSQuit;
 					if (GlobalSoundEnabled)
 						Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
@@ -240,21 +248,21 @@ void TitleScreen()
 
 		SDL_FRect Rect;
         Rect.x = 50.0f*UI_WIDTH_SCALE;
-        Rect.y = 70.0f*UI_HEIGHT_SCALE;
+        Rect.y = 64.0f*UI_HEIGHT_SCALE;
         Rect.w = 220.0f*UI_WIDTH_SCALE;
-        Rect.h = 100.0f*UI_HEIGHT_SCALE;
+        Rect.h = 113.0f*UI_HEIGHT_SCALE;
         SDL_SetRenderDrawColor(Renderer, MenuBoxColor.r,MenuBoxColor.g,MenuBoxColor.b,MenuBoxColor.a);
    		SDL_RenderFillRect(Renderer, &Rect);
         SDL_SetRenderDrawColor(Renderer,MenuBoxBorderColor.r,MenuBoxBorderColor.g,MenuBoxBorderColor.b,MenuBoxBorderColor.a);
    		SDL_RenderRect(Renderer, &Rect);      
         SDL_FRect Rect2;
         Rect2.x = 52.0f*UI_WIDTH_SCALE;
-        Rect2.y = 72.0f*UI_HEIGHT_SCALE;
+        Rect2.y = 67.0f*UI_HEIGHT_SCALE;
         Rect2.w = 216.0f*UI_WIDTH_SCALE;
-        Rect2.h = 96.0f*UI_HEIGHT_SCALE;
+        Rect2.h = 107.0f*UI_HEIGHT_SCALE;
         SDL_RenderRect(Renderer, &Rect2);		
-		sprintf(Tekst,"Play Selected LevelPack\nLevel Editor\n<%s>\nControls\nCredits\nQuit",LevelPackName);
-		WriteText(BigFont,Tekst,strlen(Tekst),80*UI_WIDTH_SCALE,77*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor,false);
+		sprintf(Tekst,"Play Selected LevelPack\nLevel Editor\n<%s>\nOptions\nControls\nCredits\nQuit",LevelPackName);
+		WriteText(BigFont,Tekst,strlen(Tekst),80*UI_WIDTH_SCALE,67*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor,false);
 		if (Selection > 1)
 		{
 			strcpy(Tekst,"\n");
@@ -264,7 +272,7 @@ void TitleScreen()
 		}
 		else
 			strcpy(Tekst,">>");
-		WriteText(BigFont,Tekst,strlen(Tekst),55*UI_WIDTH_SCALE,77*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor,false);
+		WriteText(BigFont,Tekst,strlen(Tekst),55*UI_WIDTH_SCALE,67*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor,false);
 		if(showfps)
         {
             char fpsText[100];

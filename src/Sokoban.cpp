@@ -27,6 +27,7 @@
 #include "LevelEditorMenu.h"
 #include "StageSelect.h"
 #include "Credits.h"
+#include "Options.h"
 #include "Titlescreen.h"
 #include "CInput.h"
 
@@ -74,6 +75,7 @@ int main(int argc, char **argv)
 	fullScreen = false;
 	bool useHWSurface = true;
 	bool noAudioInit = false;
+	LoadSettings(false);
 	for (int i = 0; i < argc; i++)
 	{
 
@@ -130,16 +132,10 @@ int main(int argc, char **argv)
 
 		if (SdlWindow)
 		{
-			//        Screen = SDL_SetVideoMode( WINDOW_WIDTH, WINDOW_HEIGHT,0, flags);
-	//      Icon = IMG_Load("./graphics/blips.png");
-	//    SDL_WM_SetIcon(Icon,NULL);
-		//  SDL_WM_SetCaption( "Sokoban GP2X - Created By Willems Davy - Original game by Bryant Brownell", NULL );
-
 			if (fullScreen)
 			{
 				SDL_SetWindowFullscreen(SdlWindow, fullScreen);
 			}
-			//SDL_AddEventWatch(resizingEventWatcher, SdlWindow);
 			logMessage("Succesfully Set %dx%d\n",WINDOW_WIDTH, WINDOW_HEIGHT);
 			if (useHWSurface == 0)
 				Renderer = SDL_CreateRenderer(SdlWindow, SDL_SOFTWARE_RENDERER);
@@ -230,7 +226,7 @@ int main(int argc, char **argv)
 							TTF_SetFontStyle(font,TTF_STYLE_NORMAL);
 							SearchForLevelPacks();
 							SearchForMusic();
-							LoadSettings();
+							LoadSettings(true);
 							LoadSounds();
 							LoadGraphics();
 							LevelPackFile = new CLevelPackFile();
@@ -268,6 +264,9 @@ int main(int argc, char **argv)
 									case GSLevelEditorMenu:
 										LevelEditorMode = true;
 										LevelEditorMenu();
+										break;
+									case GSOptions:
+										Options();
 										break;
 								}
 							}
