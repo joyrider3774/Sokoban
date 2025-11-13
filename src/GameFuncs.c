@@ -137,6 +137,9 @@ void DoSearchForLevelPacks(char* Path)
 				if(strncmp(".", Entry->d_name, 1)  && (InstalledLevelPacksCount< MaxLevelPacks) && (strlen(Entry->d_name) < MaxLevelPackNameLength))
 				{
 					sprintf(Name,"%s",Entry->d_name);
+					char* ext = strstr(Name,"._lev");
+					if(ext)
+						*ext = 0;
 					bool found = false;
 					for (int i = 0; i < InstalledLevelPacksCount; i++)
 					{
@@ -149,7 +152,7 @@ void DoSearchForLevelPacks(char* Path)
 					
 					if(!found)
 					{
-						sprintf(InstalledLevelPacks[InstalledLevelPacksCount],"%s",Entry->d_name);
+						sprintf(InstalledLevelPacks[InstalledLevelPacksCount],"%s",Name);
 						InstalledLevelPacksCount++;
 					}
 				}
@@ -498,20 +501,24 @@ void FindLevels()
 	int Teller=InstalledLevelsFile + 1;
 	char FileName[FILENAME_MAX];
 	char FileName2[FILENAME_MAX];
+	char FileName3[FILENAME_MAX];
 	
 	sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
-	sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackName,Teller);		
-	while (FileExists(FileName) || FileExists(FileName2))
+	sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackName,Teller);
+	sprintf(FileName3,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
+	while (FileExists(FileName) || FileExists(FileName2) || FileExists(FileName3))
 	{
 		Teller+=30;
 		sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
 		sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackName,Teller);
+		sprintf(FileName3,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
 	}
-	while (!FileExists(FileName) && !FileExists(FileName2) && (Teller > InstalledLevelsFile) )
+	while (!FileExists(FileName) && !FileExists(FileName2) && !FileExists(FileName3) && (Teller > InstalledLevelsFile) )
 	{
 		Teller--;
 		sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
 		sprintf(FileName2,"./levelpacks/%s/level%d.lev",LevelPackName,Teller);
+		sprintf(FileName3,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller);
 	}
 	InstalledLevels=Teller;
 }
@@ -541,9 +548,13 @@ void LoadGraphics()
 
 
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/floor.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/floor.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/floor.png",LevelPackName);
+	{
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/floor.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		if(!FileExists(FileName))
+			sprintf(FileName,"./levelpacks/%s/floor.png",LevelPackName);
+	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -552,9 +563,13 @@ void LoadGraphics()
 	IMGFloor = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/wall.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/wall.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/wall.png",LevelPackName);
+	{
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/wall.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		if(!FileExists(FileName))
+			sprintf(FileName,"./levelpacks/%s/wall.png",LevelPackName);
+	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -563,9 +578,13 @@ void LoadGraphics()
 	IMGWall = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/box.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/box.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/box.png",LevelPackName);
+	{
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/box.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		if(!FileExists(FileName))
+			sprintf(FileName,"./levelpacks/%s/box.png",LevelPackName);
+	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -574,9 +593,13 @@ void LoadGraphics()
 	IMGBox = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/spot.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/spot.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/spot.png",LevelPackName);
+	{
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/spot.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		if(!FileExists(FileName))
+			sprintf(FileName,"./levelpacks/%s/spot.png",LevelPackName);
+	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -585,9 +608,13 @@ void LoadGraphics()
 	IMGSpot = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/player.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/player.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/player.png",LevelPackName);
+	{
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/player.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		if(!FileExists(FileName))
+			sprintf(FileName,"./levelpacks/%s/player.png",LevelPackName);
+	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -596,9 +623,13 @@ void LoadGraphics()
 	IMGPlayer = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/empty.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/empty.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/empty.png",LevelPackName);
+	{
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/empty.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		if(!FileExists(FileName))
+			sprintf(FileName,"./levelpacks/%s/empty.png",LevelPackName);
+	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -607,9 +638,13 @@ void LoadGraphics()
 	IMGEmpty = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/background.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/background.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/background.png",LevelPackName);
+	{
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/background.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		if(!FileExists(FileName))
+			sprintf(FileName,"./levelpacks/%s/background.png",LevelPackName);
+	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -618,9 +653,13 @@ void LoadGraphics()
 	SDL_FreeSurface(Tmp);
 
 	isCustomnTitleScreen = true;
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/titlescreen.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/titlescreen.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/titlescreen.png",LevelPackName);
+	{
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/titlescreen.png", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		if(!FileExists(FileName))
+			sprintf(FileName,"./levelpacks/%s/titlescreen.png",LevelPackName);
+	}
 	if (FileExists(FileName))
 		Tmp = IMG_Load(FileName);
 	else
@@ -631,9 +670,13 @@ void LoadGraphics()
 	IMGTitleScreen = SDL_DisplayFormat(Tmp);
 	SDL_FreeSurface(Tmp);
 
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s/colors.txt", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/colors.txt", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
 	if(!FileExists(FileName))
-		sprintf(FileName,"./levelpacks/%s/colors.txt",LevelPackName);
+	{
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s/colors.txt", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName);
+		if(!FileExists(FileName))
+			sprintf(FileName,"./levelpacks/%s/colors.txt",LevelPackName);
+	}
 	ColorsFile = fopen(FileName,"rt");
 	if (ColorsFile)
 	{

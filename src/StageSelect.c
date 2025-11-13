@@ -31,9 +31,13 @@ void StageSelect()
 
 	if (SelectedLevel > 0)
 	{
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+		sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
 		if(!FileExists(FileName))
-			sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+		{
+			sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+			if(!FileExists(FileName))
+				sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+		}
 		if(FileExists(FileName))
 			CWorldParts_Load(WorldParts,FileName, true);
 		else
@@ -100,257 +104,289 @@ void StageSelect()
             GameState = GSQuit;
 
 
-                    if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_Y)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_Y)]))
-                    {
-                        if(LevelEditorMode)
+		if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_Y)] || Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_Y)]))
+		{
+			if(LevelEditorMode)
+			{
+				SelectedLevel = 0;
+				CWorldParts_RemoveAll(WorldParts);
+				LevelHasChanged = false;
+				GameState = GSLevelEditor;
+			}
+			CInput_Delay(Input);
+		}
+
+		if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_B)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_B)]))
+		{
+			if(LevelEditorMode)
+				GameState= GSLevelEditorMenu;
+			else
+				GameState= GSTitleScreen;
+			if (GlobalSoundEnabled)
+				Mix_PlayChannel(-1,Sounds[SND_BACK],0);
+			CWorldParts_RemoveAll(WorldParts);
+			CInput_Delay(Input);
+		}
+
+		if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_X)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_X)]))
+		{
+			if(LevelEditorMode && (SelectedLevel > 0))
+			{
+				if (GlobalSoundEnabled)
+					Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+				sprintf(Tekst,"Are you sure you want to delete this level:\n%s - Level %d\n\nPress (A) to Delete (X) to Cancel",LevelPackName,SelectedLevel);
+				if (AskQuestion(Tekst))
+				{
+					sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+					//to edit default levels
+					//sprintf(Tekst,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+					if(FileExists(Tekst))
+					{
+						remove(Tekst);
+						sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+						//only swap levels if we did not edit a level that also exists as a default level
+						if(!FileExists(FileName) && (SelectedLevel > LevelPackFile->LevelCount))
 						{
-							SelectedLevel = 0;
+							for(Teller=SelectedLevel;Teller<InstalledLevels;Teller++)
+							{
+								sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller+1);
+								sprintf(Tekst1,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName,Teller);
+								rename(Tekst,Tekst1);
+							}
+						}
+						//to edit default levels
+						// for(Teller=SelectedLevel;Teller<InstalledLevels;Teller++)
+						// {
+						// 	sprintf(Tekst,"./levelpacks/%s/level%d.lev", LevelPackName, Teller+1);
+						// 	sprintf(Tekst1,"./levelpacks/%s/level%d.lev", LevelPackName,Teller);                      
+						// 	rename(Tekst,Tekst1);
+						// }
+						FindLevels();
+						if (SelectedLevel > InstalledLevels)
+							SelectedLevel = InstalledLevels;
+						if (SelectedLevel==0)
 							CWorldParts_RemoveAll(WorldParts);
-							LevelHasChanged = false;
-							GameState = GSLevelEditor;
-						}
-						CInput_Delay(Input);
-                    }
-
-					if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_B)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_B)]))
-					{
-						if(LevelEditorMode)
-							GameState= GSLevelEditorMenu;
 						else
-							GameState= GSTitleScreen;
-						if (GlobalSoundEnabled)
-							Mix_PlayChannel(-1,Sounds[SND_BACK],0);
+						{
+							sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+							if(!FileExists(FileName))
+							{
+								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+								if(!FileExists(FileName))
+									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+							}
+							if(FileExists(FileName))
+								CWorldParts_Load(WorldParts,FileName, true);
+							else
+								CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
+						}
+					}
+				}
+				CInput_Reset(Input);
+			}
+			CInput_Delay(Input);
+		}
+
+		if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_A)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_A)]))
+		{
+			if (GlobalSoundEnabled)
+				Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+			if(LevelEditorMode)
+			{
+				LevelHasChanged = false;
+				GameState = GSLevelEditor;
+			}
+			else
+			{
+				if (SelectedLevel <= UnlockedLevels)
+					GameState = GSGame;
+				else
+				{
+					sprintf(Tekst,"This Level Hasn't been unlocked yet!\nDo you want to play the last unlocked\nlevel %d/%d\n\nPress (A) to Play (X) to Cancel",UnlockedLevels,InstalledLevels);
+					if	(AskQuestion(Tekst))
+					{									
+						SelectedLevel = UnlockedLevels;
+						sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+						if(!FileExists(FileName))
+						{
+							sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+							if(!FileExists(FileName))
+								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+						}
+						if(FileExists(FileName))
+							CWorldParts_Load(WorldParts,FileName, true);
+						else
+							CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
+						GameState = GSGame;
+					}
+					CInput_Reset(Input);
+				}
+			}
+			CInput_Delay(Input);
+		}
+
+		if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_L)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_L)]))
+		{
+			if(LevelEditorMode)
+			{
+				if(SelectedLevel != 0)
+				{
+					if (GlobalSoundEnabled)
+						Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+			
+					SelectedLevel -= 5;
+					if (SelectedLevel <= 0)
+					{
+						SelectedLevel = 0;
 						CWorldParts_RemoveAll(WorldParts);
-						CInput_Delay(Input);
 					}
-
-					if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_X)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_X)]))
+					else
 					{
-						if(LevelEditorMode && (SelectedLevel > 0))
+						sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+						if(!FileExists(FileName))
 						{
-							if (GlobalSoundEnabled)
-								Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
-							sprintf(Tekst,"Are you sure you want to delete this level:\n%s - Level %d\n\nPress (A) to Delete (X) to Cancel",LevelPackName,SelectedLevel);
-							if (AskQuestion(Tekst))
-							{
-								sprintf(Tekst,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
-								//to edit default levels
-								//sprintf(Tekst,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
-								if(FileExists(Tekst))
-								{
-									remove(Tekst);
-									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
-									//only swap levels if we did not edit a level that also exists as a default level
-									if(!FileExists(FileName) && (SelectedLevel > LevelPackFile->LevelCount))
-									{
-										for(Teller=SelectedLevel;Teller<InstalledLevels;Teller++)
-										{
-											sprintf(Tekst,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, Teller+1);
-											sprintf(Tekst1,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName,Teller);                      
-											rename(Tekst,Tekst1);
-										}
-									}
-									//to edit default levels
-									// for(Teller=SelectedLevel;Teller<InstalledLevels;Teller++)
-									// {
-									// 	sprintf(Tekst,"./levelpacks/%s/level%d.lev", LevelPackName, Teller+1);
-									// 	sprintf(Tekst1,"./levelpacks/%s/level%d.lev", LevelPackName,Teller);                      
-									// 	rename(Tekst,Tekst1);
-									// }
-									FindLevels();
-									if (SelectedLevel > InstalledLevels)
-										SelectedLevel = InstalledLevels;
-									if (SelectedLevel==0)
-										CWorldParts_RemoveAll(WorldParts);
-									else
-									{
-										sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
-										if(!FileExists(FileName))
-											sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
-										if(FileExists(FileName))
-											CWorldParts_Load(WorldParts,FileName, true);
-										else
-											CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
-									}
-								}
-							}
-							CInput_Reset(Input);
-						}
-						CInput_Delay(Input);
-					}
-
-					if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_A)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_A)]))
-					{
-						if (GlobalSoundEnabled)
-							Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
-						if(LevelEditorMode)
-						{
-							LevelHasChanged = false;
-							GameState = GSLevelEditor;
-						}
-						else
-						{
-							if (SelectedLevel <= UnlockedLevels)
-								GameState = GSGame;
-							else
-							{
-								sprintf(Tekst,"This Level Hasn't been unlocked yet!\nDo you want to play the last unlocked\nlevel %d/%d\n\nPress (A) to Play (X) to Cancel",UnlockedLevels,InstalledLevels);
-								if	(AskQuestion(Tekst))
-								{									
-									SelectedLevel = UnlockedLevels;
-									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
-									if(!FileExists(FileName))
-										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
-									if(FileExists(FileName))
-										CWorldParts_Load(WorldParts,FileName, true);
-									else
-										CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
-									GameState = GSGame;
-								}
-								CInput_Reset(Input);
-							}
-						}
-						CInput_Delay(Input);
-					}
-
-					if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_L)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_L)]))
-					{
-						if(LevelEditorMode)
-						{
-							if(SelectedLevel != 0)
-							{
-								if (GlobalSoundEnabled)
-									Mix_PlayChannel(-1,Sounds[SND_MENU],0);
-						
-								SelectedLevel -= 5;								
-								if (SelectedLevel <= 0)
-								{
-									SelectedLevel = 0;
-									CWorldParts_RemoveAll(WorldParts);
-								}
-								else
-								{
-									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
-									if(!FileExists(FileName))
-										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
-									if(FileExists(FileName))
-										CWorldParts_Load(WorldParts,FileName, true);
-									else
-										CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
-								}
-							}
-						}
-						else
-						{
-							if(SelectedLevel != 1)
-							{								
-								if (GlobalSoundEnabled)
-									Mix_PlayChannel(-1,Sounds[SND_MENU],0);
-								
-								SelectedLevel -= 5;	
-								if (SelectedLevel < 1)
-									SelectedLevel = 1;
-								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
-								if(!FileExists(FileName))
-									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
-								if(FileExists(FileName))
-									CWorldParts_Load(WorldParts,FileName, true);
-								else
-									CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
-							}
-						}
-                        CInput_Delay(Input);
-					}
-
-					if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_R)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_R)]))
-					{
-						if(SelectedLevel != InstalledLevels)
-						{
-							if (GlobalSoundEnabled)
-								Mix_PlayChannel(-1,Sounds[SND_MENU],0);
-							
-							SelectedLevel +=5;
-							if (SelectedLevel > InstalledLevels)
-								SelectedLevel = InstalledLevels;
 							sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
 							if(!FileExists(FileName))
 								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
-							if(FileExists(FileName))
-								CWorldParts_Load(WorldParts,FileName, true);
-							else
-								CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
 						}
-						CInput_Delay(Input);
-					}
-
-					if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_LEFT)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_LEFT)]))
-					{
-						if(LevelEditorMode)
-						{
-							if(SelectedLevel != 0)
-							{
-								if (GlobalSoundEnabled)
-									Mix_PlayChannel(-1,Sounds[SND_MENU],0);
-								
-								SelectedLevel--;
-								if (SelectedLevel <= 0)
-								{
-									SelectedLevel = 0;
-									CWorldParts_RemoveAll(WorldParts);
-								}
-								else
-								{
-									sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
-									if(!FileExists(FileName))
-										sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
-									if(FileExists(FileName))
-										CWorldParts_Load(WorldParts,FileName, true);
-									else
-										CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
-								}
-							}
-						}
+						if(FileExists(FileName))
+							CWorldParts_Load(WorldParts,FileName, true);
 						else
-						{
-							if(SelectedLevel != 1)
-							{
-								if (GlobalSoundEnabled)
-									Mix_PlayChannel(-1,Sounds[SND_MENU],0);
-								
-								SelectedLevel--;
-								if (SelectedLevel < 1)
-									SelectedLevel = 1;
-								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
-								if(!FileExists(FileName))
-									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
-								if(FileExists(FileName))
-									CWorldParts_Load(WorldParts,FileName, true);
-								else
-									CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
-							}
-						}
-                        CInput_Delay(Input);
+							CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
 					}
-
-					if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_RIGHT)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_RIGHT)]))
+				}
+			}
+			else
+			{
+				if(SelectedLevel != 1)
+				{								
+					if (GlobalSoundEnabled)
+						Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+					
+					SelectedLevel -= 5;	
+					if (SelectedLevel < 1)
+						SelectedLevel = 1;
+					sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+					if(!FileExists(FileName))
 					{
-						if(SelectedLevel != InstalledLevels)
+						sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+						if(!FileExists(FileName))
+							sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+					}
+					if(FileExists(FileName))
+						CWorldParts_Load(WorldParts,FileName, true);
+					else
+						CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
+				}
+			}
+			CInput_Delay(Input);
+		}
+
+		if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_R)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_R)]))
+		{
+			if(SelectedLevel != InstalledLevels)
+			{
+				if (GlobalSoundEnabled)
+					Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+				
+				SelectedLevel +=5;
+				if (SelectedLevel > InstalledLevels)
+					SelectedLevel = InstalledLevels;
+				sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+				if(!FileExists(FileName))
+				{
+					sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+					if(!FileExists(FileName))
+						sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+				}
+				if(FileExists(FileName))
+					CWorldParts_Load(WorldParts,FileName, true);
+				else
+					CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
+			}
+			CInput_Delay(Input);
+		}
+
+		if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_LEFT)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_LEFT)]))
+		{
+			if(LevelEditorMode)
+			{
+				if(SelectedLevel != 0)
+				{
+					if (GlobalSoundEnabled)
+						Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+					
+					SelectedLevel--;
+					if (SelectedLevel <= 0)
+					{
+						SelectedLevel = 0;
+						CWorldParts_RemoveAll(WorldParts);
+					}
+					else
+					{
+						sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+						if(!FileExists(FileName))
 						{
-							SelectedLevel++;
-							if (GlobalSoundEnabled)
-								Mix_PlayChannel(-1,Sounds[SND_MENU],0);
-							if (SelectedLevel > InstalledLevels)
-								SelectedLevel = InstalledLevels;
 							sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
 							if(!FileExists(FileName))
 								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
-							if(FileExists(FileName))
-								CWorldParts_Load(WorldParts,FileName, true);
-							else
-								CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
 						}
-                        CInput_Delay(Input);
+						if(FileExists(FileName))
+							CWorldParts_Load(WorldParts,FileName, true);
+						else
+							CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
 					}
+				}
+			}
+			else
+			{
+				if(SelectedLevel != 1)
+				{
+					if (GlobalSoundEnabled)
+						Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+					
+					SelectedLevel--;
+					if (SelectedLevel < 1)
+						SelectedLevel = 1;
+					sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+					if(!FileExists(FileName))
+					{
+						sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+						if(!FileExists(FileName))
+							sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+					}
+					if(FileExists(FileName))
+						CWorldParts_Load(WorldParts,FileName, true);
+					else
+						CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
+				}
+			}
+			CInput_Delay(Input);
+		}
+
+		if ( CInput_Ready(Input) &&  (Input->KeyboardHeld[CUsbJoystickSetup_GetKeyValue(JoystickSetup,BUT_RIGHT)]|| Input->JoystickHeld[0][CUsbJoystickSetup_GetButtonValue(JoystickSetup,BUT_RIGHT)]))
+		{
+			if(SelectedLevel != InstalledLevels)
+			{
+				SelectedLevel++;
+				if (GlobalSoundEnabled)
+					Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+				if (SelectedLevel > InstalledLevels)
+					SelectedLevel = InstalledLevels;
+				sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+				if(!FileExists(FileName))
+				{
+					sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+					if(!FileExists(FileName))
+						sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+				}
+				if(FileExists(FileName))
+					CWorldParts_Load(WorldParts,FileName, true);
+				else
+					CWorldParts_LoadFromLevelPackFile(WorldParts,LevelPackFile, SelectedLevel, true);
+			}
+			CInput_Delay(Input);
+		}
 
 		SDL_FillRect(Screen,NULL,SDL_MapRGB(Screen->format,0,0,0));
         if ((WINDOW_WIDTH != ORIG_WINDOW_WIDTH) || (WINDOW_HEIGHT != ORIG_WINDOW_HEIGHT))

@@ -133,9 +133,13 @@ void Game()
 						CWorldParts_Draw(WorldParts,Buffer);
 						if(AskQuestion("You are about to restart this level\nAre you sure you want to restart?\n\nPress (A) to Restart (X) to Cancel"))
 						{
-							sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+							sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
 							if(!FileExists(FileName))
-								sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+							{
+								sprintf(FileName,"%s/.sokoban_levelpacks/%s/level%d.lev", getenv("HOME") == NULL ? ".": getenv("HOME"), LevelPackName, SelectedLevel);
+								if(!FileExists(FileName))
+									sprintf(FileName,"./levelpacks/%s/level%d.lev",LevelPackName,SelectedLevel);
+							}
 							if(FileExists(FileName))
 								CWorldParts_Load(WorldParts,FileName, true);
 							else
