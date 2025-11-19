@@ -34,25 +34,27 @@ bool CLevelPackFile_loadFile(CLevelPackFile* LPackFile, char* filename, int maxW
 	memset(LPackFile->author, 0, MAXAUTHORLEN);
 	memset(LPackFile->set, 0, MAXSETLEN);
     struct stat statbuf;
-    stat(filename, &statbuf);
-    // test for a regular file
-    if (S_ISREG(statbuf.st_mode))
-	{
-		FILE* Fp = fopen(filename,"rb");
-		if(Fp)
+    if(stat(filename, &statbuf) == 0)
+    {
+		// test for a regular file
+		if (S_ISREG(statbuf.st_mode))
 		{
-			fseek (Fp , 0 , SEEK_END);
-			long FileSize = ftell (Fp);
-			rewind (Fp);
-			char* tmp =(char*) malloc(sizeof(char) *(FileSize + 2));
-			fread(tmp,1,FileSize,Fp);		
-			tmp[FileSize] = '\0';
-			Result = CLevelPackFile_parseText(LPackFile, tmp, maxWidth, maxHeight, MetaOnly);		
-			free(tmp);
-			fclose(Fp);
-			LPackFile->Loaded = true;
+			FILE* Fp = fopen(filename,"rb");
+			if(Fp)
+			{
+				fseek (Fp , 0 , SEEK_END);
+				long FileSize = ftell (Fp);
+				rewind (Fp);
+				char* tmp =(char*) malloc(sizeof(char) *(FileSize + 2));
+				fread(tmp,1,FileSize,Fp);		
+				tmp[FileSize] = '\0';
+				Result = CLevelPackFile_parseText(LPackFile, tmp, maxWidth, maxHeight, MetaOnly);		
+				free(tmp);
+				fclose(Fp);
+				LPackFile->Loaded = true;
+			}
 		}
-	}
+    }
 	return Result;
 }
 
@@ -285,7 +287,8 @@ bool CLevelPackFile_parseText(CLevelPackFile *LPackFile, char* text, int maxWidt
 						levelPart->x = x;
 						levelPart->y = y;
 						levelPart->id = IDSpot;
-
+						levelMeta->parts++;
+						
 						levelPart = &LPackFile->Levels[LPackFile->LevelCount][levelMeta->parts];
 						
 						levelPart->x = x;

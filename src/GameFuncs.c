@@ -862,7 +862,8 @@ bool FileExists(char * FileName)
 {
 	FILE *Fp;
 	struct stat statbuf;
-	stat(FileName, &statbuf);
+	if(stat(FileName, &statbuf) != 0)
+		return false;
     // test for a regular file
     if (S_ISREG(statbuf.st_mode))
 	{
