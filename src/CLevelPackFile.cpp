@@ -27,23 +27,25 @@ bool CLevelPackFile::loadFile(char* filename, int maxWidth, int maxHeight, bool 
 	memset(author, 0, MAXAUTHORLEN);
 	memset(set, 0, MAXSETLEN);
     struct stat statbuf;
-    stat(filename, &statbuf);
-    // test for a regular file
-    if (S_ISREG(statbuf.st_mode))
-	{
-		FILE* Fp = fopen(filename,"rb");
-		if(Fp)
+    if(stat(filename, &statbuf) == 0)
+    {
+		// test for a regular file
+		if (S_ISREG(statbuf.st_mode))
 		{
-			fseek (Fp , 0 , SEEK_END);
-			long FileSize = ftell (Fp);
-			rewind (Fp);
-			char* tmp = new char[FileSize + 2];
-			fread(tmp,1,FileSize,Fp);		
-			tmp[FileSize] = '\0';
-			Result = parseText(tmp, maxWidth, maxHeight, MetaOnly);		
-			delete[] tmp;
-			fclose(Fp);
-			Loaded = true;
+			FILE* Fp = fopen(filename,"rb");
+			if(Fp)
+			{
+				fseek (Fp , 0 , SEEK_END);
+				long FileSize = ftell (Fp);
+				rewind (Fp);
+				char* tmp = new char[FileSize + 2];
+				fread(tmp,1,FileSize,Fp);		
+				tmp[FileSize] = '\0';
+				Result = parseText(tmp, maxWidth, maxHeight, MetaOnly);		
+				delete[] tmp;
+				fclose(Fp);
+				Loaded = true;
+			}
 		}
 	}
 	return Result;
@@ -278,7 +280,7 @@ bool CLevelPackFile::parseText(char* text, int maxWidth, int maxHeight, bool Met
 						levelPart->x = x;
 						levelPart->y = y;
 						levelPart->id = IDSpot;
-
+						levelMeta->parts++;
 						levelPart = &Levels[LevelCount][levelMeta->parts];
 						
 						levelPart->x = x;

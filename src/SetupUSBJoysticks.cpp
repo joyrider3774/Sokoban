@@ -9,7 +9,7 @@
 
 void SetupUsbJoystickButtons()
 {
-    SDL_Surface *Tmp,*Tmp1;
+    SDL_Surface *Tmp1;
 	int Teller, Selection = 0;
 	char *Tekst = new char[300];
 	bool done = false;

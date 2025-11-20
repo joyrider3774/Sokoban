@@ -13,7 +13,6 @@ void Options()
 	int Teller, Selection = 1;
 	SDL_Event Event;
 	SDL_PollEvent(&Event);
-	char *TmpPath;
 	char *Tekst = new char[300];
 	char FileName[FILENAME_MAX];
 	if(MusicCount > 0)
@@ -107,7 +106,7 @@ void Options()
 			if (Selection==1)
 			{
             	if(!fullScreen)
-				SDL_GetWindowSize(SdlWindow, &WINDOW_WIDTH, &WINDOW_HEIGHT);
+					SDL_GetWindowSize(SdlWindow, &WINDOW_WIDTH, &WINDOW_HEIGHT);
 				fullScreen = !fullScreen;
 				SDL_SetWindowFullscreen(SdlWindow, fullScreen);
 				SaveSettings();
@@ -222,7 +221,7 @@ void Options()
         SDL_RenderRect(Renderer, &Rect2);
 		int w,h;
 		SDL_GetWindowSize(SdlWindow, &w, &h);
-		sprintf(Tekst,"Fullscreen:%i\nReset Window (Current: %ix%i)\nShow FPS:%i\nBack\n", fullScreen, w, h, showfps, !nodelay);
+		sprintf(Tekst,"Fullscreen:%i\nReset Window (Current: %ix%i)\nShow FPS:%i\nBack\n", fullScreen, w, h, showfps);
 		WriteText(BigFont,Tekst,strlen(Tekst),80*UI_WIDTH_SCALE,97*UI_HEIGHT_SCALE,2*UI_HEIGHT_SCALE,MenuTextColor,false);
 		if (Selection > 1)
 		{

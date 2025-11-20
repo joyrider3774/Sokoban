@@ -7,6 +7,30 @@
 #include "Common.h"
 #include "CInput.h"
 
+void LoadNormalCreatorName()
+{
+	char Filename[FILENAME_MAX];
+	memset(NormalCreateName, 0, sizeof(NormalCreateName));
+	sprintf(Filename,"%s/.sokoban_levelpacks/%s._lev/credits.dat", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
+	if(!FileExists(Filename))
+	{
+		sprintf(Filename,"%s/.sokoban_levelpacks/%s/credits.dat", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
+		if(!FileExists(Filename))
+		{
+			char *TmpPath = assetPath("levelpacks");
+			sprintf(Filename,"%s/%s/credits.dat",TmpPath,LevelPackName);
+			SDL_free(TmpPath);
+		}
+	}
+	FILE* Fp = fopen(Filename, "rt");
+	if (Fp)
+	{
+		fscanf(Fp,"[Credits]\nCreator='%[^']'\n",NormalCreateName);
+		fclose(Fp);
+	}			
+}
+
+
 char* assetPath(const char* assetSubPath)
 {
 	char* Result = (char*) SDL_malloc(FILENAME_MAX);
@@ -83,6 +107,17 @@ void LoadSettings(bool PackNameOnly)
 			}
 		fclose(Fp);
 		SDL_free(tmpName);
+	}
+	else
+	{
+		//default to SokWhole
+		for (int i = 0; i < InstalledLevelPacksCount; i++)
+			if (strcmp("SokWhole.sok", InstalledLevelPacks[i]) == 0)
+			{
+				SelectedLevelPack = i;
+				sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
+				break;
+			}
 	}
 
 }
@@ -1060,11 +1095,11 @@ void printTitleInfo()
 {
 	char Tekst[250];
 	int w;
+	SDL_Color TitleColor = {174,198,234,255};
 	if(LevelPackFile->Loaded)
 	{
 		strcpy(Tekst, "Sokoban");
 		TTF_GetStringSize(RobotoBig, Tekst, strlen(Tekst), &w, NULL);
-		SDL_Color TitleColor = {174,198,234,255};
 		WriteText(RobotoBig, Tekst, strlen(Tekst), (ORIG_WINDOW_WIDTH - w) / 2, 10, 0, TitleColor, false);
 
 		if(strlen(LevelPackFile->author) > 0)
@@ -1081,8 +1116,15 @@ void printTitleInfo()
 		{
 			strcpy(Tekst, "Sokoban");
 			TTF_GetStringSize(RobotoBig, Tekst, strlen(Tekst), &w, NULL);
-			SDL_Color TitleColor = {174,198,234,255};
 			WriteText(RobotoBig, Tekst, strlen(Tekst), (ORIG_WINDOW_WIDTH - w) / 2, 10, 0, TitleColor, false);
+		
+			if(strlen(NormalCreateName) > 0)
+			{
+				strcpy(Tekst, "Levels by ");
+				strcat(Tekst, NormalCreateName);
+				TTF_GetStringSize(RobotoMedium, Tekst, strlen(Tekst), &w, NULL);
+				WriteText(RobotoMedium, Tekst, strlen(Tekst), (ORIG_WINDOW_WIDTH - w) / 2, 290, 0, TitleColor, false);
+			}
 		}
 	}
 }
@@ -1161,7 +1203,8 @@ bool FileExists(const char * FileName)
 {
 	FILE *Fp;
 	struct stat statbuf;
-	stat(FileName, &statbuf);
+	if(stat(FileName, &statbuf) != 0)
+		return false;
     // test for a regular file
     if (S_ISREG(statbuf.st_mode))
 	{

@@ -72,6 +72,7 @@ void LevelEditorMenu()
 					}
 					LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
 					LoadGraphics();
+					LoadNormalCreatorName();
 					if (GlobalSoundEnabled)
 						Mix_PlayChannel(-1,Sounds[SND_MENU],0);
 					SaveSettings();
@@ -97,6 +98,7 @@ void LevelEditorMenu()
 					}
 					LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
 					LoadGraphics();
+					LoadNormalCreatorName();
 					if (GlobalSoundEnabled)
 						Mix_PlayChannel(-1,Sounds[SND_MENU],0);
 					SaveSettings();
@@ -188,7 +190,16 @@ void LevelEditorMenu()
 									sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
 								}
 						}
+						sprintf(FileName, "%s/.sokoban_levelpacks/%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
+						if(!FileExists(FileName))
+						{
+							TmpPath = assetPath("levelpacks");
+							sprintf(FileName,"%s/%s",TmpPath,LevelPackName);
+							SDL_free(TmpPath);
+						}
+						LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
 						LoadGraphics();
+						LoadNormalCreatorName();
 						delete[] CreatorName;
 					}
 					delete[] PackName;
@@ -204,7 +215,7 @@ void LevelEditorMenu()
 							sprintf(FileName,"%s/%s",TmpPath,LevelPackName);
 							SDL_free(TmpPath);
 						}
-						LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, false);						
+						LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, false);
 						FindLevels();
 						SelectedLevel=0;
 						GameState=GSStageSelect;
@@ -217,7 +228,7 @@ void LevelEditorMenu()
 					{
 						if (GlobalSoundEnabled)
 							Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
-						sprintf(Tekst,"do you want to delete the selected level pack:\n\"%s\"\nAll Levels in Levelpack will be deleted !!!\n\nPress A to Delete, X to Cancel",InstalledLevelPacks[SelectedLevelPack]);
+						sprintf(Tekst,"do you want to delete the selected level pack:\n\"%s\"\nAll Levels in Levelpack will be deleted !!!\n\nPress (A) to Delete, (X) to Cancel",InstalledLevelPacks[SelectedLevelPack]);
 						if(AskQuestion(Tekst))
 						{
 							FindLevels();
@@ -242,7 +253,17 @@ void LevelEditorMenu()
 							sprintf(Tekst,"%s/.sokoban_levelpacks/%s._lev",SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
 							rmdir(Tekst);
 							SearchForLevelPacks();
+							sprintf(LevelPackName,"%s",InstalledLevelPacks[SelectedLevelPack]);
+							sprintf(FileName, "%s/.sokoban_levelpacks/%s", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"),LevelPackName);
+							if(!FileExists(FileName))
+							{
+								TmpPath = assetPath("levelpacks");
+								sprintf(FileName,"%s/%s",TmpPath,LevelPackName);
+								SDL_free(TmpPath);
+							}
+							LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
 							LoadGraphics();
+							LoadNormalCreatorName();
 						}
 						Input->Reset();
 
@@ -264,6 +285,7 @@ void LevelEditorMenu()
 						}
 						LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
 						LoadGraphics();
+						LoadNormalCreatorName();
 						if (GlobalSoundEnabled)
 							Mix_PlayChannel(-1,Sounds[SND_MENU],0);
 						SaveSettings();

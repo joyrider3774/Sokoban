@@ -29,6 +29,7 @@ void LoadJoystickSettings();
 void printTitleInfo();	
 void WriteText(TTF_Font* FontIn,const char* Tekst,int NrOfChars,int X,int Y,int YSpacing,SDL_Color ColorIn,bool Centered);
 bool FileExists(const char * FileName);
+void LoadNormalCreatorName();
 char chr(int ascii);
 int ord(char chr);
 #endif

@@ -46,4 +46,5 @@ extern int fpsAvgCount, skipCounter;
 extern char basePath[FILENAME_MAX];
 extern bool fullScreen;
 extern CInput *Input;
+extern char NormalCreateName[21];
 #endif

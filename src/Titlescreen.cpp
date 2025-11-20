@@ -53,6 +53,7 @@ void TitleScreen()
 		}
 		LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);	
 	}
+	LoadNormalCreatorName();
 	while (GameState == GSTitleScreen)
 	{
 		frameticks = SDL_GetPerformanceCounter();
@@ -101,6 +102,7 @@ void TitleScreen()
 					}
 					LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);									
 					LoadGraphics();
+					LoadNormalCreatorName();
 					if (GlobalSoundEnabled)
 						Mix_PlayChannel(-1,Sounds[SND_MENU],0);
 					SaveSettings();
@@ -126,6 +128,7 @@ void TitleScreen()
 					}
 					LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
 					LoadGraphics();
+					LoadNormalCreatorName();
 					if (GlobalSoundEnabled)
 						Mix_PlayChannel(-1,Sounds[SND_MENU],0);
 					SaveSettings();
@@ -214,6 +217,7 @@ void TitleScreen()
 						}
 						LevelPackFile->loadFile(FileName, NrOfCols, NrOfRows, true);
 						LoadGraphics();
+						LoadNormalCreatorName();
 						if (GlobalSoundEnabled)
 							Mix_PlayChannel(-1,Sounds[SND_MENU],0);
 						SaveSettings();

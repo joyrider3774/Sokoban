@@ -42,4 +42,5 @@ int fpsAvgCount = 0, skipCounter = 10;
 char basePath[FILENAME_MAX];
 bool fullScreen = false;
 bool showfps = false;
+char NormalCreateName[21];
 CInput *Input = NULL;

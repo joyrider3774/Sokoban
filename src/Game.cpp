@@ -198,7 +198,7 @@ void Game()
 					sprintf(Msg,"Level Pack: %s\nLevel: %d/%d - Moves: %d - Pushes: %d\nAuthor: %s\nComments: %s",LevelPackName,SelectedLevel,InstalledLevels,WorldParts.Moves,WorldParts.Pushes,LevelPackFile->author,LevelPackFile->LevelsMeta[SelectedLevel-1].comments);
 			}
 			else
-				sprintf(Msg,"Level Pack: %s\nLevel: %d/%d - Moves: %d - Pushes: %d",LevelPackName,SelectedLevel,InstalledLevels,WorldParts.Moves,WorldParts.Pushes);
+				sprintf(Msg,"Level Pack: %s\nLevel: %d/%d - Moves: %d - Pushes: %d\nAuthor: %s",LevelPackName,SelectedLevel,InstalledLevels,WorldParts.Moves,WorldParts.Pushes, NormalCreateName);
 			PrintForm(Msg);
 			SDL_Delay(250);
 			Input->Delay();

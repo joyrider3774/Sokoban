@@ -12,37 +12,23 @@ void Credits()
     Input->SetInputDelay(InputDelay);
 	SDL_Event Event;
 	char *LevelPackCreator = new char[21];
-	char FileName[FILENAME_MAX];
 	FILE *Fp;
 	SDL_PollEvent(&Event);
 	char *Tekst = new char[500];
 	char *Tekst2 = new char[500];
-	sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/credits.dat", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
-	if(!FileExists(FileName))
-	{
-		sprintf(FileName,"%s/.sokoban_levelpacks/%s/credits.dat", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName);
-		if(!FileExists(FileName))
-        {
-            char *TmpPath = assetPath("levelpacks");
-            sprintf(FileName,"%s/%s/credits.dat",TmpPath,LevelPackName);
-            SDL_free(TmpPath);
-        }
-	}
 	if(InstalledLevelPacksCount > 0)
 	{
-		Fp = fopen(FileName,"rt");
-		if (Fp)
+		if(strlen(NormalCreateName) > 0)
 		{
-			fscanf(Fp,"[Credits]\nCreator='%[^']'\n",LevelPackCreator);
-			fclose(Fp);
-			sprintf(Tekst,"Sokoban GP2X was created by\nWillems Davy - Willems Soft 2006-2025.\nHttps://joyrider3774.itch.io\n\nLevelpack %s was created\nby %s.",LevelPackName,LevelPackCreator);
+			sprintf(Tekst,"Sokoban GP2X was created by Willems Davy\nWillems Soft 2006-2025.\nHttps://joyrider3774.itch.io\n\nLevelpack %s was created\nby %s.",LevelPackName,NormalCreateName);
 		}
 		else
-			sprintf(Tekst,"Sokoban GP2X was created by\nWillems Davy - Willems Soft 2006-2025.\nHttps://joyrider3774.itch.io\n\nLevelpack %s was created\nby %s.",LevelPackName, LevelPackFile->author);
+			sprintf(Tekst,"Sokoban GP2X was created by Willems Davy\nWillems Soft 2006-2025.\nHttps://joyrider3774.itch.io\n\nLevelpack %s was created\nby %s.",LevelPackName, LevelPackFile->author);
 	}
 	else
-		sprintf(Tekst,"Sokoban GP2X was created by\nWillems Davy - Willems Soft 2006-2025\nHttps://joyrider3774.itch.io");
-	while (GameState == GSCredits)
+		sprintf(Tekst,"Sokoban GP2X was created by Willems Davy\nWillems Soft 2006-2025\nHttps://joyrider3774.itch.io");
+
+    while (GameState == GSCredits)
 	{
         frameticks = SDL_GetPerformanceCounter();
         SDL_SetRenderTarget(Renderer, Buffer);
