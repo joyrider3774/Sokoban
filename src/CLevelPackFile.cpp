@@ -278,7 +278,8 @@ bool CLevelPackFile::parseText(char* text, int maxWidth, int maxHeight, bool Met
 						levelPart->x = x;
 						levelPart->y = y;
 						levelPart->id = IDSpot;
-
+						levelMeta->parts++;
+						
 						levelPart = &Levels[LevelCount][levelMeta->parts];
 						
 						levelPart->x = x;
