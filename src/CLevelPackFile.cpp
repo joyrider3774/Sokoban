@@ -195,6 +195,9 @@ bool CLevelPackFile::parseText(char* text, int maxWidth, int maxHeight, bool Met
 				(levelMeta->maxy+1 <= maxHeight))
 			{
 				LevelCount++;
+				//don't exceed limits
+				if (LevelCount >= MAXLEVELS)
+					return true;
 				levelMeta = &LevelsMeta[LevelCount];
 			}
 			continue;
