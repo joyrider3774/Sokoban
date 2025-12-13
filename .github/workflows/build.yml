@@ -82,7 +82,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -G "Ninja" -DUSE_VENDORED_SDL=1 ..
+          cmake -G "Ninja" -DUSE_VENDORED_SDL=1 -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
           ninja
           
       - if: ${{ matrix.runsontype != 'windows'}}
@@ -90,7 +90,7 @@ jobs:
         run: |
           mkdir build
           cd build      
-          cmake -DUSE_VENDORED_SDL=1 ..
+          cmake -DUSE_VENDORED_SDL=1 -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
           make
 
       - if: ${{ matrix.runsontype == 'mac'}}
