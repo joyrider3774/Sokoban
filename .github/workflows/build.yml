@@ -13,13 +13,13 @@ jobs:
           - { runson: 'windows-latest',   runsontype: 'windows', sys: 'mingw64', env: 'x86_64', name: 'Sokoban', binsuffix: '.exe', }
           - { runson: 'windows-latest',   runsontype: 'windows', sys: 'mingw32', env: 'i686',   name: 'Sokoban', binsuffix: '.exe', }
           - { runson: 'ubuntu-24.04',     runsontype: 'linux',   sys: 'usr',     env: 'x64',    name: 'Sokoban', binsuffix: '',     }
-          - { runson: 'ubuntu-22.04',     runsontype: 'linux',   sys: 'usr',     env: 'x64',    name: 'Sokoban', binsuffix: '',     }
-          - { runson: 'ubuntu-20.04',     runsontype: 'linux',   sys: 'usr',     env: 'x64',    name: 'Sokoban', binsuffix: '',     }
+          - { runson: 'ubuntu-22.04',     runsontype: 'linux',   sys: 'usr',     env: 'x64',    name: 'Sokoban', binsuffix: '',     }          
           - { runson: 'ubuntu-24.04-arm', runsontype: 'linux',   sys: 'usr',     env: 'arm64',  name: 'Sokoban', binsuffix: '',     }
           - { runson: 'ubuntu-22.04-arm', runsontype: 'linux',   sys: 'usr',     env: 'arm64',  name: 'Sokoban', binsuffix: '',     }
-          - { runson: 'macos-13',         runsontype: 'mac',     sys: 'usr',     env: 'intel',  name: 'Sokoban', binsuffix: '',     }
+          - { runson: 'macos-15-intel',   runsontype: 'mac',     sys: 'usr',     env: 'intel',  name: 'Sokoban', binsuffix: '',     }
           - { runson: 'macos-14',         runsontype: 'mac',     sys: 'usr',     env: 'arm64',  name: 'Sokoban', binsuffix: '',     }
           - { runson: 'macos-15',         runsontype: 'mac',     sys: 'usr',     env: 'arm64',  name: 'Sokoban', binsuffix: '',     }
+          - { runson: 'macos-26',         runsontype: 'mac',     sys: 'usr',     env: 'arm64',  name: 'Sokoban', binsuffix: '',     }
 
     runs-on: ${{matrix.runson}}    
     steps:
