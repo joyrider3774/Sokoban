@@ -1,5 +1,6 @@
 #include <SDL3/SDL.h>
 #include <SDL3_mixer/SDL_mixer.h>
+#include "GameFuncs.h"
 #include "CWorldParts.h"
 #include "CWorldPart.h"
 #include "CHistory.h"
@@ -547,7 +548,7 @@ void CPlayer::MoveTo(const int PlayFieldXin,const int PlayFieldYin,bool BackWard
 				}
 			}
 			if (GlobalSoundEnabled)
-				Mix_PlayChannel(-1,Sounds[SND_MOVE],0);
+				PlaySoundTrack(Sounds[SND_MOVE]);
 			IsMoving = true;
 		}
 		else

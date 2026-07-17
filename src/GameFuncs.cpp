@@ -56,9 +56,7 @@ void SetVolume(const int VolumeIn)
 {
 	if (GlobalSoundEnabled)
 	{
-		Mix_Volume(0,VolumeIn);
-		Mix_Volume(1,VolumeIn);
-		Mix_VolumeMusic(VolumeIn);
+		MIX_SetMixerGain(0,VolumeIn/128);
 	}
 }
 
@@ -80,7 +78,7 @@ void DecVolume()
 	}
 }
 
-void MusicFinished()
+void MusicFinished(void *userdata, MIX_Track *track)
 {
 	ReloadMusic=true;
 }
@@ -149,7 +147,7 @@ void SearchForMusic()
 	if (GlobalSoundEnabled)
 	{
 		Tmp = assetPath("music/title.ogg");
-		Music[0] = Mix_LoadMUS(Tmp);
+		Music[0] = MIX_LoadAudio(Mixer, Tmp, true);
 		SDL_free(Tmp);
 	}
 	Teller=1;
@@ -168,7 +166,7 @@ void SearchForMusic()
 				{
 					if (GlobalSoundEnabled)
 					{
-						Music[Teller] = Mix_LoadMUS(FileName);
+						Music[Teller] =  MIX_LoadAudio(Mixer, FileName, true);
 						if(Music[Teller])
 							Teller++;
 					}
@@ -315,9 +313,9 @@ bool AskQuestion(const char *Msg)
 		frameticks = SDL_GetPerformanceCounter();
 		Input->Update();
 		if(GlobalSoundEnabled)
-		if(!Mix_PlayingMusic())
+		if(!MIX_TrackPlaying(MusicTrack))
 		{
-			Mix_PlayMusic(Music[SelectedMusic],0);
+			PlayMusicTrack(Music[SelectedMusic],0);
 			SetVolume(Volume);
 		}
 		if(showfps)
@@ -377,13 +375,13 @@ bool AskQuestion(const char *Msg)
 	if (Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_A)) || Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_A)))
 	{
 		if (GlobalSoundEnabled)
-			Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+			PlaySoundTrack(Sounds[SND_SELECT]);
 		Result = true;
 	}
 	else
 	{
 		if (GlobalSoundEnabled)
-			Mix_PlayChannel(-1,Sounds[SND_BACK],0);
+			PlaySoundTrack(Sounds[SND_BACK]);
 		Result = false;
 	}
 
@@ -425,9 +423,9 @@ void PrintForm(const char *msg)
 		frameticks = SDL_GetPerformanceCounter();
         Input->Update();
         if(GlobalSoundEnabled)
-        if(!Mix_PlayingMusic())
+        if(!MIX_TrackPlaying(MusicTrack))
         {
-            Mix_PlayMusic(Music[SelectedMusic],0);
+            PlayMusicTrack(Music[SelectedMusic],0);
             //Mix_HookMusicFinished(MusicFinished);
             SetVolume(Volume);
         }
@@ -488,7 +486,7 @@ void PrintForm(const char *msg)
 	if(Input->SpecialsHeld(SPECIAL_QUIT_EV))
 	    GameState = GSQuit;
 	if (GlobalSoundEnabled)
-		Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+		PlaySoundTrack(Sounds[SND_SELECT]);
 	Input->Reset();
 	SDL_SetRenderTarget(Renderer, PrevTarget);
 }
@@ -542,9 +540,9 @@ char *GetString(const char *NameIn,const char *Msg)
 		frameticks = SDL_GetPerformanceCounter();
 		SDL_SetRenderTarget(Renderer, Buffer);
 	    if(GlobalSoundEnabled)
-			if(!Mix_PlayingMusic())
+			if(!MIX_TrackPlaying(MusicTrack))
 			{
-				Mix_PlayMusic(Music[SelectedMusic],0);
+				PlayMusicTrack(Music[SelectedMusic],0);
 				SetVolume(Volume);
 			}
         Input->Update();
@@ -622,7 +620,7 @@ char *GetString(const char *NameIn,const char *Msg)
         if(Input->Ready() && (Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_A)) ||Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_A))))
         {
             if (GlobalSoundEnabled)
-                Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+                PlaySoundTrack(Sounds[SND_SELECT]);
             End = true;
             SubmitChanges=true;
         }
@@ -630,7 +628,7 @@ char *GetString(const char *NameIn,const char *Msg)
         if(Input->Ready() && (Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_X)) || Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_X)) ))
         {
 			if (GlobalSoundEnabled)
-                Mix_PlayChannel(-1,Sounds[SND_BACK],0);
+                PlaySoundTrack(Sounds[SND_BACK]);
             End=true;
             SubmitChanges=false;
         }
@@ -1044,10 +1042,10 @@ void UnloadMusic()
 	int Teller;
 	if (GlobalSoundEnabled)
 	{
-		Mix_HaltMusic();
+		MIX_StopTrack(MusicTrack, 0);
 		for (Teller=0;Teller < MusicCount;Teller++)
 			if (Music[Teller])
-				Mix_FreeMusic(Music[Teller]);
+				MIX_DestroyAudio(Music[Teller]);
 	}
 }
 
@@ -1056,39 +1054,70 @@ void LoadSounds()
 	if (GlobalSoundEnabled)
 	{
 		char *Tmp = assetPath("sound/menu.wav");
-		Sounds[SND_MENU] = Mix_LoadWAV(Tmp);
+		Sounds[SND_MENU] = MIX_LoadAudio(Mixer, Tmp, true);
 		SDL_free(Tmp);
 
 		Tmp = assetPath("sound/select.wav");
-		Sounds[SND_SELECT] = Mix_LoadWAV(Tmp);
+		Sounds[SND_SELECT] = MIX_LoadAudio(Mixer, Tmp, true);
 		SDL_free(Tmp);
 
 		Tmp = assetPath("sound/error.wav");
-		Sounds[SND_ERROR] = Mix_LoadWAV(Tmp);
+		Sounds[SND_ERROR] = MIX_LoadAudio(Mixer, Tmp, true);
 		SDL_free(Tmp);
 
 		Tmp = assetPath("sound/stageend.wav");
-		Sounds[SND_STAGEEND] = Mix_LoadWAV(Tmp);
+		Sounds[SND_STAGEEND] = MIX_LoadAudio(Mixer, Tmp, true);
 		SDL_free(Tmp);
 
 		Tmp = assetPath("sound/move.wav");
-		Sounds[SND_MOVE] = Mix_LoadWAV(Tmp);
+		Sounds[SND_MOVE] = MIX_LoadAudio(Mixer, Tmp, true);
 		SDL_free(Tmp);
 
 		Tmp = assetPath("sound/back.wav");
-		Sounds[SND_BACK] = Mix_LoadWAV(Tmp);
+		Sounds[SND_BACK] = MIX_LoadAudio(Mixer, Tmp, true);
 		SDL_free(Tmp);
+
+		for (int i = 0; i < NrOfTracks; i++)
+    		SoundsTracks[i] = MIX_CreateTrack(Mixer);
+		
+		MusicTrack = MIX_CreateTrack(Mixer);
 	}
 }
-
-
 
 void UnloadSounds()
 {
 	int Teller;
 	for (Teller=0;Teller<NrOfSounds;Teller++)
 		if(Sounds[Teller])
-			Mix_FreeChunk(Sounds[Teller]);
+			MIX_DestroyAudio(Sounds[Teller]);
+}
+
+// "play on any free channel" helper, replicating Mix_PlayChannel(-1, ...)
+MIX_Track* GetFreeSfxTrack() {
+    for (int i = 0; i < NrOfTracks; i++) {
+        if (!MIX_TrackPlaying(SoundsTracks[i]))
+            return SoundsTracks[i];
+    }
+    return SoundsTracks[0]; // fallback: steal the first one, like SDL2_mixer did when all channels were busy
+}
+
+void PlaySoundTrack (MIX_Audio *Audio)
+{
+	// playing a sound effect
+	MIX_Track* t = GetFreeSfxTrack();
+	MIX_SetTrackAudio(t, Audio);
+	MIX_PlayTrack(t, 0);
+}
+
+void PlayMusicTrack (MIX_Audio *Audio, int loops)
+{
+	// playing a music
+	MIX_SetTrackAudio(MusicTrack, Audio);
+	SDL_PropertiesID props = SDL_CreateProperties();
+	SDL_SetNumberProperty(props, MIX_PROP_PLAY_LOOPS_NUMBER, loops); 
+	MIX_PlayTrack(MusicTrack, props);
+	SDL_DestroyProperties(props); // safe to destroy right after the call
+	MIX_SetTrackStoppedCallback(MusicTrack, MusicFinished, NULL);
 }
 
 void printTitleInfo()

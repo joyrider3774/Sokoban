@@ -19,10 +19,10 @@ void StageSelect()
 	char Tekst1[300];
 	SelectedMusic = 0;
 	if(MusicCount > 0)
-		if (! Mix_PlayingMusic())
+		 if(!MIX_TrackPlaying(MusicTrack))
 			if(GlobalSoundEnabled)
 			{
-				Mix_PlayMusic(Music[SelectedMusic],0);
+				PlayMusicTrack(Music[SelectedMusic],0);
 				//Mix_HookMusicFinished(MusicFinished);
 				SetVolume(Volume);
 			}
@@ -55,7 +55,7 @@ void StageSelect()
 		if (ReloadMusic)
 		{
 			ReloadMusic=false;
-			Mix_PlayMusic(Music[SelectedMusic],0);
+			PlayMusicTrack(Music[SelectedMusic],0);
 			//Mix_HookMusicFinished(MusicFinished);
 			SetVolume(Volume);
 		}
@@ -151,7 +151,7 @@ void StageSelect()
 						else
 							GameState= GSTitleScreen;
 						if (GlobalSoundEnabled)
-							Mix_PlayChannel(-1,Sounds[SND_BACK],0);
+							PlaySoundTrack(Sounds[SND_BACK]);
 						WorldParts.RemoveAll();
 						Input->Delay();
 					}
@@ -161,7 +161,7 @@ void StageSelect()
 						if(LevelEditorMode && (SelectedLevel > 0))
 						{
 							if (GlobalSoundEnabled)
-								Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+								PlaySoundTrack(Sounds[SND_SELECT]);
 							sprintf(Tekst,"Are you sure you want to delete this level:\n%s - Level %d\n\nPress (A) to Delete (X) to Cancel",LevelPackName,SelectedLevel);
 							if (AskQuestion(Tekst))
 							{
@@ -224,7 +224,7 @@ void StageSelect()
 					if ( Input->Ready() &&  (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_A))|| Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_A))))
 					{
 						if (GlobalSoundEnabled)
-							Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+							PlaySoundTrack(Sounds[SND_SELECT]);
 						if(LevelEditorMode)
 						{
 							LevelHasChanged = false;
@@ -270,7 +270,7 @@ void StageSelect()
 							if(SelectedLevel != 0)
 							{
 								if (GlobalSoundEnabled)
-									Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+									PlaySoundTrack(Sounds[SND_MENU]);
 						
 								SelectedLevel -= 5;
 								if (SelectedLevel <= 0)
@@ -303,7 +303,7 @@ void StageSelect()
 							if(SelectedLevel != 1)
 							{								
 								if (GlobalSoundEnabled)
-									Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+									PlaySoundTrack(Sounds[SND_MENU]);
 								
 								SelectedLevel -= 5;	
 								if (SelectedLevel < 1)
@@ -333,7 +333,7 @@ void StageSelect()
 						if(SelectedLevel != InstalledLevels)
 						{
 							if (GlobalSoundEnabled)
-								Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+								PlaySoundTrack(Sounds[SND_MENU]);
 							
 							SelectedLevel +=5;
 							if (SelectedLevel > InstalledLevels)
@@ -364,7 +364,7 @@ void StageSelect()
 							if(SelectedLevel != 0)
 							{
 								if (GlobalSoundEnabled)
-									Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+									PlaySoundTrack(Sounds[SND_MENU]);
 								
 								SelectedLevel--;
 								if (SelectedLevel <= 0)
@@ -397,7 +397,7 @@ void StageSelect()
 							if(SelectedLevel != 1)
 							{
 								if (GlobalSoundEnabled)
-									Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+									PlaySoundTrack(Sounds[SND_MENU]);
 								
 								SelectedLevel--;
 								if (SelectedLevel < 1)
@@ -428,7 +428,7 @@ void StageSelect()
 						{
 							SelectedLevel++;
 							if (GlobalSoundEnabled)
-								Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+								PlaySoundTrack(Sounds[SND_MENU]);
 							if (SelectedLevel > InstalledLevels)
 								SelectedLevel = InstalledLevels;
 							sprintf(FileName,"%s/.sokoban_levelpacks/%s._lev/level%d.lev", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"), LevelPackName, SelectedLevel);

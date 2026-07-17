@@ -23,10 +23,10 @@ void SetupUsbJoystickButtons()
 		{
             if(GlobalSoundEnabled)
 			{
-                if(!Mix_PlayingMusic())
+                if(!MIX_TrackPlaying(MusicTrack))
                 {
                     SelectedMusic = 0;
-                    Mix_PlayMusic(Music[SelectedMusic],0);
+                    PlayMusicTrack(Music[SelectedMusic],0);
                     SetVolume(Volume);
                 }
 			}
@@ -53,7 +53,7 @@ void SetupUsbJoystickButtons()
 			sprintf(FileName,"%s/.sokoban_joystick.def", SDL_getenv("HOME") == NULL ? ".": SDL_getenv("HOME"));
 			JoystickSetup->SaveCurrentButtonValues(FileName);
 			if (GlobalSoundEnabled)
-				Mix_PlayChannel(-1,Sounds[SND_BACK],0);
+				PlaySoundTrack(Sounds[SND_BACK]);
             GameState = GSTitleScreen;
 		}
 
@@ -63,7 +63,7 @@ void SetupUsbJoystickButtons()
             if( Selection < 0)
                 Selection = 11;
             if (GlobalSoundEnabled)
-                    Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+                    PlaySoundTrack(Sounds[SND_MENU]);
             Input->Delay();
         }
 
@@ -71,7 +71,7 @@ void SetupUsbJoystickButtons()
 			Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_RIGHT)) || Input->JoystickHeld(0, JoystickSetup->GetButtonValue(BUT_RIGHT))))
 		{
 			if (GlobalSoundEnabled)
-            	Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+            	PlaySoundTrack(Sounds[SND_MENU]);
 			keyboard = !keyboard;
 			Input->Delay();
 		}
@@ -86,7 +86,7 @@ void SetupUsbJoystickButtons()
             if( Selection >=12)
                 Selection = 0;
             if (GlobalSoundEnabled)
-                    Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+                PlaySoundTrack(Sounds[SND_MENU]);
             Input->Delay();
         }
 
@@ -181,7 +181,7 @@ void SetupUsbJoystickButtons()
         if(Input->Ready() && (Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_A)) ||  Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_A))))
         {
             if (GlobalSoundEnabled)
-                Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+                PlaySoundTrack(Sounds[SND_SELECT]);
             Input->Reset();
             while (!done)
             {
@@ -276,7 +276,7 @@ void SetupUsbJoystickButtons()
                         if(Input->KeyboardHeld(SDL_SCANCODE_TO_KEYCODE(Teller)))
                         {
                             if (GlobalSoundEnabled)
-                                Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+                                PlaySoundTrack(Sounds[SND_SELECT]);
                             done = true;
                             JoystickSetup->SetKeyValue(Selection,SDL_SCANCODE_TO_KEYCODE(Teller));
                             break;
@@ -287,7 +287,7 @@ void SetupUsbJoystickButtons()
                     if(Input->JoystickHeld(0,Teller))
                     {
                         if (GlobalSoundEnabled)
-                            Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+                            PlaySoundTrack(Sounds[SND_SELECT]);
                         done = true;
                         JoystickSetup->SetButtonValue(Selection,Teller);
                         break;
@@ -302,7 +302,7 @@ void SetupUsbJoystickButtons()
                 if((!done) && (Input->KeyboardHeld(JoystickSetup->GetKeyValue(BUT_B)) || Input->SpecialsHeld(SPECIAL_QUIT_EV) || Input->JoystickHeld(0,JoystickSetup->GetButtonValue(BUT_B))))
                 {
                     if (GlobalSoundEnabled)
-                        Mix_PlayChannel(-1,Sounds[SND_BACK],0);
+                        PlaySoundTrack(Sounds[SND_BACK]);
                     done= true;
                 }
                 

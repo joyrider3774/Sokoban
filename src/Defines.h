@@ -26,6 +26,7 @@
 #define MaxLevelPacks 1000
 #define MaxMusicFiles 26
 #define NrOfSounds 6
+#define NrOfTracks 8
 #define SND_MENU 0
 #define SND_SELECT 1
 #define SND_ERROR 2

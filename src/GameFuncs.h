@@ -3,13 +3,16 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
+#include <SDL3_mixer/SDL_mixer.h>
 
 char* assetPath(const char* assetSubPath);
 void logMessage(SDL_PRINTF_FORMAT_STRING const char *fmt, ...);
 void SetVolume(const int VolumeIn);
 void IncVolume();
 void DecVolume();
-void MusicFinished();
+void PlaySoundTrack (MIX_Audio *Audio);
+void PlayMusicTrack (MIX_Audio *Audio, int loops);
+void MusicFinished(void *userdata, MIX_Track *track);
 void LoadSettings(bool PackNameOnly);
 void SaveSettings();
 void SearchForMusic();

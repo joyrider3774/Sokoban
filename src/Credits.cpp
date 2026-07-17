@@ -20,23 +20,23 @@ void Credits()
 	{
 		if(strlen(NormalCreateName) > 0)
 		{
-			sprintf(Tekst,"Sokoban GP2X was created by Willems Davy\nWillems Soft 2006-2025.\nHttps://joyrider3774.itch.io\n\nLevelpack %s was created\nby %s.",LevelPackName,NormalCreateName);
+			sprintf(Tekst,"Sokoban GP2X was created by Willems Davy\nWillems Soft 2006-2026.\nHttps://joyrider3774.itch.io\n\nLevelpack %s was created\nby %s.",LevelPackName,NormalCreateName);
 		}
 		else
-			sprintf(Tekst,"Sokoban GP2X was created by Willems Davy\nWillems Soft 2006-2025.\nHttps://joyrider3774.itch.io\n\nLevelpack %s was created\nby %s.",LevelPackName, LevelPackFile->author);
+			sprintf(Tekst,"Sokoban GP2X was created by Willems Davy\nWillems Soft 2006-2026.\nHttps://joyrider3774.itch.io\n\nLevelpack %s was created\nby %s.",LevelPackName, LevelPackFile->author);
 	}
 	else
-		sprintf(Tekst,"Sokoban GP2X was created by Willems Davy\nWillems Soft 2006-2025\nHttps://joyrider3774.itch.io");
+		sprintf(Tekst,"Sokoban GP2X was created by Willems Davy\nWillems Soft 2006-2026\nHttps://joyrider3774.itch.io");
 
     while (GameState == GSCredits)
 	{
         frameticks = SDL_GetPerformanceCounter();
         SDL_SetRenderTarget(Renderer, Buffer);
         if(GlobalSoundEnabled)
-            if(!Mix_PlayingMusic())
+            if(!MIX_TrackPlaying(MusicTrack))
             {
                 SelectedMusic = 0;
-                Mix_PlayMusic(Music[SelectedMusic],0);
+                PlayMusicTrack(Music[SelectedMusic],0);
                 SetVolume(Volume);
             }
 		SDL_RenderTexture(Renderer, IMGTitleScreen,NULL,NULL);
@@ -62,7 +62,7 @@ void Credits()
            Input->JoystickHeld(0, JoystickSetup->GetButtonValue(BUT_X)) ||  Input->JoystickHeld(0, JoystickSetup->GetButtonValue(BUT_Y))  || Input->JoystickHeld(0, JoystickSetup->GetButtonValue(BUT_B)) )
         {
 			if (GlobalSoundEnabled)
-				Mix_PlayChannel(-1,Sounds[SND_BACK],0);
+				PlaySoundTrack(Sounds[SND_BACK]);
 		    GameState = GSTitleScreen;
 		}
        

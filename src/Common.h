@@ -27,8 +27,10 @@ extern CLevelPackFile *LevelPackFile;
 extern int Volume;
 extern char LevelPackName[100];
 extern char InstalledLevelPacks[MaxLevelPacks][100];
-extern Mix_Music *Music[MaxMusicFiles];
-extern Mix_Chunk *Sounds[NrOfSounds];
+extern MIX_Audio *Music[MaxMusicFiles];
+extern MIX_Track *MusicTrack;
+extern MIX_Audio *Sounds[NrOfSounds];
+extern MIX_Track* SoundsTracks[NrOfTracks];
 extern CUsbJoystickSetup *JoystickSetup;
 extern bool isCustomnTitleScreen;
 extern bool disableJoysticks;;
@@ -47,4 +49,5 @@ extern char basePath[FILENAME_MAX];
 extern bool fullScreen;
 extern CInput *Input;
 extern char NormalCreateName[21];
+extern MIX_Mixer *Mixer;
 #endif

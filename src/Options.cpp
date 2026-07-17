@@ -16,11 +16,11 @@ void Options()
 	char *Tekst = new char[300];
 	char FileName[FILENAME_MAX];
 	if(MusicCount > 0)
-		if (! Mix_PlayingMusic())
+		if(!MIX_TrackPlaying(MusicTrack))
 			if(GlobalSoundEnabled)
 			{
 				SelectedMusic = 0;
-				Mix_PlayMusic(Music[SelectedMusic],0);
+				PlayMusicTrack(Music[SelectedMusic],0);
 				//Mix_HookMusicFinished(MusicFinished);
 				SetVolume(Volume);
 			}
@@ -32,7 +32,7 @@ void Options()
 		if (ReloadMusic)
 		{
 			ReloadMusic=false;
-			Mix_PlayMusic(Music[SelectedMusic],0);
+			PlayMusicTrack(Music[SelectedMusic],0);
 			//Mix_HookMusicFinished(MusicFinished);
 			SetVolume(Volume);
 		}
@@ -47,7 +47,7 @@ void Options()
 		{
 			GameState= GSTitleScreen;
 			if (GlobalSoundEnabled)
-				Mix_PlayChannel(-1,Sounds[SND_BACK],0);
+				PlaySoundTrack(Sounds[SND_BACK]);
 			Input->Delay();
 		}
 
@@ -74,7 +74,7 @@ void Options()
 				SaveSettings();
 				Input->Delay();
 				if (GlobalSoundEnabled)
-					Mix_PlayChannel(-1,Sounds[SND_SELECT],0);					
+					PlaySoundTrack(Sounds[SND_SELECT]);					
             	continue;
 			}
 
@@ -87,7 +87,7 @@ void Options()
 				SDL_SetWindowSize(SdlWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
 				SDL_SetWindowPosition(SdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 				if (GlobalSoundEnabled)
-					Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+					PlaySoundTrack(Sounds[SND_SELECT]);
 				Input->Delay();
 			}
 			
@@ -96,7 +96,7 @@ void Options()
 				showfps = !showfps;
 				Input->Delay();
 				if (GlobalSoundEnabled)
-					Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+					PlaySoundTrack(Sounds[SND_SELECT]);
 				continue;
 			}
 		}
@@ -112,7 +112,7 @@ void Options()
 				SaveSettings();
 				Input->Delay();
 				if (GlobalSoundEnabled)
-					Mix_PlayChannel(-1,Sounds[SND_SELECT],0);					
+					PlaySoundTrack(Sounds[SND_SELECT]);					
             	continue;
 			}
 
@@ -125,7 +125,7 @@ void Options()
 				SDL_SetWindowSize(SdlWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
 				SDL_SetWindowPosition(SdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 				if (GlobalSoundEnabled)
-					Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+					PlaySoundTrack(Sounds[SND_SELECT]);
 				Input->Delay();
 			}
 
@@ -134,7 +134,7 @@ void Options()
 				showfps = !showfps;
 				Input->Delay();
 				if (GlobalSoundEnabled)
-					Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+					PlaySoundTrack(Sounds[SND_SELECT]);
 				continue;
 			}
 		}
@@ -145,7 +145,7 @@ void Options()
 			{
 				Selection--;
 				if (GlobalSoundEnabled)
-					Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+					PlaySoundTrack(Sounds[SND_MENU]);
 			}
 			Input->Delay();
 		}
@@ -156,7 +156,7 @@ void Options()
 			{
 				Selection++;
 				if (GlobalSoundEnabled)
-					Mix_PlayChannel(-1,Sounds[SND_MENU],0);
+					PlaySoundTrack(Sounds[SND_MENU]);
 			}
 			Input->Delay();
 		}
@@ -173,7 +173,7 @@ void Options()
 					SaveSettings();
 					Input->Delay();
 					if (GlobalSoundEnabled)
-						Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+						PlaySoundTrack(Sounds[SND_SELECT]);
 					break;
 				case 2:
 					fullScreen = false;
@@ -183,19 +183,19 @@ void Options()
 					SDL_SetWindowSize(SdlWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
 					SDL_SetWindowPosition(SdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 					if (GlobalSoundEnabled)
-						Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+						PlaySoundTrack(Sounds[SND_SELECT]);
 					Input->Delay();
 					break;
 				case 3:
 					showfps = !showfps;
 					Input->Delay();
 					if (GlobalSoundEnabled)
-						Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+						PlaySoundTrack(Sounds[SND_SELECT]);
 					break;
 				case 4:
 					GameState = GSTitleScreen;
 					if (GlobalSoundEnabled)
-						Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+						PlaySoundTrack(Sounds[SND_SELECT]);
 					break;
 			}
 			Input->Delay();

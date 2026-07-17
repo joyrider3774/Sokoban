@@ -34,13 +34,13 @@ void Game()
 	SDL_Event Event;
 	SDL_PollEvent(&Event);
 	if (GlobalSoundEnabled)
-		Mix_HaltMusic();
+		MIX_StopTrack(MusicTrack, 0);
 	if (MusicCount > 1)
  	{
  		SelectedMusic =	1+SDL_rand(MusicCount-1);
 		if(GlobalSoundEnabled)
 		{
-			Mix_PlayMusic(Music[SelectedMusic],0);
+			PlayMusicTrack(Music[SelectedMusic],0);
 			//Mix_HookMusicFinished(MusicFinished);
 			SetVolume(Volume);
 		}
@@ -68,7 +68,7 @@ void Game()
 		if (ReloadMusic)
 		{
 			ReloadMusic=false;
-			Mix_PlayMusic(Music[SelectedMusic],0);
+			PlayMusicTrack(Music[SelectedMusic],0);
 			//Mix_HookMusicFinished(MusicFinished);
 			SetVolume(Volume);
 		}
@@ -93,14 +93,14 @@ void Game()
 			if(!LevelEditorMode)
 			{
 				if (GlobalSoundEnabled)
-					Mix_PlayChannel(-1,Sounds[SND_BACK],0);
+					PlaySoundTrack(Sounds[SND_BACK]);
 		
 				if (AskQuestion("Are you sure you want to return to the stage selector?\n\nPress (A) to confirm (X) to Cancel"))
 				{
 					GameState = GSStageSelect;
 				}
 				if (GlobalSoundEnabled)
-					Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+					PlaySoundTrack(Sounds[SND_SELECT]);
 				Input->Reset();
 			}
 		}
@@ -114,7 +114,7 @@ void Game()
 					GameState=GSLevelEditor;
 				}
 				if (GlobalSoundEnabled)
-					Mix_PlayChannel(-1,Sounds[SND_SELECT],0);
+					PlaySoundTrack(Sounds[SND_SELECT]);
 				Input->Reset();
 			}
 		}
@@ -126,8 +126,8 @@ void Game()
 				SelectedMusic = 1;
 			if(GlobalSoundEnabled)
 			{
-				Mix_HaltMusic();
-				Mix_PlayMusic(Music[SelectedMusic],0);
+				MIX_StopTrack(MusicTrack, 0);
+				PlayMusicTrack(Music[SelectedMusic],0);
 				//Mix_HookMusicFinished(MusicFinished);
 				SetVolume(Volume);
 			}
@@ -142,8 +142,8 @@ void Game()
 
 			if(GlobalSoundEnabled)
 			{
-				Mix_HaltMusic();
-				Mix_PlayMusic(Music[SelectedMusic],0);
+				MIX_StopTrack(MusicTrack, 0);
+				PlayMusicTrack(Music[SelectedMusic],0);
 				//Mix_HookMusicFinished(MusicFinished);
 				SetVolume(Volume);
 			}
@@ -321,7 +321,7 @@ void Game()
 		if (!Player->IsMoving && (WorldParts.Moves >0) && StageDone())
 		{
 			if (GlobalSoundEnabled)
-				Mix_PlayChannel(-1,Sounds[SND_STAGEEND],0);
+				PlaySoundTrack(Sounds[SND_STAGEEND]);
 			SDL_Delay(250);
 			if (LevelEditorMode)
 			{
@@ -382,7 +382,7 @@ void Game()
 		}
 	}
 	if (GlobalSoundEnabled)
-		Mix_HaltMusic();
+		MIX_StopTrack(MusicTrack, 0);
 	SelectedMusic++;
 	if (SelectedMusic >= MusicCount)
 		SelectedMusic = 1;
