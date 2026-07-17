@@ -9,13 +9,21 @@
 # builds the game from source with vendored (static) SDL3, bundles
 # everything into a portable AppImage using sharun.
 #
+# Uses squashfs with zstd compression instead of DwarFS so that file
+# manager thumbnailers (KDE Dolphin, GNOME Nautilus) can show the
+# embedded icon without third-party plugins.
+#
 # The resulting AppImage works on any Linux distro (including old and
 # musl-based ones) and does not require FUSE.
 #
-# Prerequisites: cmake, make, a C++ compiler, git, wget, patchelf, cc
+# Prerequisites: cmake, make, a C++ compiler, git, wget or curl, patchelf
 #   On Debian/Ubuntu:  sudo apt install build-essential cmake git wget patchelf
+#   On Fedora/RHEL:    sudo dnf install gcc-c++ cmake git wget patchelf
+#   On openSUSE:       sudo zypper install gcc-c++ cmake git wget patchelf
 #   On Arch:           sudo pacman -S base-devel cmake git wget patchelf
-#   On Fedora:         sudo dnf install gcc-c++ cmake git wget patchelf
+#   On Gentoo:         sudo emerge dev-build/cmake dev-vcs/git net-misc/wget dev-util/patchelf
+#   On Slackware:      sbopkg -i cmake patchelf (wget/git ship with full install)
+#   On WSL:            same as the underlying distro (Ubuntu/Debian/Fedora/etc.)
 #
 # Usage:
 #   chmod +x build-appimage.sh
@@ -43,7 +51,7 @@ APP_COMMENT="Sokoban engine initially made for the gp2x"
 
 # Desktop entry categories (semicolon-separated, must end with semicolon)
 # Full list: https://specifications.freedesktop.org/menu-spec/latest/category-registry.html
-APP_CATEGORIES="Game;PuzzleGame;"
+APP_CATEGORIES="Game;LogicGame;"
 
 # Path to the icon file inside the source tree (PNG, ideally 256x256)
 APP_ICON="graphics/sokoban.png"
@@ -68,10 +76,32 @@ DIST_DIR="$SCRIPT_DIR/dist"
 TOOLS_DIR="$BUILD_DIR/tools"
 ARCH="$(uname -m)"
 
-# Compression level for the AppImage filesystem.
-# Lower = faster startup, larger file. Higher = smaller file, slower startup.
-# Default in quick-sharun is 22 (maximum). 9 is a good balance.
-export DWARFS_COMP="zstd:level=9 -S26 -B6"
+# Squashfs zstd compression level (1-22). 15 balances size, build speed,
+# and decompression speed. Benchmarked against gzip 9, zstd 19, and DwarFS.
+SQFS_COMP_LEVEL="${SQFS_COMP_LEVEL:-15}"
+
+# ---------------------------------------------------------------------------
+# Appimagetool download URL
+# ---------------------------------------------------------------------------
+# The new appimagetool from AppImage/appimagetool bundles its own
+# mksquashfs with zstd support and auto-downloads the type-2 runtime.
+# No system squashfs-tools package needed.
+
+APPIMAGETOOL_BASE="https://github.com/AppImage/appimagetool/releases/download/continuous"
+
+case "$ARCH" in
+    x86_64)
+        APPIMAGETOOL_URL="$APPIMAGETOOL_BASE/appimagetool-x86_64.AppImage"
+        ;;
+    aarch64)
+        APPIMAGETOOL_URL="$APPIMAGETOOL_BASE/appimagetool-aarch64.AppImage"
+        ;;
+    *)
+        echo "ERROR: Unsupported architecture: $ARCH" >&2
+        echo "Only x86_64 and aarch64 are supported." >&2
+        exit 1
+        ;;
+esac
 
 # ---------------------------------------------------------------------------
 # Cleanup previous build
@@ -84,7 +114,7 @@ cleanup() {
 }
 
 # ---------------------------------------------------------------------------
-# Version detection - reads the latest vX.Y.Z git tag from git, otherwise 
+# Version detection - reads the latest vX.Y.Z git tag from git, otherwise
 #                     set the version statically
 # ---------------------------------------------------------------------------
 
@@ -102,11 +132,9 @@ detect_version() {
 # ---------------------------------------------------------------------------
 # Download quick-sharun if it is not available
 # ---------------------------------------------------------------------------
-# quick-sharun is a shell script that handles:
-#   - bundling the binary and its shared libraries with sharun
-#   - downloading sharun, appimagetool, and uruntime automatically
-#   - creating the final AppImage
-# It downloads its own tooling on first run, so we only need the script.
+# quick-sharun handles bundling the binary and its shared libraries with
+# sharun into an AppDir. We only use it for the AppDir preparation step,
+# NOT for the final packaging (that uses appimagetool with squashfs).
 
 get_quick_sharun() {
     QUICK_SHARUN="$TOOLS_DIR/quick-sharun"
@@ -117,10 +145,45 @@ get_quick_sharun() {
     fi
 
     echo "Downloading quick-sharun..."
-    wget -q -O "$QUICK_SHARUN" \
+    _download "$QUICK_SHARUN" \
         "https://raw.githubusercontent.com/pkgforge-dev/Anylinux-AppImages/main/useful-tools/quick-sharun.sh"
     chmod +x "$QUICK_SHARUN"
     echo "quick-sharun ready."
+}
+
+# ---------------------------------------------------------------------------
+# Download appimagetool if it is not available
+# ---------------------------------------------------------------------------
+
+get_appimagetool() {
+    APPIMAGETOOL="$TOOLS_DIR/appimagetool"
+
+    if [ -x "$APPIMAGETOOL" ]; then
+        echo "appimagetool already present."
+        return
+    fi
+
+    echo "Downloading appimagetool for $ARCH..."
+    _download "$APPIMAGETOOL" "$APPIMAGETOOL_URL"
+    chmod +x "$APPIMAGETOOL"
+    echo "appimagetool ready."
+}
+
+# ---------------------------------------------------------------------------
+# Portable download helper (wget preferred, curl fallback)
+# ---------------------------------------------------------------------------
+
+_download() {
+    _dest="$1"
+    _url="$2"
+    if command -v wget >/dev/null 2>&1; then
+        wget -q -O "$_dest" "$_url"
+    elif command -v curl >/dev/null 2>&1; then
+        curl -fSL -o "$_dest" "$_url"
+    else
+        echo "ERROR: wget or curl required" >&2
+        exit 1
+    fi
 }
 
 # ---------------------------------------------------------------------------
@@ -196,7 +259,7 @@ debloat_appdir() {
     # ~192 MB.
     #
     # if there are issues like you described with WSL, try to comment that out
-    # 
+    #
     rm -f "$APPDIR"/lib/*/libLLVM*.so*
     rm -f "$APPDIR"/lib/*/libgallium*.so*
     rm -f "$APPDIR"/lib/*/libz3*.so*
@@ -231,7 +294,47 @@ debloat_appdir() {
 }
 
 # ---------------------------------------------------------------------------
-# Assemble and package with quick-sharun
+# Resolve .DirIcon symlink chains to real files
+# ---------------------------------------------------------------------------
+# The KDE AppImage thumbnailer (libappimage) cannot follow chained
+# symlinks inside squashfs. quick-sharun sometimes creates:
+#   .DirIcon -> app.png -> deep/path/icon.png
+# We resolve any chain to a real file so every thumbnailer works.
+
+fix_diricon() {
+    if [ -L "$APPDIR/.DirIcon" ]; then
+        RESOLVED=$(readlink -f "$APPDIR/.DirIcon")
+        if [ -f "$RESOLVED" ]; then
+            rm "$APPDIR/.DirIcon"
+            cp -a "$RESOLVED" "$APPDIR/.DirIcon"
+            echo "Resolved .DirIcon symlink chain to real file"
+        fi
+    fi
+
+    for img in "$APPDIR"/*.png "$APPDIR"/*.svg; do
+        if [ -L "$img" ] && [ -f "$img" ]; then
+            RESOLVED=$(readlink -f "$img")
+            rm "$img"
+            cp -a "$RESOLVED" "$img"
+        fi
+    done
+
+    # The standard appimagetool requires an icon file at the AppDir root
+    # whose name matches the desktop file's Icon= field. quick-sharun
+    # places the icon under its original name (e.g. blips.png), but the
+    # desktop file may use a reverse-DNS id (e.g. be.willemssoft.blips).
+    # Copy the icon with the expected name if it is missing.
+    ICON_ID=$(grep '^Icon=' "$APPDIR"/*.desktop 2>/dev/null | head -1 | cut -d= -f2)
+    if [ -n "$ICON_ID" ] && [ ! -f "$APPDIR/${ICON_ID}.png" ] && [ ! -f "$APPDIR/${ICON_ID}.svg" ]; then
+        if [ -f "$APPDIR/.DirIcon" ]; then
+            cp -a "$APPDIR/.DirIcon" "$APPDIR/${ICON_ID}.png"
+            echo "Created ${ICON_ID}.png from .DirIcon for appimagetool"
+        fi
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# Assemble and package
 # ---------------------------------------------------------------------------
 
 make_appimage() {
@@ -282,24 +385,36 @@ make_appimage() {
     done
 
     # Step 3: Debloat.
-    # quick-sharun traces all shared library dependencies and pulls them in.
-    # For an SDL game that statically links SDL3, it still picks up the
-    # build system's Mesa/OpenGL stack (LLVM, gallium, z3) and various
-    # desktop data (ibus, unicode tables, icon themes). These are either
-    # unnecessary or better served by the host system's own drivers.
     debloat_appdir
 
-    # Step 4: Turn the AppDir into a compressed AppImage.
-    "$QUICK_SHARUN" --make-appimage
+    # Step 4: Fix .DirIcon for thumbnailer compatibility.
+    fix_diricon
+
+    # Step 5: Package as squashfs AppImage with zstd compression.
+    echo ""
+    echo "Packaging AppImage (squashfs, zstd level $SQFS_COMP_LEVEL)..."
+    echo "---------------------------------------------------------------"
+
+    APPIMAGE_OUT="$DIST_DIR/${APP_NAME}-${APP_VERSION}-anylinux-${ARCH}.AppImage"
+
+    if ! "$APPIMAGETOOL" --no-appstream \
+            --comp zstd \
+            --mksquashfs-opt -Xcompression-level \
+            --mksquashfs-opt "$SQFS_COMP_LEVEL" \
+            "$APPDIR" \
+            "$APPIMAGE_OUT"; then
+        echo "ERROR: appimagetool failed" >&2
+        exit 1
+    fi
 
     echo ""
     echo "---------------------------------------------------------------"
     echo "Done!"
-    ls -lh "$DIST_DIR"/*.AppImage 2>/dev/null
+    ls -lh "$APPIMAGE_OUT" 2>/dev/null
     echo ""
     echo "To run it:"
-    echo "  chmod +x dist/*.AppImage"
-    echo "  ./dist/*.AppImage"
+    echo "  chmod +x $APPIMAGE_OUT"
+    echo "  ./$APPIMAGE_OUT"
     echo "---------------------------------------------------------------"
 }
 
@@ -315,6 +430,7 @@ echo ""
 cleanup
 detect_version
 get_quick_sharun
+get_appimagetool
 build_game
 create_desktop_and_icon
 make_appimage
