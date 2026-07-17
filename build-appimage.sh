@@ -164,10 +164,14 @@ EOF
     echo "Desktop file: $DESKTOP_FILE"
 
     # quick-sharun wants ICON and DESKTOP as env vars pointing to files
-    ICON_FILE="$SOURCE_DIR/$APP_ICON"
-    if [ ! -f "$ICON_FILE" ]; then
-        echo "WARNING: icon not found at $ICON_FILE"
+    SRC_ICON="$SOURCE_DIR/$APP_ICON"
+    if [ ! -f "$SRC_ICON" ]; then
+        echo "WARNING: icon not found at $SRC_ICON"
         ICON_FILE="DUMMY"
+    else
+        # Rename to match Icon=${APP_ID} regardless of the source filename
+        ICON_FILE="$BUILD_DIR/${APP_ID}.png"
+        cp "$SRC_ICON" "$ICON_FILE"
     fi
 }
 
