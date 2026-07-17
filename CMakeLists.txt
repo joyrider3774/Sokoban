@@ -68,12 +68,15 @@ if(USE_VENDORED_SDL)
 	add_subdirectory("${PROJECT_SOURCE_DIR}/Vendored/SDL_image" EXCLUDE_FROM_ALL)
 	
 else()
-	set(SDL_SHARED ON)
-    # 1. Look for a SDL3 package, 2. look for the SDL3 component and 3. fail if none can be found
-    find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
-	find_package(SDL3_image REQUIRED CONFIG REQUIRED COMPONENTS SDL3_image)
-	find_package(SDL3_mixer REQUIRED CONFIG REQUIRED COMPONENTS SDL3_mixer)
-	find_package(SDL3_ttf REQUIRED CONFIG REQUIRED COMPONENTS SDL3_ttf)
+    set(SDL_SHARED ON)
+    
+    # Core SDL3 
+    find_package(SDL3 REQUIRED CONFIG)
+    
+    # Satellite extensions
+    find_package(SDL3_image REQUIRED CONFIG)
+    find_package(SDL3_mixer REQUIRED CONFIG)
+    find_package(SDL3_ttf REQUIRED CONFIG)
 endif()
 
 
